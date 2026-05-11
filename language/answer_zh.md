@@ -7,6 +7,13 @@
 那么请开lssues并提供你的模块列表信息以及使用了哪些xp模块，我有时间的话会回复
 并帮助
 
+# 存在模块修改春秋
+> 使用IsolPolicy模块后出现，关闭作用域或者卸载模块解决
+
+# 设备取得ROOT权限
+> 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
+> 更新KSU管理器并开启对应功能
+
 # fdinfo mnt 采样异常（c）
 > 复现不稳定，误报处理
 
