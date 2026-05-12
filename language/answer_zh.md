@@ -8,8 +8,9 @@
 并帮助
 
 #HMA或许存在
-> 不使用应用程序列表尝试解决
->
+> 疑似检测旧版Scene_Hide-eBPF行为
+> [分支项目/拉取更新重新构建模块](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
+
 # 存在模块修改春秋
 > 使用IsolPolicy模块后出现，关闭作用域或者卸载模块解决
 
