@@ -12,7 +12,9 @@
 
 # 设备取得ROOT权限
 > 新加入的SELinux特性（应用程序 zygote 拥有访问 /sys/fs/selinux/access 的权限）
-> [更新KSU管理器](https://t.me/KernelSU_group/3234/478759)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
+> KSU使用者[更新KSU管理器](https://t.me/KernelSU_group/3234/478759)并重新修补镜像并刷入后重启再开启selinux_hide功能解决
+>
+>APatch/FolkPatch使用者[加载/嵌入此kpm](https://t.me/APatch_nightly/118)
 
 # fdinfo mnt 采样异常（c）
 > 复现不稳定，误报处理
