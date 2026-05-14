@@ -11,7 +11,8 @@
 > 正在分析复现，待补充...
 
 # HMA或许存在
-> 疑似检测旧版使用Scene_Hide-eBPF模块行为
+> 疑似检测旧版使用Scene_Hide-eBPF模块行为（检测不到scene包名，但检测到相关服务）
+> 
 > [分支项目/拉取更新重新构建模块并刷入](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
 
 # 存在模块修改春秋
