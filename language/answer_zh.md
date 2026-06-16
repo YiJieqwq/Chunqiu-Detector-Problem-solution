@@ -58,7 +58,7 @@
 ## zygote test (1)
 > 打开zygisk next的链接器功能与匿名内存功能尝试解决。
 > 排除列表策略-仅还原挂载。
-> 不稳定检测，偶发性
+> 不稳定检测，侧信道
 
 ## Inconsistent mount
 > /proc/self/exe/解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
@@ -229,7 +229,7 @@
 > 路径/data/local/tmp 文件夹的inode值高于10000
 
 解决方案: 将设备恢复出厂设置 / 使用SUSFS对路径伪装inode值小于1000 / 尝试使用[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases)脚本解决
-
+注意:此操作或会导致有线投屏功能失效
 
 ## Suspicious Surroundings（c）
 > /data/local/tmp 的权限被修改（默认771）
