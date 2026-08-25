@@ -9,18 +9,6 @@
 
 ---
 
-### ⚙️ 开启 GitHub Pages 步骤说明 / How to Enable GitHub Pages
-如果您是仓库所有者，首次部署 GitHub Pages 时需在仓库设置中启用页面服务（只需设置一次）：
-
-1. 打开仓库页面，点击顶部 **Settings**（设置）。
-2. 在左侧菜单中选择 **Pages**。
-3. 在 **Build and deployment** -> **Source** 下：
-   - **推荐方式**：选择 **GitHub Actions**（本仓库已配置 `.github/workflows/pages.yml`，每次提交将自动构建发布）。
-   - **传统方式**：选择 **Deploy from a branch**，分支选择 `main`（或 `master`），目录选择 `/ (root)`，点击 **Save**。
-4. 保存后等待 1-2 分钟，页面即可通过 `https://<your-username>.github.io/<repository-name>/` 访问！
-
----
-
 ## 语言选择 / Language
 Select one of the following languages to view the solution file.
 请选择以下语言之一来查看解决方案文件。
@@ -33,12 +21,20 @@ Select one of the following languages to view the solution file.
 ---
 
 ## 依赖与文件说明 / Files & Attachments
+
 仓库中包含了部分自动化修复脚本与 KPM 模块，位于 `/File/` 目录下：
 - `/File/Found property.sh` - 修复 Found property 属性检测
 - `/File/Tampered Attestation Key(26)Pass.sh` - 修复证书 Patch 标签异常
 - `/File/shamiko_Plus.sh` - 隐藏属性区空洞修改
 - `/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm` - APatch 隐藏 KPM 模块
 - `/File/Doc/ksu_kp_sidechannel_zh.md` - KSU/APatch 侧信道检测原理说明
+=======
+仓库中包含了部分自动化修复脚本与 KPM 模块，位于 `/file/` 目录下：
+- `/file/found property.sh` - 修复 Found property 属性检测
+- `/file/tampered attestation key(26)pass.sh` - 修复证书 Patch 标签异常
+- `/file/shamiko_plus.sh` - 隐藏属性区空洞修改
+- `/file/bin/nohello-v1.8.2.9-83-b3e7d87-release.kpm` - APatch 隐藏 KPM 模块
+- `/file/doc/ksu_kp_sidechannel_zh.md` - KSU/APatch 侧信道检测原理说明
 
 ---
 
