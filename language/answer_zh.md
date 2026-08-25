@@ -1,5 +1,5 @@
 # 春秋检测项解决方案（跟进最新版本）中文版
-> 整理：mingzun09(SuXiaoMing) | 仅供参考，具体结果因设备/环境而异。
+> 整理：铭鐏(mingzun09) | 仅供参考，具体结果因设备/环境而异。
 > 解决方案尾巴带“?”符号的都为不确定
 > 文档链接：[github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
@@ -30,7 +30,7 @@
 
 > 使用 IsolPolicy 模块后出现，关闭作用域或者卸载模块解决。
 > 
-> 并不是只有模块，比如说类似于面具的隐藏也算（比如 SELinux 修改隐藏）请尝试跟进相关 root 管理器最新 CI 来解决此问题。
+> 并不是只有模块，比如旧版ksu启用了隐藏SELinux修改也算，请尝试跟进相关 root 管理器最新 CI 来解决此问题。
 </details>
 
 <details>
@@ -65,14 +65,6 @@
 <summary>SU binary detected</summary>
 
 > 检测到 SU 二进制文件（检测到 ROOT）
-</details>
-
-<details>
-<summary>SU list（已被删除）</summary>
-
-> 检测到类似 ksu 的 ROOT 权限排除列表
-> 
-> 此检测项不稳定偶尔出现（通常使用 KSU LKM 模式的较多）
 </details>
 
 <details>
