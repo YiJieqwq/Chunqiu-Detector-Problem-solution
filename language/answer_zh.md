@@ -597,6 +597,11 @@
 ---
 
 ## 内核、属性与系统特征检测
+<details>
+
+<summary>无效的伪造信息(1)</summary>
+>解锁后L1证书变成L3证书，但是无法返回正确L1证书信息导致的，即使使用模块替换keybox文件来伪装状态也会检测与L1不符，解决方案推荐使用远程RKP密钥（可自行搜索查阅）
+<details>
 
 <details>
 <summary>Found property</summary>
