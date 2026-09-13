@@ -277,7 +277,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>Zygote Anomaly</summary>
 
-> **Detection method**: reads the GID list of this process (the app zygote child) and checks whether **GID 3009 (AID_READPROC)** is present (probe output `readproc_gid_3009=present/missing`) → a missing GID hits; it corresponds to modules that stripe it away via “restrict zygote permissions”.
+> **Detection method**: reads the GID list of this process (the app zygote child) and checks whether **GID 3009 (AID_READPROC)** is present (probe output `readproc_gid_3009=present/missing`) → a missing GID hits (**the cause of the missing GID is not yet confirmed**).
 >
 > **Solution**: in the app-hiding module, disable the restriction on `INET_GID` / zygote permissions for the detector.
 >
