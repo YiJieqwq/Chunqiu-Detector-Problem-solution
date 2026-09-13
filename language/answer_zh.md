@@ -21,6 +21,19 @@
 请开 Issues 并提供你的模块列表信息 + 使用了哪些 Xposed 模块等详细修改，我有时间会回复/帮助。
 </details>
 
+<details>
+<summary>通用排查方法（遇到“未知 / 未解决”条目时）</summary>
+
+1. **记录现状**：`ls /data/adb/modules`、Xposed 模块列表、Zygisk 排除策略、伪装类属性（`getprop | grep -iE "spoof|pihooks|pixelprops|resetprop"`）。
+2. **最小集复测**：只保留 root 管理器 + 必需的 Zygisk 提供者（如 ZygiskNext），重启后扫描，确认命中是否仍在。
+3. **二分定位**：之后每次只启用一个模块 → 重启 → 复扫，逐步收敛到具体触发项（每次只改一个变量）。
+4. **挂载类条目**优先动：元模块、Zygisk 排除策略（“仅还原挂载”）、SusFS / PathMask 类隐藏。
+5. **密钥 / TEE 类条目**：修改 `keybox.xml`、`target.txt`、安全补丁同步等之后**必须重启**再复测。
+6. 少数条目属**侧信道 / 不稳定检测**：同一环境多次扫描结果可能不一致，先排除偶发再定位。
+
+> ⚠️ **安全提示**：任何“更换 keybox / 更换 RKP 密钥 / 改回锁状态 / 改安全补丁同步”的操作都会改变设备的密钥与认证（attestation）状态，**不一定可逆**；操作前请评估风险，必要时先备份相关目录。
+</details>
+
 ---
 
 ## Root 权限与 SELinux 检测
@@ -134,7 +147,7 @@
 ## TEE 与密钥证明检测
 
 <details>
-<summary>TEE伪造2</summary>
+<summary>TEE 伪造(2)</summary>
 
 > 先确认普通签名、纯 ATTEST_KEY 密钥签发子证书都正常。
 > 通过 Keystore2 创建同时具有 SIGN + ATTEST_KEY 用途的密钥。
@@ -167,7 +180,7 @@
 </details>
 
 <details>
-<summary>Tampered Attentionkey(X)</summary>
+<summary>Tampered Attestation Key(X)</summary>
 
 > 携带 20+ 类异常标签（多数是 OEM 特有标签）针对 TEE 处理异常标签反馈来对照预期值进行判断是否异常。
 >
@@ -205,7 +218,7 @@
 </details>
 
 <details>
-<summary>TEE伪造</summary>
+<summary>TEE 伪造</summary>
 
 > 使用 TEESimulator(RS) 模块解决，使用证书链生成模式。
 </details>
@@ -437,7 +450,7 @@
 </details>
 
 <details>
-<summary>Drity Device(a)</summary>
+<summary>Dirty Device(a)</summary>
 
 > 检测到内核接口？外挂 sh?
 > 
@@ -615,8 +628,16 @@
 <details>
 <summary>无效的伪造信息(1)</summary>
 
-> 解锁后L1证书变成L3证书，但是无法返回正确L1证书信息导致的，即使使用模块替换keybox文件来伪装状态也会检测与L1不符
-> 解决方案推荐使用[远程RKP密钥](/File/rkp-release-v10.apk)安装RKPConfig后向Google请求RKP下发
+> **现象**：设备显示 Widevine L1（DRM Info 与检测器“设备信息”都会显示 L1），但本条目仍判定“与 L1 不符”。该条目在界面上**没有展开详情**（属摘要型条目）。
+>
+> **第一步：先判断是不是误报**
+> 1. 播放**必须 L1 才能解码**的内容（Netflix / Disney+ / Prime 等的 HD / 1080p+）：
+>    - 能 HD / 1080p+ 正常播放 ⇒ L1 本体正常，本条**大概率是误报**（已知小米设备、含**未解锁**设备也会稳定命中），可先忽略并等待版本更新；
+>    - 只能播放 SD ⇒ 继续第 2 步。
+> 2. 排查“伪装 L1 状态”的模块：TrickyStore / TEESimulator(-RS) 的 target 列表、`keybox.xml`、安全补丁同步，以及各类 PIF / 属性伪装模块；逐项关闭后**重启**复测。
+> 3. 只在最后才考虑“远程 RKP 密钥（RKPConfig）”：本机若已是 RKP（远程密钥下发）通常无效，目前小米机型普遍无效。
+>
+> ⚠️ **安全提示**：RKPConfig 类应用会让设备向 Google 请求 RKP 密钥下发，会**改变设备的密钥供应 / 认证状态**；安装前请确认来源可信与可撤销性。
 </details>
 
 <details>
@@ -724,11 +745,12 @@
 <details>
 <summary>环境伪造</summary>
 
-> 旧设备（4系内核）可能或误报？
-> 
-> 此检测项在刷入 ZN-Audit Patch 模块或类似行为后会触发。
+> 旧设备（4系内核）可能误报？
 >
-> 卸载 ZN-Audit Patch 模块。
+> **已知触发面：**
+> - 刷入 ZN-Audit Patch 模块或类似行为后会触发 → 卸载该模块；
+> - **属性伪装类模块**（PIF / pihooks / pixelprops / spoof 类）也可能触发（待验证）→ 用 `getprop | grep -iE "pihooks|pixelprops|spoof"` 检查是否存在属性伪装残留，定位到对应模块后处理，或对检测器隐藏相关属性；
+> - 部分自定义 / 移植 ROM 自带的机型或属性伪装也可能触发。
 </details>
 
 <details>
