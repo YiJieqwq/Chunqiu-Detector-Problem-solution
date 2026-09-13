@@ -134,12 +134,14 @@
 > **常见原因族**（命中时详情会给出）：`enforcing is not 1`、`deny_unknown is not 1`、`unexpected version`、`sequence/policyload unexpected`、`direct syscall and libc views disagree (PLT-hook residue)`。
 >
 > **解决办法**
-> - - 参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
-> - - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
-> - - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像，或重新进行**免解（越狱）**后重启）；
-> - - **内核级方案**：SELinux_Hook.kpm 一类 SELinux hook（KPM 或内核集成；模块链接见序章「相关模块推荐」）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
-> - - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
-> - 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
+> - 检测方式参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
+> - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
+>   - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新进行**免解（越狱）**后重启）；
+>   - **内核级方案**：SELinux_Hook.kpm 一类 SELinux hook（KPM 或内核集成；模块链接见序章「相关模块推荐」）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
+>   - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
+>
+> 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
+</details>
 
 <details>
 <summary>Found ksu/免解设备</summary>
@@ -329,31 +331,26 @@
 <details>
 <summary>Tampered Attestation Key(X)（含 16 / 31）</summary>
 
-> **检测方式**：对密钥证明证书链做 20+ 类标签一致性校验，例如：叶证书 `KeyUsage` 与扩展 `KeyPurpose` 是否矛盾、叶证书签名算法与签发钥算法是否一致、证书内的安全补丁标签与系统属性是否一致、无 challenge 却带 `APPLICATION_ID`、`USER_ID` 出现在 `teeEnforced`、厂商占位 tag 仍成功签发等。
+> **检测方式**：对密钥证明证书链做 20+ 类标签一致性校验，例如：叶证书 `KeyUsage` 与扩展 `KeyPurpose` 是否矛盾、叶证书签名算法与签发钥算法是否一致、证书内的安全补丁标签与系统属性是否一致、无 challenge 却带 `APPLICATION_ID`、`USER_ID` 出现在 `teeEnforced`、厂商占位 tag 仍成功签发等；命中时会给出具体标签编号。
 >
-> 携带 20+ 类异常标签（多数是 OEM 特有标签）针对 TEE 处理异常标签反馈来对照预期值进行判断是否异常。
+> **常见标签编号**
+> - 15：HanAttest 链不一致（与 TeeSim 常量不同源，但同在 mask 里）
+> - 16：HanAttest 链不一致一族（多为误报）
+> - 18：厂商占位 KeyMint tag 仍成功输出密钥
+> - 23：叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
+> - 24：Binder 超长 alias / 大事务探针异常
+> - 25：叶证书 SigAlg 与签发钥算法不符
+> - 26：证书 patch 标签与系统属性不一致（见下方脚本）
+> - 27：USER_ID 出现在 teeEnforced
+> - 29：无 challenge 却有 APPLICATION_ID
+> - 30：敏感设备标识类 attest 未被拒绝（如 SERIAL）
+> - 31：安全补丁日期异常（国内厂商统一为 YYYY-MM-01；Lenovo / 努比亚会更新到 05 日期；pixel / Samsung 已排除）
 >
-> 针对 TEE 的检测，若有，“请等待相关模块更新修复”，或者回锁。
->
-> 即使是 efisp 方式的**假回锁**或者自定义引导程序也“可能”会报。
->
-> - 15: HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
-> - 18: 厂商占位 KeyMint tag 仍成功输出密钥（tee2 §1）
-> - 23: 叶证书 KeyUsage 与扩展内 KeyPurpose 矛盾
-> - 24: Binder 超长 alias / 大事务探针异常
-> - 25: 叶证书 SigAlg 与签发钥算法不符
-> - 26: 证书 patch 标签与系统属性不一致（与安全补丁有关）（[执行此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Tampered%20Attestation%20Key(26)Pass.sh)尝试解决）
-> - 27: USER_ID 出现在 teeEnforced
-> - 29: 无 challenge 却有 APPLICATION_ID（上表）
-> - 30: 敏感设备标识类 attest 未被拒绝（如 SERIAL）
-> - 31：安全补丁日期异常（如YYYY-MM-05,China手机厂商对安全补丁日期及推送都是统一，YYYY-MM-01,当然对国外设备pixel&Samsung做了排除，此检测安全补丁日期篡改，如pif，及TA插件的安全日期同步会篡改
-国内的Lenovo与努比亚可以忽略此问题，确实会更新05日期）
-> **小米/红米用户注意**：2026-03 前后更新的系统，其构建时间与 Android 安全补丁时间本身就不一致，**不管是否 root 都会报（26）→ 无视即可**；魔改版 密钥模块（如 yurikey）/一键隐藏模块（部分一键隐藏模块）/部分改机模块也会导致，换回原版或卸载。
-> 关系：`Tampered Attestation Key (16) / (31)` 是同一判据族（`Tampered Attestation Key(%1$d)`，标签参数不同）的其它标签，**已并入本条**。
-> - ****：同属证书链 / 标签一致性判据族（16 为 HanAttest 链不一致一族，31 为安全补丁日期一族），多为误报。
-> - TEE 标签异常（HanAttest 链不一致、KeyMint 异常、证书矛盾等）。
-> - **纯误报**：假回锁、未 root 也可能概率命中 → 重测或直接无视。
-
+> **解决办法**
+> - **26**：[执行此脚本](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Tampered%20Attestation%20Key(26)Pass.sh) 写入 `/data/adb/tricky_store/security_patch.txt`；
+> - **小米 / 红米注意**：2026-03 前后更新的系统，其构建时间与安全补丁时间本身就不一致，**不管是否 root 都会报（26）→ 无视即可**；魔改版密钥模块、一键隐藏模块、部分改机模块也会导致，换回原版或卸载；
+> - **16 / 31**：纯误报居多（假回锁、未 root 也可能概率命中）→ 重测或直接无视。
+</details>
 
 <details>
 <summary>TrickyStore Hook/2</summary>
@@ -433,16 +430,14 @@
 <details>
 <summary>Bootloader unlock / 解锁属性</summary>
 
-> **检测方式**：读取 bootloader 锁定状态相关属性 / 认证结果。
+> **检测方式**：读取 bootloader 锁定状态相关属性 / 认证结果 —— `ro.boot.flash.locked`、`ro.boot.verifiedbootstate`、`ro.boot.vbmeta.device_state` 等（`0` / `orange` / `unlocked` 表示已解锁）。
 >
-> **真解锁设备**：使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）。
+> **解决办法**
+> - **真解锁设备**：使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）；
+> - **假回锁 / 免解 / 自签设备**：设备对外本就是“已锁定（locked & green）”，通常不会命中此项（该状态由启动链早期方案，如 efisp 一类提供）。
 >
-> **假回锁 / 免解 / 自签设备**：设备对外本就是“已锁定（locked & green）”，通常不会命中此项。
 > 组合方案见 `启动状态异常`；另有反馈 iQoo/Vivo 橘子 5 不报、橘子 6 报（未确认是否误报）。
-> - ****：读取 `ro.boot.flash.locked`、`ro.boot.verifiedbootstate`、`ro.boot.vbmeta.device_state` 等属性判断解锁状态。
-> - `ro.boot.flash.locked=0` / `ro.boot.verifiedbootstate=orange` / `ro.boot.vbmeta.device_state=unlocked` 等属性表明设备已解锁。
-> - **假回锁设备**：由启动链早期方案（efisp 一类）提供已锁定状态；**真解锁设备**：见序章「最小完美隐藏环境所需模块集合」。
-
+</details>
 
 <details>
 <summary>启动状态异常</summary>
@@ -499,32 +494,20 @@
 <details>
 <summary>zygote test (1) / App Zygote 分叉顺序异常</summary>
 
-> **检测方式**：app_zygote（应用 zygote）内的 fork 顺序探针：用 `/dev/socket/logdw` 打开日志 socket 取 identity / cookie，按 `prepare/parent/child`、父子存活与 fd 关闭顺序判断是否存在 **Zygisk 早于 app-zygote 注入** 的残留；属侧信道类，不稳定。
+> **检测方式**：app_zygote（应用 zygote）内的 fork 顺序探针 —— 用 `/dev/socket/logdw` 打开日志 socket 取 identity / cookie，按 `prepare/parent/child`、父子存活与 fd 关闭顺序判断是否存在 **Zygisk 早于 app-zygote 注入** 的残留；属侧信道类，不稳定。
 >
-> 打开 Zygisk 实现模块 的链接器功能与匿名内存功能尝试解决。
-> 
-> 排除列表策略-仅还原挂载。
-> 
-> 不稳定检测，侧信道。
-> 说明：本条即旧版 `zygote test (1)` 与社区名 `App Zygote 分叉顺序异常` 所指的**同一个探针**（app_zygote 内的 fork 顺序 / Zygisk 早注入残留）。
-> - ****：app_zygote 内的 fork 顺序探针（`/dev/socket/logdw` 取 identity / cookie，检查 `prepare/parent/child`、存活与 fd 关闭顺序），用于发现 **Zygisk 早于 app-zygote 注入**的残留。
-> - 应用自身 zygote 权限被修改。
-> - 暂按**误报**理解（有人**假回锁**、0 模块也会报；**自签设备**如联想 Y700 系列无论是否 root 都会出现）。
-> - 关系：即旧版条目 `zygote test (1)`（同一探针）。
-
+> **解决办法**：打开 Zygisk 实现模块的「链接器功能」与「匿名内存功能」；排除列表策略设为「仅还原挂载」；不稳定时可直接重测。
+</details>
 
 <details>
 <summary>Inconsistent mount / 不一致的挂载（debug_ramdisk）</summary>
 
-> **检测方式**：把 `/proc/self/exe` 解析出的挂载与 `statfs` 得到的文件系统类型做比对，类型不一致即命中。
+> **检测方式**：把 `/proc/self/exe` 解析出的挂载与 `statfs` 得到的文件系统类型做比对，类型不一致即命中；另有 `/debug_ramdisk` 挂载视图不一致的变体。
 >
-> `/proc/self/exe/` 解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
-> 
-> 存在部分设备暂未修复的误报现象（3.4版本中已修复）。
-> - ****：检查 `/debug_ramdisk` 是否被卸载 / 挂载视图不一致。
-> - `umount /debug_ramdisk`
-> - `su -c umount /debug_ramdisk`。
-
+> **解决办法**：`su -c umount /debug_ramdisk`。
+>
+> 备注：部分设备存在暂未修复的误报现象（3.4 版本已修复其中一部分）。
+</details>
 
 <details>
 <summary>Mount loophole</summary>
@@ -671,16 +654,13 @@
 <details>
 <summary>风险应用 / Risk apps‘软件包名’</summary>
 
-> **检测方式**：与风险包名名单比对（见附录 A）。
+> **检测方式**：读取 `/storage/emulated/0/Android/data/` 下的目录名以获取已安装包名（普通应用通常没有该权限），借助 **Unicode 零宽字符**绕过读取限制，再与风险名单比对（名单见附录 A）。
 >
-> 暂时未知的手段，自行尝试使用应用隐藏模块对检测器隐藏某些可能是风险的应用程序。
-> - ****：读取 `/storage/emulated/0/Android/data/` 下的目录名以获取已安装包名（普通应用通常没有该权限），再与风险名单比对。
-> - 通过 Unicode 零宽字符漏洞检查 `/storage/emulated/0/Android/data/` 中的风险应用包名。
-> - 修复 `/storage/emulated/0/Android/data/` 的零宽读取限制（社区方案：[FuseFixer](https://github.com/5ec1cff/FuseFixer)），并搭配 应用隐藏模块对风险应用隐藏。
-> - 有效组合：**应用隐藏模块 黑名单模式 + 零宽读取修复方案**（部分机型开启作用域后可能卡开机，安全模式关掉即可）。
-> - 只想让春秋这一项通过的做法：在 应用隐藏模块 里对春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开。
-> - 判据（社区实测）：读取 `/storage/emulated/0/Android/data/` 下的目录名来获取包名（借助 **Unicode 零宽字符**绕过读取限制），再与风险名单比对。
-
+> **解决办法**
+> - 有效组合：**应用隐藏模块黑名单模式 + 零宽读取修复方案**（[FuseFixer](https://github.com/5ec1cff/FuseFixer)）；部分机型开启作用域后可能卡开机，安全模式关掉即可；
+> - 只想让春秋这一项通过：在应用隐藏模块里对检测春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开；
+> - 这类判定手段未知的条目，也可用应用隐藏模块把可疑应用对检测器隐藏。
+</details>
 
 <details>
 <summary>Dirty Device(a)</summary>
@@ -994,16 +974,14 @@
 <details>
 <summary>Tampered kernel / 伪装内核</summary>
 
-> **检测方式**：读取内核 uname（版本、构建时间）与预设名单 / 基线比对。
+> **检测方式**：读取内核 uname（版本字符串、构建时间）与预设名单 / 基线比对；内核信息被伪装（SUSFS 等）后的一致性判定也在本条。
 >
-> 内核信息校验异常（内核字符版本，内核构建时间）。
-> 
-> 尝试使用 SusFS 隐藏或者还原未修改的 boot.img。
+> **解决办法**
+> - 使用 SUSFS 等内核级方案隐藏内核名称；伪装内核时把启动阶段选为 `post-fs-data`；
+> - 也可还原未修改的 boot.img。
+>
 > 开发者原话：原厂系统 + LKM 模式下出现即为误报。
-> - ****：内核信息被伪装（SusFS 等）后的一致性判定。
-> - 无效的使用 SusFS 伪装内核。
-> - 伪装内核启动阶段选择 post-fs-data。
-
+</details>
 
 <details>
 <summary>[hook]Resetprop modified</summary>
