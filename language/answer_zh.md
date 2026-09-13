@@ -261,7 +261,6 @@
 > 侧信道（不稳定）重新打开或许消失
 >
 > 更换模块[TEESimulator](https://github.com/JingMatrix/TEESimulator)
-> （**旧版本已删除**。）
 </details>
 
 <details>
@@ -272,7 +271,6 @@
 > **尝试1**：更换模块比如 [TEESimulator](https://github.com/JingMatrix/TEESimulator)
 >
 > **尝试2**：把 `/data/adb/tricky_store/security_patch.txt` 文件删除
-> （**旧版本已删除**。）
 </details>
 
 <details>
@@ -429,7 +427,6 @@
 > 排除列表策略-仅还原挂载。
 > 
 > 不稳定检测，侧信道。
-> （**旧版本已删除**；若仍出现多为概率误报，重测即可。）
 </details>
 
 <details>
@@ -440,7 +437,6 @@
 > `/proc/self/exe/` 解析出其中部分的挂载，然后再去看文件系统类型是否一致。（挂载的类型不同）
 > 
 > 存在部分设备暂未修复的误报现象（3.4版本中已修复）。
-> （**旧版本已删除**；3.4 版本已修复该误报。）
 </details>
 
 <details>
@@ -528,7 +524,6 @@
 > 通过扫描 smaps 启发式探测 Zygisk 实现（特别是 Zygisk-Next），但目前的实现方式存在问题，导致检测失效。
 > 
 > 在检测方法被修复或移除前请忽略此条目。
-> （**旧版本已删除**。）
 </details>
 
 <details>
@@ -602,7 +597,6 @@
 > **检测方式**：实验性环境一致性判定（社区反馈：HMA-OSS 黑名单模式 + 勾选“输入法”预设时出现）。
 >
 > 在 HMA-OSS 中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，此检测项就会出现？
-> （**旧版本已删除**。）
 </details>
 
 <details>
@@ -639,6 +633,7 @@
 >
 > 当前是模拟器设备。
 > 社区实测：在**未插 SIM 卡 + 满电 + 充电**的状态下测试确实会被判为模拟器（无直接证据时也会报）→ 先卸载重装检测器、换正常状态重测。
+> 判据补充（社区实测）：在**未插 SIM 卡 + 满电 + 充电**状态下会命中（无直接证据时也会报）；先卸载重装、换正常状态重测。
 </details>
 
 <details>
@@ -693,6 +688,7 @@
 > 
 > 如遇到有线投屏（如 Scrcpy）不可用，使用 `su -c restorecon -RF /data/local/tmp` 解决问题。
 > 参考工具：[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker)（下载执行即可；执行不了的换老 release）。
+> 判据（社区实测）：`/data/local/tmp` 的 **inode 值 > 10000**（该目录曾被删除 / 重建）。
 </details>
 
 <details>
@@ -756,6 +752,7 @@
 > 安装 [Unicode零宽修复模块](https://github.com/5ec1cff/FuseFixer) 对 `/storage/emulated/0/Android/data/` 目录修复可被读取问题，并搭配 HMA-OSS 对风险应用隐藏。
 > 有效组合：**HMA-OSS 黑名单模式 + Fuse Hide 零宽漏洞修复模块**（部分机型开启作用域后可能卡开机，安全模式关掉即可）。
 > 只想让春秋这一项通过的做法：在 HMA-OSS 里对春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开。
+> 判据（社区实测）：读取 `/storage/emulated/0/Android/data/` 下的目录名来获取包名（借助 **Unicode 零宽字符**绕过读取限制），再与风险名单比对。
 </details>
 
 <details>
@@ -978,7 +975,6 @@
 > **检测方式**：该条检测本身未成功完成（环境限制 / 超时等），**不是“命中”**；可重试或忽略。
 >
 > 2333333
-> （**旧版本已删除**；新版不再出现此项。）
 </details>
 
 <details>
@@ -1023,6 +1019,8 @@
 <details>
 <summary>检测运行环境可疑 / 容器 / 多开</summary>
 
+> **检测方式**：校验 `/proc/self/cgroup` 的路径格式是否匹配 `^0::/uid_\d+/pid_\d+$` 或 `^0::/apps/uid_\d+/pid_\d+$`（两个正则直接内置在代码里），并结合 parallel / clone 相关探针（`parallel_ok=`、`signal_parallel_access_mismatch=`）；格式异常或探针不一致即命中。
+>
 > 检测到应用处于多开 / 沙盒 / 容器环境。
 > 卸载重装春秋检测；**不要对春秋检测使用应用双开**。
 </details>
@@ -1030,6 +1028,8 @@
 <details>
 <summary>发现异常模块</summary>
 
+> **检测方式**：命中“温控 / 调度 / 优化”类模块的特征签名（驱动、守护进程、配置路径一族，如 `/data/encore/*_cpu_gov`、`/data/swap_config.conf`、`/dev/cpuset/AppOpt/`、`/data/local/tmp/yshell` 等同一张特征表）→ 报 `发现异常模块 / Suspicious modules detected`。
+>
 > 部分温控 / 调度 / 优化模块被特征化命中。
 > 排查并卸载相关模块；也可多重启几次再测（大概率误报）。
 </details>
@@ -1037,6 +1037,8 @@
 <details>
 <summary>设备获取 Root 权限 / 异常模块</summary>
 
+> **检测方式**：与「检测 SELinux Policy 时发现问题」同一套判据：探测 KSU / Magisk 对 SELinux 上下文与规则的修改（`ksu_file`、`magisk_file`、context 一致性等）。
+>
 > 检测 KSU / Magisk 修改过的 SELinux 上下文。
 > 同「检测 SELinux Policy 时发现问题」（隐藏 SELinux 修改 / selinux-hook）。
 </details>
@@ -1044,6 +1046,8 @@
 <details>
 <summary>GMS 被屏蔽</summary>
 
+> **检测方式**：检查 ROM 侧“屏蔽 GMS”的特征：`/my_product/etc/permissions/oplus_google_cn_gms_features.xml`（OPPO / 一加国内机型配置）、可执行文件 `/system/bin/gmsc`，以及 PIF 类属性（`persist.sys.pihooks.disable.gms`、`persist.sys.pixelprops.gms`、`persist.sys.spoof.gms`）；命中即报 `GMS被屏蔽 / GMS blocked`。
+>
 > 未检测到 Google 服务套件 / Google 服务被屏蔽。
 > 检查 HMA 是否隐藏了系统组件；或排查 ROM 侧 GMS 问题。
 </details>
@@ -1051,6 +1055,8 @@
 <details>
 <summary>/dev/cpuset/AppOpt</summary>
 
+> **检测方式**：该路径属“线程 / 调度模块挂载”的特征签名（与 `/data/swap_config.conf`、`/data/encore/*_cpu_gov`、`/data/local/tmp/yshell` 等在同一张特征表里），目录存在即报。
+>
 > 检测到线程 / 调度类模块的挂载。
 > 卸载对应线程模块。
 </details>
@@ -1058,6 +1064,8 @@
 <details>
 <summary>/system/bin/fastboot 和 /system/bin/adb</summary>
 
+> **检测方式**：对系统可执行文件做异常存在性检查（`/system/bin/adb` 已确认在特征表内，`fastboot` 待确认），常见于小米官改包。
+>
 > 检测到异常可执行文件（常见于小米官改包）。
 > 刷回官方包；或用 PathMask 隐藏这两个文件。
 </details>
@@ -1065,6 +1073,8 @@
 <details>
 <summary>“一条路径”</summary>
 
+> **检测方式**：命中黑名单特征（文件 / 目录 / 驱动）后，把**实际命中的路径**放到条目标题 / 详情里 → 按提示删除即可。
+>
 > 检测到特定 sh / 模块等释放的文件（夹）。
 > 按条目展开后给出的路径删除即可。
 </details>
@@ -1072,6 +1082,8 @@
 <details>
 <summary>Zygote 存在异常</summary>
 
+> **检测方式**：读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中；对应 HMA-OSS 等模块的“限制 zygote 权限”把它去掉了。
+>
 > 应用自身的 INET-GID 权能被限制。
 > 在 HMA-OSS 中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
 </details>
@@ -1079,6 +1091,8 @@
 <details>
 <summary>OBB 目录存在异常</summary>
 
+> **检测方式**：用多种只读方式读取应用**自身的 OBB 路径**并比对结果：`statx` / `newfstatat` / `openat_chain`（探针 `self_obb_path_visible`、`inconsistent_read_only_views`）→ 各视图不一致（说明有模块在拦截 / 隐藏该路径）即命中。
+>
 > 安装了试图阻止检测器扫盘的模块。
 > 暂按**误报**理解；可在 HMA-OSS 中对春秋检测开启「限制 zygote 权限」（除 `INET_GID` 外全开）。
 </details>
@@ -1086,6 +1100,8 @@
 <details>
 <summary>App Zygote 分叉顺序异常</summary>
 
+> **检测方式**：app_zygote 内的 fork 顺序探针（`/dev/socket/logdw` 取 identity / cookie，检查 `prepare/parent/child`、存活与 fd 关闭顺序），用于发现 **Zygisk 早于 app-zygote 注入**的残留。
+>
 > 应用自身 zygote 权限被修改。
 > 暂按**误报**理解（有人假回锁、0 模块也会报；联想 Y700 系列无论是否 root 都会出现）。
 </details>
@@ -1093,6 +1109,8 @@
 <details>
 <summary>SELinux 状态指纹可疑</summary>
 
+> **检测方式**：对 selinuxfs 的元数据做 stat 校验（`SELinux fs stat anomaly`），并在**加扰动后**复检 raw selinuxfs 与 libselinux 的视图是否一致。
+>
 > SELinux 规则被修改。
 > 非联想用户参考「检测 SELinux Policy 时发现问题」；确保管理器为最新版，并尝试关闭再打开「隐藏 SELinux 修改」。
 </details>
@@ -1100,6 +1118,8 @@
 <details>
 <summary>Current-app-root-domain-trace</summary>
 
+> **检测方式**：以 `untrusted_app` 身份遍历 `/proc` 的 PID，逐个读 `attr/current`、`cmdline`、`comm`（正常应全被 SELinux 拒绝），随后去 `auditd` / `logcat` 里翻 AVC denied 记录，出现 `tcontext=u:r:ksu:s0` 一类即命中（探针 `proc_pid_avc_context_leak`）。
+>
 > 以 `untrusted_app` 身份遍历 `/proc` 的 PID，逐个尝试读取 `attr/current`、`cmdline`、`comm`（正常情况下应全部被 SELinux 拒绝），随后翻 `auditd`/`logcat` 的 AVC denied 记录，若出现 `tcontext=u:r:ksu:s0` 一类即可命中。
 > **KSU · LKM**：刷入对应版本的 PathMask 并开启「隔离防护（procguard）」，或刷入 ZN-Audit-Patch（可能导致其它检测项泄露）；
 > **KSU · GKI**：在管理器设置中打开「AVC 日志欺骗」；
@@ -1109,6 +1129,8 @@
 <details>
 <summary>Bootloader 解锁（属性）</summary>
 
+> **检测方式**：读取 `ro.boot.flash.locked`、`ro.boot.verifiedbootstate`、`ro.boot.vbmeta.device_state` 等属性判断解锁状态。
+>
 > `ro.boot.flash.locked=0` / `ro.boot.verifiedbootstate=orange` / `ro.boot.vbmeta.device_state=unlocked` 等属性表明设备已解锁。
 > 使用可用的 BL 弱级隐藏方案。
 </details>
@@ -1116,6 +1138,8 @@
 <details>
 <summary>证书链篡改(x)</summary>
 
+> **检测方式**：判据尚未恢复（可能读取 `ro.secureboot.lockstate` 一类属性或做证书链一致性校验），待确认。
+>
 > 检测到 `ro.secureboot.lockstate=unlocked`。
 > `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
 </details>
@@ -1123,6 +1147,8 @@
 <details>
 <summary>USB 调试已开启</summary>
 
+> **检测方式**：native 层未见判据串，推测在 Java 层读取 `adb_enabled`（Settings.Global）等设置项。
+>
 > 检测到 USB 调试处于开启状态。
 > 关闭 USB 调试：`su -c settings put global adb_enabled 0`；可写入 `/data/adb/service.d/` 实现开机自动关闭。
 </details>
@@ -1130,6 +1156,8 @@
 <details>
 <summary>Tampered Attestation Key (16) / (31)</summary>
 
+> **检测方式**：同属证书链 / 标签一致性判据族（16 为 HanAttest 链不一致一族，31 为安全补丁日期一族），多为误报。
+>
 > TEE 标签异常（HanAttest 链不一致、KeyMint 异常、证书矛盾等）。
 > **纯误报**：假回锁、未 root 也可能概率命中 → 重测或直接无视。
 </details>
@@ -1137,6 +1165,8 @@
 <details>
 <summary>挂载异常(X)</summary>
 
+> **检测方式**：挂载表扫描（`verdict=hit: peer-group table inconsistency (hidden mount points)`、`suspicious mount entry`、overlay 检测等），命中后会把具体 `/dev/block/...` 或模块名放进展开详情。
+>
 > 检测到某些模块 / 应用的挂载。
 > **KSU · LKM**：按条目展开给出的 `/dev/block/xxx` 路径用 PathMask 隐藏后热重载；**GKI + SUSFS**：在 SUSFS 中写入对应隐藏路径；**GKI 无 SUSFS**：参考 LKM 方案；其它管理器暂无方案。
 > 若展开内容里出现 **overlay** 字样 → 更换元模块（推荐 mountify）；若确定是某模块导致的挂载 → 卸载该模块。
