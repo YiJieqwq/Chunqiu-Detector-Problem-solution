@@ -353,7 +353,7 @@
 >
 > 侧信道（不稳定）重新打开或许消失
 >
-> 更换模块[密钥模块](https://github.com/JingMatrix/TEESimulator)
+> 更换模块密钥模块
 </details>
 
 <details>
@@ -361,7 +361,7 @@
 
 > **检测方式**：证书链为模块生成（合成链），与真实 TEE 链特征不符。
 >
-> **尝试1**：更换模块比如 [密钥模块](https://github.com/JingMatrix/TEESimulator)
+> **尝试1**：更换模块比如 密钥模块
 >
 > **尝试2**：把 `/data/adb/tricky_store/security_patch.txt` 文件删除
 </details>
@@ -379,7 +379,7 @@
 
 > **检测方式**：TEE 侧密钥 / 证书链不完整或不可用。
 >
-> 使用密钥模块解决，搭配 [TS插件使用](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)。
+> 使用密钥模块解决，搭配 TS 插件。
 >
 > 刷入后请重启，开机后打开模块的 webUI 进行配置。
 >
@@ -397,7 +397,7 @@
 
 > **检测方式**：密钥证明证书链不完整或与预期链不一致。
 >
-> 使用 [密钥模块](https://github.com/Enginex0/TEESimulator-RS) 并配置后尝试解决
+> 使用 密钥模块 并配置后尝试解决
 </details>
 
 <details>
@@ -407,7 +407,7 @@
 >
 > 更换 `/data/adb/tricky_store/` 目录下的 `keybox.xml` 文件。
 >
-> 也可选择刷入 [TS插件](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1)，重启后打开模块的 webUI 界面进行密钥配置。
+> 也可选择刷入 TS 插件，重启后打开模块的 webUI 界面进行密钥配置。
 </details>
 
 <details>
@@ -417,7 +417,7 @@
 >
 > boot 镜像的 Hash 不匹配。
 >
-> 通常 BL 解锁后 hash 会变成 0000，使用 [Native detector](https://t.me/rootdetector/49) 获取正确的 hash 后使用密钥模块并使用 [TS插件](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) 配置 hash 解决。
+> 通常 BL 解锁后 hash 会变成 0000，使用 [Native detector](https://t.me/rootdetector/49) 获取正确的 hash 后使用密钥模块并使用 TS 插件 配置 hash 解决。
 > 打开密钥认证，取 `VerifiedBootHash` 的值，用 TS 插件写入。
 </details>
 
@@ -430,7 +430,7 @@
 >
 > 需要配置 `/data/adb/tricky_store/` 目录下的 `target.txt` 文件，在其中添加软件包名（实时生效无需重启）。
 >
-> 也推荐使用 [TS插件](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) 进行软件包名的可视化配置。
+> 也推荐使用 TS 插件 进行软件包名的可视化配置。
 > 同上一条的组合方案；另有反馈 iQoo/Vivo 橘子 5 不报、橘子 6 报（未确认是否误报）。
 
 > **检测方式**：读取 `ro.boot.flash.locked`、`ro.boot.verifiedbootstate`、`ro.boot.vbmeta.device_state` 等属性判断解锁状态。
@@ -461,13 +461,21 @@
 </details>
 
 <details>
-<summary>密钥篡改</summary>
+<summary>密钥篡改 / 证书链篡改(x)</summary>
 
-> **检测方式**：密钥 / 证书链属性一致性判定未通过（分组见详情，其中 128 最常见）。
+> **检测方式**
+> - 密钥篡改：密钥 / 证书链属性一致性判定未通过，命中时会给出分组；
+> - 证书链篡改(x)：Java 层读取系统属性 `ro.secureboot.lockstate`（该属性与 `ro.lenovo.series`、`ro.lewa.version`、`ro.meizu.product.model`、`ro.miui.ui.version.name`、`ro.vivo.os.build.display.id` 等厂商 ROM 属性在同一张表里），取到 `unlocked` 即命中。
 >
-> 分组 128 的常见来源：密钥模块在一加 / 高通设备上默认使用“证书链生成模式”。
+> **分组说明**
+> - **128**：最常见。密钥模块在一加 / 高通设备上默认使用“证书链生成模式”时容易出现；
+> - 其它分组（如 q、b）原因暂未公开。
 >
-> **解决办法**：更换 / 更新密钥模块，并按「模块正确配置」完成配置（target 列表、安全补丁日期、boot hash）。
+> **解决办法**
+> - 密钥篡改：更换 / 更新密钥模块，并按「模块正确配置」完成配置（target 列表、安全补丁日期、boot hash）；
+> - 证书链篡改(x)：`su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
+>
+> 关系：与 `密钥证明未完成或链不一致` 同属证书链 / 密钥一致性族。
 </details>
 
 
