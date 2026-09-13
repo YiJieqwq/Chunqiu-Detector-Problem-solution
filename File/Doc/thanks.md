@@ -11,7 +11,7 @@
   *佐证：90 次提交（2026-04-07 起）；PR #30–#35 的合并人。*
 
 - **YiJieqwq** —— 文档结构重构；各条目「检测方式」补充与指标附录；检测项更新；术语规范化；中英文同步。
-  *佐证：41 次提交（2026-06-11 起）；PR #18 / #19 / #20 / #24 / #39 / #40。*
+  *佐证：41 次提交（2026-06-11 起）；PR #18 / #19 / #20 / #24 / #39 / #40 / #41。*
 
 - **741afb7** —— 更正多条错误解释；文档拆分；引入 `File/Doc/ksu_kp_sidechannel_zh.md` 与 NoHello KPM（`File/Bin/`）；修订 SELinux_Hook 使用说明。
   *佐证：8 次提交（2026-07-06 – 07-23）；PR #22 / #23 / #26。*
@@ -59,7 +59,7 @@
   *Evidence: 90 commits (since 2026-04-07); merged PRs #30–#35.*
 
 - **YiJieqwq** — document restructuring; per-item “Detection method” sections and the indicator appendices; detection-item updates; terminology standardisation; ZH/EN synchronisation.
-  *Evidence: 41 commits (since 2026-06-11); PRs #18 / #19 / #20 / #24 / #39 / #40.*
+  *Evidence: 41 commits (since 2026-06-11); PRs #18 / #19 / #20 / #24 / #39 / #40 / #41.*
 
 - **741afb7** — corrected several wrong explanations; split the document; introduced `File/Doc/ksu_kp_sidechannel_zh.md` and the NoHello KPM (`File/Bin/`); revised the SELinux_Hook usage notes.
   *Evidence: 8 commits (2026-07-06 – 07-23); PRs #22 / #23 / #26.*
