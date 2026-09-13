@@ -114,6 +114,23 @@
 </details>
 
 <details>
+<summary>发现APatch 的鉴权密钥</summary>
+
+> **检测方式**：以“**系统调用参数页被额外读取**”为判据的侧信道。检测器把目标调用的参数/缓冲区放在一块受监控的用户页上，测量调用前后该页被内核读取的页数（kB）：
+> - `No-read control`：一个“内核按语义不应读取该页”的调用 → 期望 `0→0 kB`；
+> - `Read control`：一个“内核应当读取该页”的调用 → 期望 `0→4 kB`；
+> - `Target call`：目标调用 → 若出现 `0→4 kB, unexpected read`，说明内核在该 syscall 路径上**多读了一次用户内存**，即该路径被内核补丁（KernelPatch / APatch 的鉴权路径）额外处理。
+>
+> 该条目同时会输出 `Argument layouts`（内核读取系统调用参数的寄存器布局探测）、多轮一致性 `Consistency: n/n`、`Page size` 与 `Probe duration`（秒级，采样较重）。
+>
+> **与 `Abnormal Environment` 的关系**：两者针对同一类“鉴权路径”侧信道——仓库内 [KSU/APatch 侧信道说明](/File/Doc/ksu_kp_sidechannel_zh.md) 描述的是“懒分配页是否被映射”与“鉴权时延比值”两种口径；本条是按**页读取量**做对照的实现，属同一思路的不同变体，可互相印证。
+>
+> **解决办法**：APatch / KernelPatch 侧使用 [nohello](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm) 一类 KPM，并把检测器加入排除列表（在 `cmd` 判断之前就拒绝鉴权，探测无法观察到“进入鉴权路径”的行为）；或使用按 uid 判断鉴权的最新版 KPatch-Next；否则可等待上游修复。
+>
+> **备注**：该条目在英文界面下目前**没有对应的英文标题**（仅中文显示）。
+</details>
+
+<details>
 <summary>KernelSU loop device</summary>
 
 > **检测方式**：检查是否存在 KernelSU 特征的 loop 设备挂载。
