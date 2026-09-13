@@ -256,7 +256,7 @@
 <details>
 <summary>Zygote 存在异常</summary>
 
-> **检测方式**：读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中；对应 应用隐藏模块模块的“限制 zygote 权限”把它去掉了。
+> **检测方式**：读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中；对应应用隐藏模块的「限制 zygote 权限」把它去掉了。
 >
 > 应用自身的 INET-GID 权能被限制。
 > 在 应用隐藏模块 中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
