@@ -1158,13 +1158,3 @@
 - `ro.product.brand=`
 </details>
 
-<details>
-<summary>附录 D：近期版本新增 / 加强的检测面（社区实测）</summary>
-
-- 进程 / 命名空间：`/proc/self/cgroup`、`/proc/self/stat`、`/proc/self/task`、`/proc/thread-self/status`、`/sys/fs/cgroup/apps`（含 cgroup 路径格式校验 `0::/uid_N/pid_M`、`0::/apps/uid_N/pid_M`）
-- SELinux：`SELinux fs stat anomaly`（对 selinuxfs 文件元数据做 stat 校验）、**加扰动后**的 `raw/lib` 一致性复检、`selinux_get_callback`
-- 日志面扩大：`logcat -b all -d -t 768`（旧版是定向读取 events/auditd）
-- 属性伪装新增：`persist.sys.pihooks_FINGERPRINT`、`persist.sys.pihooks_SDK_INT`、`ro.build.fingerprint`
-- 新增黑名单 / 特征路径：`/storage/emulated/0/keybox.xml`、`/storage/emulated/0/sukisu一键隐藏环境v4.9.zip`、`/storage/emulated/0/BY物资`、`/data/BingPUBG/guns.cfg`、`/data/local/tmp/mount_mark`、`/data/local/tmp/单发枪配置.txt`、`/sdcard/Android/data/`、`/vendor/etc/selinux/vendor_file_contexts`
-
-</details>
