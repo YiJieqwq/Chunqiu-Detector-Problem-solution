@@ -1,6 +1,6 @@
 # Chunqiu Detector Solutions (Latest Version) - English Version
 > Checked against version: 4.5.5(68) | Last updated: 2026-09-13
-> Organized by: mingzun09(SuXiaoMing) | For reference only, results vary by device/environment.
+> Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ## Table of Contents
@@ -663,7 +663,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>Risky Applications / Risk apps 'package name'</summary>
 
-> **Detection method**: reads the directory names under `/storage/emulated/0/Android/data/` to obtain installed package names (normal apps do not have this permission), bypassing the read restriction via a **Unicode zero-width character**, then matches them against the risky list (see Appendix A).
+> **Detection method**: reads the directory names under `/storage/emulated/0/Android/data/` to obtain installed package names (normal apps do not have this permission), bypassing the read restriction with a **Unicode zero-width character** where that is possible (it is not a fixed method), then matches them against the risky list (see Appendix A).
 >
 > **Solution**
 > - Effective combination: **app-hiding module blacklist mode + zero-width read fix** ([FuseFixer](https://github.com/5ec1cff/FuseFixer)); on some devices enabling the scope may cause a boot hang — turn the scope off in safe mode;
@@ -674,15 +674,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>Dirty Device(a)</summary>
 
-> **Detection method**: Dirty-device determination related to *key-replacement behaviour*; some versions additionally match `.sh` cheat files under `/storage/emulated/0`.
+> **Detection method**: detects folders / files whose names contain `sh` under `/storage/emulated/0/` (`/sdcard`), plus cheat-related files / drivers (some versions also combine this with “key-replacement behaviour”).
 >
-> Kernel interface detected? External sh detected?
-> 
-> Detects folders/files under `/storage/emulated/0/` with "sh" in their names.
->
-> Try restarting or reinstalling the system. Delete any folders/files with "sh" in their names under `/storage/emulated/0/`.
-
-> This item also scans for **files / folders whose names contain `sh`** under `/sdcard`, plus cheat files / drivers → delete them after a reboot.
+> **Solution**: this item simply means “game-cheat files were found on the device” → **just delete them yourself**, then reboot and re-test.
 </details>
 
 <details>
