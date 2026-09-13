@@ -693,7 +693,7 @@
 
 > **检测方式**：读取 `/storage/emulated/0/Android/data/` 下的目录名以获取已安装包名（普通应用通常没有该权限），再与风险名单比对。
 > 通过 Unicode 零宽字符漏洞检查 `/storage/emulated/0/Android/data/` 中的风险应用包名。
-> 修复 `/storage/emulated/0/Android/data/` 的零宽读取限制（社区方案：[FuseFixer](https://github.com/5ec1cff/FuseFixer)），并搭配 应用隐藏模块 对风险应用隐藏。
+> 修复 `/storage/emulated/0/Android/data/` 的零宽读取限制（社区方案：[FuseFixer](https://github.com/5ec1cff/FuseFixer)），并搭配 应用隐藏模块对风险应用隐藏。
 > 有效组合：**应用隐藏模块 黑名单模式 + 零宽读取修复方案**（部分机型开启作用域后可能卡开机，安全模式关掉即可）。
 > 只想让春秋这一项通过的做法：在 应用隐藏模块 里对春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开。
 > 判据（社区实测）：读取 `/storage/emulated/0/Android/data/` 下的目录名来获取包名（借助 **Unicode 零宽字符**绕过读取限制），再与风险名单比对。
