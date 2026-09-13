@@ -8,74 +8,18 @@
 
 ## 目录
 
-
-
----
-
-## 用语介绍与规范
-
-> **真解锁设备**：ABL 解锁标志真实置位，放行未经签名校验的镜像并允许刷写，且解锁状态如实反映在系统属性与 KeyMint attestation 上的设备。
->
-> **假回锁设备**：在 ABL 真实解锁的设备上，于启动链早期（早于系统与 TEE 读取并固化启动状态）植入并执行自定义 payload，改写内存中的解锁状态并上报，使设备对外呈现“已锁定（locked & green）”，并能返回硬件级“已锁定的 attestation 证书”，而实际仍加载被篡改的 boot / init_boot 镜像的设备（如使用 gbl_root_canoe 项目的高通骁龙 8e5 设备）。
->
-> **免解设备**：在 ABL 保持真实锁定（未解锁）的状态下，通过 Android / 用户空间提权漏洞（常伴随 SELinux 被置为 permissive）取得 Root 的设备。此类 Root 通常不持久、需每次启动重新利用。
->
-> **自签设备**：设备启动链所信任的 boot / init_boot 签名密钥可被第三方获得或复现，用户可用该密钥自行签名被篡改的 boot / init_boot / vbmeta 等镜像，并在 ABL 保持真实锁定的状态下通过校验运行的设备；系统启动状态与 OEM 解锁状态仍显示“未解锁”（典型：联想拯救者 Y700 二 / 三 / 四代，用公开 testkey 重签镜像即可免解锁刷入 root 补丁）。
->
-> **Root 管理器**：由一套完整的权限管理组件集合组成，包含面向用户的 Android 交互 App、用户态守护服务，以及部署在内核或 ramdisk 中的持久化钩子或内存补丁等，用于实现 Root 权限的管控。
->
-> **元模块**：模块管理器类型的顶层模块，本身不直接提供设备伪装、系统补丁等功能，核心职责是管控子模块和提供挂载功能；一台设备同时只能安装一个元模块（详见 [KernelSU 官方文档](https://kernelsu.org/zh_CN/guide/metamodule.html)）。
->
-> **密钥模块**：在系统 keystore 守护进程（keystore2）内拦截 / 替换 KeyMint 的 attestation 路径，并用 keybox 生成设备已锁定的虚假证明的模块，多数同时自带系统属性伪装功能。
->
-> **Zygisk 实现模块**：提供 Zygisk runtime 的模块，负责把代码注入 Zygote / app 进程，并对外暴露一套 Zygisk 行为的 API，为真正干活的其他 Zygisk 模块提供加载运行环境。
->
-> **应用隐藏模块**：以“包可见性”为操作对象，在目标进程（或系统进程）里拦截包查询链路，进而按照用户的配置，对目标应用隐藏选中应用可见性的模块。
-
-## 最小完美隐藏环境所需模块集合
-
-> - 真解锁设备：**密钥模块 + Zygisk 实现模块 + 应用隐藏模块**
-> - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
-
-## 相关模块推荐（排名不分先后）
-
-> **密钥模块**
-> - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)：继 TrickyStore 后最知名的密钥模块，更新较勤，不自带 WebUI。
-> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/)：自带 WebUI 的新模块，行为更接近 AOSP，IO 开销可能比 TEES-RS 更低。
-> - [Tricky-addon-Enhanced](https://github.com/Enginex0/tricky-addon-enhanced)：TS / TEES-RS 可用的 WebUI 拓展模块。
-> - 不推荐原版 TrickyStore：其最后更新为 2025-11-30，部分功能已严重落后于其他密钥模块。
->
-> **Zygisk 实现模块**
-> - [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext)：最为广泛使用的 Zygisk 独立实现模块。
->
-> **应用隐藏模块**
-> - [HMA-OSS](https://github.com/frknkrc44/HMA-OSS)：Zygisk 模块版 / Xposed 模块版双版本可选。
->
-> **元模块**
-> - 若设备 root 管理器自带元模块 API，可以考虑启用；
-> - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount)：比较广泛使用的第三方元模块。
-
-## 模块正确配置
-
-> **密钥模块**
-> a. 将目标应用添加到包名列表内（如 TS / TEES 的 `/data/adb/tricky_store/target.txt`，或使用 WebUI 配置）；
-> b. 正确配置安全补丁日期，或直接删除其配置文件（如 `/data/adb/tricky_store/security_patch.txt`，直接删最省事）；
-> c. 正确配置 boot hash（正常情况下会自动设置）。
->
-> **Zygisk 实现模块**
-> 开启“使用 Zygisk 连接器”和“使用匿名内存”；“仅还原挂载”可能会和设备 root 管理器的“内核卸载模块”冲突，自行二选一即可。
->
-> **应用隐藏模块**
-> 使用方法不唯一，此处仅作名词解释（以 HMA-OSS 为例）：
-> - **黑名单工作模式**：被开启此模式的应用，将不可见其被应用黑名单模板内的应用；
-> - **黑名单模板**：对于被应用此模板的应用，模板内的应用不可见；
-> - **白名单工作模式**：被开启此模式的应用，将只可见其被应用白名单模板内的应用；
-> - **白名单模板**：对于被应用此模板的应用，只可见模板内的应用。
+- [说明与反馈](#说明与反馈)
+- [序章](#序章)
+- [Root 权限与 SELinux 检测](#root-权限与-selinux-检测)
+- [TEE 与密钥证明检测](#tee-与密钥证明检测)
+- [挂载与命名空间检测](#挂载与命名空间检测)
+- [环境、进程与文件检测](#环境进程与文件检测)
+- [内核、属性与系统特征检测](#内核属性与系统特征检测)
+- [附录](#附录)
 
 ---
 
 ## 说明与反馈
-
 <details>
 <summary>自行尝试但仍然无法通过的检测</summary>
 
@@ -97,8 +41,71 @@
 
 ---
 
-## Root 权限与 SELinux 检测
+## 序章
 
+### 用语介绍与规范
+
+> **真解锁设备**：ABL 解锁标志真实置位，放行未经签名校验的镜像并允许刷写，且解锁状态如实反映在系统属性与 KeyMint attestation 上的设备。
+>
+> **假回锁设备**：在 ABL 真实解锁的设备上，于启动链早期（早于系统与 TEE 读取并固化启动状态）植入并执行自定义 payload，改写内存中的解锁状态并上报，使设备对外呈现“已锁定（locked & green）”，并能返回硬件级“已锁定的 attestation 证书”，而实际仍加载被篡改的 boot / init_boot 镜像的设备（如使用 gbl_root_canoe 项目的高通骁龙 8e5 设备）。
+>
+> **免解设备**：在 ABL 保持真实锁定（未解锁）的状态下，通过 Android / 用户空间提权漏洞（常伴随 SELinux 被置为 permissive）取得 Root 的设备。此类 Root 通常不持久、需每次启动重新利用。
+>
+> **自签设备**：设备启动链所信任的 boot / init_boot 签名密钥可被第三方获得或复现，用户可用该密钥自行签名被篡改的 boot / init_boot / vbmeta 等镜像，并在 ABL 保持真实锁定的状态下通过校验运行的设备；系统启动状态与 OEM 解锁状态仍显示“未解锁”（典型：联想拯救者 Y700 二 / 三 / 四代，用公开 testkey 重签镜像即可免解锁刷入 root 补丁）。
+>
+> **Root 管理器**：由一套完整的权限管理组件集合组成，包含面向用户的 Android 交互 App、用户态守护服务，以及部署在内核或 ramdisk 中的持久化钩子或内存补丁等，用于实现 Root 权限的管控。
+>
+> **元模块**：模块管理器类型的顶层模块，本身不直接提供设备伪装、系统补丁等功能，核心职责是管控子模块和提供挂载功能；一台设备同时只能安装一个元模块（详见 [KernelSU 官方文档](https://kernelsu.org/zh_CN/guide/metamodule.html)）。
+>
+> **密钥模块**：在系统 keystore 守护进程（keystore2）内拦截 / 替换 KeyMint 的 attestation 路径，并用 keybox 生成设备已锁定的虚假证明的模块，多数同时自带系统属性伪装功能。
+>
+> **Zygisk 实现模块**：提供 Zygisk runtime 的模块，负责把代码注入 Zygote / app 进程，并对外暴露一套 Zygisk 行为的 API，为真正干活的其他 Zygisk 模块提供加载运行环境。
+>
+> **应用隐藏模块**：以“包可见性”为操作对象，在目标进程（或系统进程）里拦截包查询链路，进而按照用户的配置，对目标应用隐藏选中应用可见性的模块。
+
+### 最小完美隐藏环境所需模块集合
+
+> - 真解锁设备：**密钥模块 + Zygisk 实现模块 + 应用隐藏模块**
+> - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
+
+### 相关模块推荐（排名不分先后）
+
+> **密钥模块**
+> - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)：继 TrickyStore 后最知名的密钥模块，更新较勤，不自带 WebUI。
+> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/)：自带 WebUI 的新模块，行为更接近 AOSP，IO 开销可能比 TEES-RS 更低。
+> - [Tricky-addon-Enhanced](https://github.com/Enginex0/tricky-addon-enhanced)：TS / TEES-RS 可用的 WebUI 拓展模块。
+> - 不推荐原版 TrickyStore：其最后更新为 2025-11-30，部分功能已严重落后于其他密钥模块。
+>
+> **Zygisk 实现模块**
+> - [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext)：最为广泛使用的 Zygisk 独立实现模块。
+>
+> **应用隐藏模块**
+> - [HMA-OSS](https://github.com/frknkrc44/HMA-OSS)：Zygisk 模块版 / Xposed 模块版双版本可选。
+>
+> **元模块**
+> - 若设备 root 管理器自带元模块 API，可以考虑启用；
+> - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount)：比较广泛使用的第三方元模块。
+
+### 模块正确配置
+
+> **密钥模块**
+> a. 将目标应用添加到包名列表内（如 TS / TEES 的 `/data/adb/tricky_store/target.txt`，或使用 WebUI 配置）；
+> b. 正确配置安全补丁日期，或直接删除其配置文件（如 `/data/adb/tricky_store/security_patch.txt`，直接删最省事）；
+> c. 正确配置 boot hash（正常情况下会自动设置）。
+>
+> **Zygisk 实现模块**
+> 开启“使用 Zygisk 连接器”和“使用匿名内存”；“仅还原挂载”可能会和设备 root 管理器的“内核卸载模块”冲突，自行二选一即可。
+>
+> **应用隐藏模块**
+> 使用方法不唯一，此处仅作名词解释（以 HMA-OSS 为例）：
+> - **黑名单工作模式**：被开启此模式的应用，将不可见其被应用黑名单模板内的应用；
+> - **黑名单模板**：对于被应用此模板的应用，模板内的应用不可见；
+> - **白名单工作模式**：被开启此模式的应用，将只可见其被应用白名单模板内的应用；
+> - **白名单模板**：对于被应用此模板的应用，只可见模板内的应用。
+
+---
+
+## Root 权限与 SELinux 检测
 <details>
 <summary>存在模块修改春秋</summary>
 
@@ -279,7 +286,6 @@
 ---
 
 ## TEE 与密钥证明检测
-
 <details>
 <summary>TEE 伪造(2)</summary>
 
@@ -478,11 +484,9 @@
 > 关系：与 `密钥证明未完成或链不一致` 同属证书链 / 密钥一致性族。
 </details>
 
-
 ---
 
 ## 挂载与命名空间检测
-
 <details>
 <summary>mountinfo</summary>
 
@@ -629,7 +633,6 @@
 ---
 
 ## 环境、进程与文件检测
-
 <details>
 <summary>Miscellaneous Check(12)</summary>
 
@@ -751,12 +754,9 @@
 <details>
 <summary>设备为模拟器</summary>
 
-> **检测方式**：检查模拟器 / 虚拟化特征，如 `/dev/goldfish_pipe`、`/dev/qemu_pipe`、`/dev/socket/genyd`、`/sys/qemu_trace` 等，以及 `goldfish` / `ranchu` / `qemu` / `genymotion` / `bluestacks` / `ldplayer` / `nox` / `memu` / `ttvm` / `vbox` / `vmware` 等机型关键字。
+> **检测方式**：检查模拟器 / 虚拟化特征，如 `/dev/goldfish_pipe`、`/dev/qemu_pipe`、`/dev/socket/genyd`、`/sys/qemu_trace` 等，以及 `goldfish` / `ranchu` / `qemu` / `genymotion` / `bluestacks` / `ldplayer` / `nox` / `memu` / `ttvm` / `vbox` / `vmware` 等机型关键字；同时引用 `android/os/BatteryManager` 与 `android/telephony/TelephonyManager`，即也会参考**电量 / 充电状态与 SIM 状态**。
 >
-> 当前是模拟器设备。
-> 社区实测：在**未插 SIM 卡 + 满电 + 充电**的状态下测试确实会被判为模拟器（无直接证据时也会报）→ 先卸载重装检测器、换正常状态重测。
-> 判据补充（社区实测）：在**未插 SIM 卡 + 满电 + 充电**状态下会命中（无直接证据时也会报）；先卸载重装、换正常状态重测。
-> 关系：`检测运行环境可疑 / 容器 / 多开`、`Miscellaneous Check(4/5/6/7/8/9)` 是相邻但不同的条目（模拟器特征 / 容器分身 / 改机），可能同时出现；另有函数 `runCloudPhoneChecks`（云手机方向），无独立条目标题。
+> **解决办法**：先卸载重装检测器；避免在**未插 SIM 卡 + 满电 + 充电**的状态下测试。
 </details>
 
 <details>
@@ -803,11 +803,11 @@
 <details>
 <summary>Suspicious Surroundings（b）</summary>
 
-> **检测方式**：检查 `/data/local/tmp` 的 **inode 值是否高于 10000**（该目录曾被删除 / 重建时，inode 会异常增大）。
+> **检测方式**：检查 `/data/local/tmp` 的 inode 值是否偏高（社区实测阈值为 **> 10000**；该目录曾被删除 / 重建时 inode 会异常增大）。
 >
 > **解决方案**（任选其一）：
 > 1. 恢复出厂设置；
-> 2. 使用 SusFS 把该路径的 inode 伪装成小于 1000；
+> 2. 使用内核级隐藏把该路径的 inode 伪装成小于 1000；
 > 3. 使用 [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) 脚本（下载执行即可；执行不了的换老 release）。
 >
 > 注意：**使用 Inode-Hijacker 之后，如果出现有线投屏（如 Scrcpy）不可用**，执行 `su -c restorecon -RF /data/local/tmp` 恢复即可。
@@ -923,19 +923,17 @@
 <details>
 <summary>发现异常模块</summary>
 
-> **检测方式**：命中“温控 / 调度 / 优化”类模块的特征签名（驱动、守护进程、配置路径一族，如 `/data/encore/*_cpu_gov`、`/data/swap_config.conf`、`/dev/cpuset/AppOpt/`、`/data/local/tmp/yshell` 等同一张特征表）→ 报 `发现异常模块 / Suspicious modules detected`。
+> **检测方式**：命中温控 / 调度 / 优化类模块的特征签名，其中最常见的是 **Encore Tweaks** 家族：管理端应用、`/system/bin/encore_profiler`、`/data/encore/default_cpu_gov`、`/data/encore/custom_default_cpu_gov`、`/data/local/tmp/encore_logo.png`；命中时会分别报 `Encore 管理端已安装 / Encore Tweaks 模块 / Encore Tweaks 可能` 等文案。
 >
-> 部分温控 / 调度 / 优化模块被特征化命中。
-> 排查并卸载相关模块；也可多重启几次再测（大概率误报）。
+> **解决办法**：排查并卸载相关模块（此类条目多为概率命中，可多重启几次再测）。
 </details>
 
 <details>
 <summary>GMS 被屏蔽</summary>
 
-> **检测方式**：检查 ROM 侧“屏蔽 GMS”的特征：`/my_product/etc/permissions/oplus_google_cn_gms_features.xml`（OPPO / 一加国内机型配置）、可执行文件 `/system/bin/gmsc`，以及 PIF 类属性（`persist.sys.pihooks.disable.gms`、`persist.sys.pixelprops.gms`、`persist.sys.spoof.gms`）；命中即报 `GMS被屏蔽 / GMS blocked`。
+> **检测方式**：检查 ROM 侧“屏蔽 GMS”的特征文件与可执行文件 —— `/my_product/etc/permissions/oplus_google_cn_gms_features.xml`（OPPO / 一加国内机型，检测器会直接 `access` 该路径）、`/system/bin/gmsc`；另有 PIF 类属性 `persist.sys.pihooks.disable.gms`、`persist.sys.pixelprops.gms`、`persist.sys.spoof.gms`。
 >
-> 未检测到 Google 服务套件 / Google 服务被屏蔽。
-> 检查 HMA 是否隐藏了系统组件；或排查 ROM 侧 GMS 问题。
+> **解决办法**：检查是否用应用隐藏模块隐藏了系统组件（Google 服务套件），或排查 ROM 侧 GMS 问题。
 </details>
 
 <details>
@@ -969,10 +967,10 @@
 <details>
 <summary>USB 调试已开启</summary>
 
-> **检测方式**：native 方法 **`runFormalUsbDebuggingCheck`** 实现，走 **SELinux 规则/上下文族**判断 USB 调试链路是否存在 —— 同族串有 `u:r:adbd:s0`、`u:r:adbroot:s0`、`adbd -> adbroot binder`、`zygote -> adb_data_file search`、`u:object_r:adb_data_file:s0`（即查 `adbd` / `adbroot` / `adb_data_file` 相关规则是否被接受），**不是**读 `adb_enabled`。
+> **检测方式**：native 方法 `runFormalUsbDebuggingCheck`；静态产物中未见 `adb_enabled` 一类设置项串，推测与 `adbd` / `adbroot` / `adb_data_file` 相关的 SELinux 规则族有关（与 SELinux 规则探测同源），具体判据待确认。
 >
-> 检测到 USB 调试处于开启状态。
-> 关闭 USB 调试：`su -c settings put global adb_enabled 0`；可写入 `/data/adb/service.d/` 实现开机自动关闭。
+> **解决办法**：关闭 USB 调试（`su -c settings put global adb_enabled 0`）；可写入 `/data/adb/service.d/` 实现开机自动关闭。
+>
 > 关系：与 `fdinfo mnt 采样异常（c）` 都涉及 USB 调试，但判据不同——那条看的是 `/proc/*/fdinfo` 的 `mnt_id` 残留。
 </details>
 
@@ -984,7 +982,6 @@
 ---
 
 ## 内核、属性与系统特征检测
-
 <details>
 <summary>无效的伪造信息(1)</summary>
 
