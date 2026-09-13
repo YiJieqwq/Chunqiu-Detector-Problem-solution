@@ -360,6 +360,14 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 </details>
 
 <details>
+<summary>TEE Spoofing (2)</summary>
+
+> **Detection method**: creates a key with both `SIGN` and `ATTEST_KEY` purposes via Keystore2 reflection — a normal device should reject this mixed use (e.g. with `-3`); if the key can sign but **both** sub-certificate issuances (with and without a challenge) fail (e.g. with `-49`), it is reported as TEE Spoofing (2).
+>
+> **Solution**: replace / update the key module (see “Recommended Modules” and “Correct Module Configuration”).
+</details>
+
+<details>
 <summary>TEE Spoofing</summary>
 
 > **Detection method**: Certificate chain / key attributes indicate that TEE behaviour is being simulated.
@@ -494,16 +502,6 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Relation: the same probe as the community name “App Zygote Fork Order Anomaly” (fork order inside the app_zygote / Zygisk early-injection residue).</details>
 
 <details>
-<summary>Inconsistent mount</summary>
-
-> **Detection method**: Resolves mounts from `/proc/self/exe` and compares them with the filesystem type reported by `statfs`; a mismatch hits.
->
-> Parses part of the mount from `/proc/self/exe/`, then checks if file system types are consistent.
-> 
-> Some devices have unfixed false positives (fixed in version 3.4).
-</details>
-
-<details>
 <summary>Mount loophole</summary>
 
 > **Detection method**: Checks whether magic mount from system-modifying modules actually takes effect on the system partition.
@@ -537,6 +535,11 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > `umount /debug_ramdisk`
 
 > `su -c umount /debug_ramdisk`.
+> **Detection method**: Resolves mounts from `/proc/self/exe` and compares them with the filesystem type reported by `statfs`; a mismatch hits.
+>
+> Parses part of the mount from `/proc/self/exe/`, then checks if file system types are consistent.
+> 
+> Some devices have unfixed false positives (fixed in version 3.4).
 </details>
 
 <details>
