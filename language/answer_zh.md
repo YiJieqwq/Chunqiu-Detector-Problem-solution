@@ -130,7 +130,7 @@
 > **解决办法**
 > - 检测方式参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
 > - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
->   - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新越狱后重启）；
+>   - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像，或重新进行**免解（越狱）**后重启）；
 >   - **内核级方案**：[selinux_hook](https://github.com/Admirepowered/selinux_hook) 一类 SELinux hook（KPM 或内核集成）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
 >   - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
 >
@@ -142,9 +142,9 @@
 
 > **检测方式**：KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备。
 >
-> 发现 ksu 处于越狱模式，当前设备使用 ksu 越狱模式的 ROOT 方式或者发现 ksu 进程等其他因素。
+> 发现 KSU 处于**免解（越狱）模式**，或发现 ksu 相关进程等因素。
 > 
-> 不推荐使用越狱模式，所以不提供解决方案。
+> 不推荐使用**免解（越狱）模式**，因此不提供解决方案。
 </details>
 
 <details>
@@ -331,7 +331,7 @@
 >
 > 针对 TEE 的检测，若有，“请等待相关模块更新修复”，或者回锁。
 >
-> 即使是 efisp 的假锁或者自定义引导程序也“可能”会报。
+> 即使是 efisp 方式的**假回锁**或者自定义引导程序也“可能”会报。
 >
 > - 15: HanAttest 链不一致（与下面 TeeSim 常量不同源，但同在 mask 里）
 > - 18: 厂商占位 KeyMint tag 仍成功输出密钥（tee2 §1）
@@ -423,7 +423,7 @@
 >
 > boot 镜像的 Hash 不匹配。
 >
-> 通常 BL 解锁后 hash 会变成 0000，使用 [Native detector](https://t.me/rootdetector/49) 获取正确的 hash 后使用密钥模块并使用 TS 插件 配置 hash 解决。
+> 通常**真解锁设备**的 hash 会变成 0000，使用 [Native detector](https://t.me/rootdetector/49) 获取正确的 hash 后使用密钥模块并使用 TS 插件 配置 hash 解决。
 > 打开密钥认证，取 `VerifiedBootHash` 的值，用 TS 插件写入。
 </details>
 
@@ -432,16 +432,14 @@
 
 > **检测方式**：读取 bootloader 锁定状态相关属性 / 认证结果。
 >
-> BL 已解锁，使用「密钥模块」隐藏。
+> **真解锁设备**：使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）。
 >
-> 需要配置 `/data/adb/tricky_store/` 目录下的 `target.txt` 文件，在其中添加软件包名（实时生效无需重启）。
->
-> 也推荐使用 TS 插件 进行软件包名的可视化配置。
-> 同上一条的组合方案；另有反馈 iQoo/Vivo 橘子 5 不报、橘子 6 报（未确认是否误报）。
+> **假回锁 / 免解 / 自签设备**：设备对外本就是“已锁定（locked & green）”，通常不会命中此项。
+> 组合方案见 `启动状态异常`；另有反馈 iQoo/Vivo 橘子 5 不报、橘子 6 报（未确认是否误报）。
 
 > **检测方式**：读取 `ro.boot.flash.locked`、`ro.boot.verifiedbootstate`、`ro.boot.vbmeta.device_state` 等属性判断解锁状态。
 > `ro.boot.flash.locked=0` / `ro.boot.verifiedbootstate=orange` / `ro.boot.vbmeta.device_state=unlocked` 等属性表明设备已解锁。
-> 使用可用的 BL 弱级隐藏方案。
+> **假回锁设备**：由启动链早期方案（efisp 一类）提供已锁定状态；**真解锁设备**：见序章「最小完美隐藏环境所需模块集合」。
 </details>
 
 <details>
@@ -449,9 +447,7 @@
 
 > **检测方式**：读取 verified boot 状态（如 `ro.boot.verifiedbootstate`）与预期比对。
 >
-> BL 已解锁，使用「密钥模块」隐藏。
->
-> 需要配置 `/data/adb/tricky_store/` 目录下的 `target.txt` 文件，在其中添加软件包名（实时生效无需重启）。
+> **真解锁设备**：使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）。
 > 社区在测试中的组合尝试：更新 密钥模块(-v307) + TS 插件 v5.0-beta1 → 管理器设置里关闭「卸载模块（内核级）」→ Zygisk 实现模块 设为「仅还原挂载」→ 冻结手机管家（小米可用按应用隐藏 / 冻结方案并打开「禁用环境检查」）→ 把属性隐藏脚本放入 `/data/adb/service.d/`。
 </details>
 
@@ -512,7 +508,7 @@
 
 > **检测方式**：app_zygote 内的 fork 顺序探针（`/dev/socket/logdw` 取 identity / cookie，检查 `prepare/parent/child`、存活与 fd 关闭顺序），用于发现 **Zygisk 早于 app-zygote 注入**的残留。
 > 应用自身 zygote 权限被修改。
-> 暂按**误报**理解（有人假回锁、0 模块也会报；联想 Y700 系列无论是否 root 都会出现）。
+> 暂按**误报**理解（有人**假回锁**、0 模块也会报；**自签设备**如联想 Y700 系列无论是否 root 都会出现）。
 > 关系：即旧版条目 `zygote test (1)`（同一探针）。
 </details>
 
@@ -993,7 +989,7 @@
 >
 > **第一步：先判断是不是误报**
 > 1. 播放**必须 L1 才能解码**的内容（Netflix / Disney+ / Prime 等的 HD / 1080p+）：
->    - 能 HD / 1080p+ 正常播放 ⇒ L1 本体正常，本条**大概率是误报**（已知小米设备、含**未解锁**设备也会稳定命中），可先忽略并等待版本更新；
+>    - 能 HD / 1080p+ 正常播放 ⇒ L1 本体正常，本条**大概率是误报**（已知小米设备、含**未解锁的原厂设备**也会稳定命中），可先忽略并等待版本更新；
 >    - 只能播放 SD ⇒ 继续第 2 步。
 > 2. 排查“伪装 L1 状态”的模块：密钥模块的 target 列表、`keybox.xml`、安全补丁同步，以及各类 PIF / 属性伪装模块；逐项关闭后**重启**复测。
 > 3. 只在最后才考虑“远程 RKP 密钥（RKPConfig）”：本机若已是 RKP（远程密钥下发）通常无效，目前小米机型普遍无效。
