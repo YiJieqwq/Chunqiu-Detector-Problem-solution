@@ -773,15 +773,14 @@
 <details>
 <summary>Suspicious Surroundings（b）</summary>
 
-> **检测方式**：检查 `/data/local/tmp` 的 inode 值是否偏高（异常增大往往是目录被替换 / 重建导致）。
+> **检测方式**：检查 `/data/local/tmp` 的 **inode 值是否高于 10000**（该目录曾被删除 / 重建时，inode 会异常增大）。
 >
-> 路径 `/data/local/tmp` 文件夹的 inode 值高于 10000。
-> 
-> **解决方案**：将设备恢复出厂设置 / 使用 SusFS 对路径伪装 inode 值小于 1000 / 尝试使用 [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) 脚本解决。
-> 
-> 如遇到有线投屏（如 Scrcpy）不可用，使用 `su -c restorecon -RF /data/local/tmp` 解决问题。
-> 参考工具：[Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker)（下载执行即可；执行不了的换老 release）。
-> 判据（社区实测）：`/data/local/tmp` 的 **inode 值 > 10000**（该目录曾被删除 / 重建）。
+> **解决方案**（任选其一）：
+> 1. 恢复出厂设置；
+> 2. 使用 SusFS 把该路径的 inode 伪装成小于 1000；
+> 3. 使用 [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) 脚本（下载执行即可；执行不了的换老 release）。
+>
+> 注意：**使用 Inode-Hijacker 之后，如果出现有线投屏（如 Scrcpy）不可用**，执行 `su -c restorecon -RF /data/local/tmp` 恢复即可。
 </details>
 
 <details>
@@ -879,6 +878,7 @@
 >    /data/swap_config.conf
 >    /data/local/tmp/resetprop
 >    ```
+> 命中后，条目会把**实际命中的路径**直接给出（社区称“一条路径”），按提示删除即可。
 </details>
 
 <details>
@@ -926,14 +926,6 @@
 > 刷回官方包；或用 PathMask 隐藏这两个文件。
 </details>
 
-<details>
-<summary>“一条路径”</summary>
-
-> **检测方式**：命中黑名单特征（文件 / 目录 / 驱动）后，把**实际命中的路径**放到条目标题 / 详情里 → 按提示删除即可。
->
-> 检测到特定 sh / 模块等释放的文件（夹）。
-> 按条目展开后给出的路径删除即可。
-</details>
 
 <details>
 <summary>OBB 目录存在异常</summary>
