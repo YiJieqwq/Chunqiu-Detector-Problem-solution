@@ -281,7 +281,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > **Solution**: in the app-hiding module, disable the restriction on `INET_GID` / zygote permissions for the detector.
 >
-> Note: that switch strips **several AIDs at once** (including **3009 / `AID_READPROC`**), so as long as it is not enabled for the detector (or the corresponding entry is allowed), 3009 is restored. **This item only checks 3009**, which is a different GID from `INET_GID` (3003 / 3004).
+> Note: that switch removes, as a **blacklist**, the extra GIDs the user ticks (the selectable set in HMA-OSS is 1015 / 1023 / 1032 / 1077 / 1078 / 1079 / 3003 / 9997 — **eight entries, not including 3009**). The **criterion** of this item is confirmed to be “GID 3009 missing”, but **whether this switch is the cause cannot be confirmed yet**.
 </details>
 
 <details>
@@ -1088,7 +1088,6 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: This check itself did not complete (environment limits / timeout, etc.) — **it is not a hit**; retry or ignore it.
 >
-> 2333333
 </details>
 
 <details>
