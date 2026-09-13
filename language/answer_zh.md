@@ -69,6 +69,7 @@
 > 3. 内核版本 4.9 的设备，建议嵌入模块，且无模拟 context_struct_compute_av 的风险，加载模式效果同 4.14。
 >
 > **Magisk**：尝试更换内核级管理器。在将来 Magisk 可能会合并保存 Clean policy blob 功能，如果合并此功能，Magisk 将有机会通过此检测。
+> 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 都属于同一套 SELinux 判据族（不同版本的不同切面），处理方式一致。
 </details>
 
 <details>
@@ -251,6 +252,7 @@
 > - 31：安全补丁日期异常（如YYYY-MM-05,China手机厂商对安全补丁日期及推送都是统一，YYYY-MM-01,当然对国外设备pixel&Samsung做了排除，此检测安全补丁日期篡改，如pif，及TA插件的安全日期同步会篡改
 国内的Lenovo与努比亚可以忽略此问题，确实会更新05日期）
 > **小米/红米用户注意**：2026-03 前后更新的系统，其构建时间与 Android 安全补丁时间本身就不一致，**不管是否 root 都会报（26）→ 无视即可**；魔改版 TEESimulator-RS（如 yurikey）/一键隐藏模块（月虹、悲伤）/部分改机模块也会导致，换回原版或卸载。
+> 关系：`Tampered Attestation Key (16) / (31)` 是同一判据族的其它标签（另见补充章节）。
 </details>
 
 <details>
@@ -427,6 +429,7 @@
 > 排除列表策略-仅还原挂载。
 > 
 > 不稳定检测，侧信道。
+> 关系：与补充条目 `App Zygote 分叉顺序异常` 是**同一个探针**（app_zygote 内的 fork 顺序 / Zygisk 早注入残留），只是不同版本的条目名不同。
 </details>
 
 <details>
@@ -634,6 +637,7 @@
 > 当前是模拟器设备。
 > 社区实测：在**未插 SIM 卡 + 满电 + 充电**的状态下测试确实会被判为模拟器（无直接证据时也会报）→ 先卸载重装检测器、换正常状态重测。
 > 判据补充（社区实测）：在**未插 SIM 卡 + 满电 + 充电**状态下会命中（无直接证据时也会报）；先卸载重装、换正常状态重测。
+> 关系：`云手机检测`、`检测运行环境可疑 / 容器 / 多开`、`Miscellaneous Check(4/5/6/7/8/9)` 是相邻但不同的条目（模拟器特征 / 云机 / 容器分身 / 改机），可能同时出现。
 </details>
 
 <details>
@@ -674,7 +678,7 @@
 > `/data/local/tmp` 文件夹所有组异常。
 >
 > **解决方案**：所有组改为 shell。
-> 社区实测：该条判的是 `/data/local/tmp` **属主为 root**；改为 shell 即可：`su -c chown shell:shell /data/local/tmp`。
+> 社区实测：该条判的是 `/data/local/tmp` 的**属主 / 属组异常**（原文档写的“所有组异常”与之对应）；统一改回 shell 即可：`su -c chown shell:shell /data/local/tmp`。
 </details>
 
 <details>
@@ -839,6 +843,7 @@
 > **检测方式**：扫描属性区空洞：`/dev/__properties__/` 下属性文件的权限 / 属主 / 大小与对应 SELinux context，以及属性区是否存在未被使用的空洞（`prop_area` 重叠 / 空洞）——出现空洞说明属性被动态修改过。
 >
 > 隐藏被修改的属性可将 shamiko 模块中的 [shamiko_Plus.sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh) 文件添加并移动到 `/data/adb/service.d/` 目录下，确认该脚本有执行权限后重启，尝试解决。
+> 注意：`shamiko_Plus.sh` 是用 `resetprop -n` 在早期写属性，需放在 `/data/adb/service.d/` 执行且**不要持久化**，否则反而可能产生新的属性区空洞。
 </details>
 
 <details>
@@ -891,6 +896,7 @@
 > 改机检测？
 >
 > 以下方案可能过时：开启过“隐藏应用列表(HMA)”的 Vold appdata 隔离？
+> 注意（待作者确认）：本项与 `Vold隔离已开启` 互相牵制——开启 HMA/HMA-OSS 的 Vold appdata 隔离可能解本项，但会触发 `Vold隔离已开启`（该属性被写入）；请按更优先的一条取舍。
 </details>
 
 <details>
@@ -1007,6 +1013,7 @@
 > 如果关闭重启后还存在 `persist.sys.vold_app_data_isolation_enabled=0`
 > 
 > su shell执行 `resetprop -p --delete persist.sys.vold_app_data_isolation_enabled` 然后重启即可
+> 注意（待作者确认）：与 `Miscellaneous Check(3)` 互相牵制，见该条说明。
 </details>
 
 
@@ -1104,6 +1111,7 @@
 >
 > 应用自身 zygote 权限被修改。
 > 暂按**误报**理解（有人假回锁、0 模块也会报；联想 Y700 系列无论是否 root 都会出现）。
+> 关系：即旧版条目 `zygote test (1)`（同一探针）。
 </details>
 
 <details>
@@ -1142,6 +1150,7 @@
 >
 > 检测到 `ro.secureboot.lockstate=unlocked`。
 > `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
+> 关系：与 `密钥证明未完成或链不一致`、`TrustedCert 证书篡改`、`密钥篡改(128/q/b)` 同属证书链 / 密钥一致性族，处理方式相近（换 `keybox.xml`、配置 TS / TEESimulator-RS）。
 </details>
 
 <details>
@@ -1151,6 +1160,7 @@
 >
 > 检测到 USB 调试处于开启状态。
 > 关闭 USB 调试：`su -c settings put global adb_enabled 0`；可写入 `/data/adb/service.d/` 实现开机自动关闭。
+> 关系：与 `fdinfo mnt 采样异常（c）` 都涉及 USB 调试，但判据不同——那条看的是 `/proc/*/fdinfo` 的 `mnt_id` 残留。
 </details>
 
 <details>
@@ -1170,6 +1180,7 @@
 > 检测到某些模块 / 应用的挂载。
 > **KSU · LKM**：按条目展开给出的 `/dev/block/xxx` 路径用 PathMask 隐藏后热重载；**GKI + SUSFS**：在 SUSFS 中写入对应隐藏路径；**GKI 无 SUSFS**：参考 LKM 方案；其它管理器暂无方案。
 > 若展开内容里出现 **overlay** 字样 → 更换元模块（推荐 mountify）；若确定是某模块导致的挂载 → 卸载该模块。
+> 关系：与 `2222`、`Futile hide 04`、`Mount loophole`、`Magic Mount`、`挂载间隙` 同属挂载类；处理手段相同（ZygiskNext「仅还原挂载」、换元模块 mountify、PathMask/SUSFS 隐藏）。
 </details>
 <details>
 <summary>发现 ROOT 管理器</summary>
@@ -1177,6 +1188,7 @@
 > 检测到设备上安装了 ROOT 管理器（Magisk / APatch / KernelSU 等）。
 > 原理：native 方法 **`runRootManagerIntentChecks`** —— 用 **Intent / 包可见性（`<queries>`）**探测管理器应用是否安装或能否响应（对应新版 manifest 新增的 `me.bmax.apatch.magica.LAUNCH`、KSU `magica.LAUNCH`、`ksu://` 等条目）。
 > 解决：对检测器隐藏管理器应用（HMA-OSS 等），或使用不暴露 LAUNCH Intent 的管理器版本。
+> 关系：与 `Found ksu/免解设备`、`Suspicious Surroundings`（APatch 特征）、`SU binary detected`、`设备获取 Root 权限 / 异常模块` 属同一类“ROOT 痕迹”条目，判据各不相同，可能同时命中。
 </details>
 
 <details>
@@ -1185,6 +1197,7 @@
 > 同一 UID 下的命名空间视图不一致。相关条目：**UID Namespace mismatch（同 UID 命名空间不一致）**、**Mount Namespace（挂载命名空间）/ Mount namespace anomaly**、**PID Namespace（进程命名空间）/ PID namespace anomaly**。
 > 原理：比对同一 UID 进程（或应用自身与 zygote）的 `/proc/<pid>/ns/user|mnt|pid` 视图是否一致 —— 隐藏方案在 namespace 上做手脚时会出现不一致。
 > 解决：更换/更新元模块、检查隐藏框架是否改动了 namespace（本项多为侧信道，可能不稳定）。
+> 关系：Mount 命名空间一项与 `不一致的挂载/debug_ramdisk`、`挂载间隙` 相关但判据不同（这里比的是 namespace 视图，不是挂载表 / statfs）。
 </details>
 
 <details>
