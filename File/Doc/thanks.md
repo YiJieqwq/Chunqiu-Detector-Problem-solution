@@ -1,4 +1,4 @@
-# 致谢清单 · Chunqiu Detector Solutions
+# 致谢清单 · Chunqiu Detector Solutions / Credits
 
 > 整理时间：2026-09-13
 > 数据来源：GitHub API（提交记录 + Pull Request 记录）
@@ -43,4 +43,52 @@
 - 多显示名 / 多邮箱已合并：`mingzun09` 曾以 `Su xiaoming`、`铭鐏` 两个显示名提交（同一邮箱 `3472449264@qq.com`，合计 90 次）；`YiJieqwq` 另有 3 次使用 `YiJieqwq@users.noreply.github.com` 提交。
 - 提出过但未合并的 PR：#5（RGWS-LiuLai）、#7（HongSir6）。
 - 计数为仓库全历史（截至 2026-09-13），**含合并提交**。
+- 本清单已于 2026-09-13 通过 GitHub API 复核（contributors 含匿名 + 全部 PR 记录），各条均与上游记录一致。
 - 本清单只统计文档与配套文件的改动，**不含**社区口头反馈，也不含所提供判据的逐条归属；如需逐条署名，请补充对应条目清单。
+
+---
+
+# Credits · Chunqiu Detector Solutions
+
+> Compiled: 2026-09-13
+> Sources: GitHub API (commit history + pull-request records)
+
+## 1. Documentation contributors
+
+- **铭鐏 (mingzun09)** — project founder and long-term maintainer; main editor of the Chinese document; merged all PRs; uploaded `File/rkp-release-v10.apk`.
+  *Evidence: 90 commits (since 2026-04-07); merged PRs #30–#35.*
+
+- **YiJieqwq** — document restructuring; per-item “Detection method” sections and the indicator appendices; detection-item updates; terminology standardisation; ZH/EN synchronisation.
+  *Evidence: 41 commits (since 2026-06-11); PRs #18 / #19 / #20 / #24 / #39 / #40.*
+
+- **741afb7** — corrected several wrong explanations; split the document; introduced `File/Doc/ksu_kp_sidechannel_zh.md` and the NoHello KPM (`File/Bin/`); revised the SELinux_Hook usage notes.
+  *Evidence: 8 commits (2026-07-06 – 07-23); PRs #22 / #23 / #26.*
+
+- **huoyan1231** — added the “Vold isolation enabled” solution (ZH + EN).
+  *Evidence: 2 commits (2026-09-03); PR #37.*
+
+- **juanma0511 (Juan Martin)** — early English translation.
+  *Evidence: 1 commit (2026-04-19); PR #2, `answer_en.md` +80 / −72.*
+
+- **Young-Six-6 (小乌龟的6)** — added the “Scene port occupied” item.
+  *Evidence: 1 commit (2026-06-07); PR #15.*
+
+- **HongSir6 (畜中牲)** — Chinese item corrections.
+  *Evidence: 1 commit (2026-05-01); PR #6.*
+
+## 2. Special thanks (no GitHub commits)
+
+- **[JeTeeZNtMax](https://github.com/jeteezntmax)** — provided organisation and leads for **16 detection items**. Because they never committed to this repository, they do not appear in the commit history or the contributor list; recorded here in thanks.
+
+## 3. Tools & automation
+
+- **google-labs-jules[bot]** (Google Jules automation, **not a human contributor**) — converted the repository into a Docsify site: collapsible item cards, navbar search with auto-expanding results, GitHub Pages deployment (`.github/workflows/pages.yml`); merged by the repository owner.
+  *Evidence: 6 commits (2026-08-25 – 08-28); PRs #30 / #31 / #32 / #33 / #34 / #35.*
+
+## 4. Notes on the statistics
+
+- Merged identities: `mingzun09` also committed under the display names `Su xiaoming` and `铭鐏` (same e-mail `3472449264@qq.com`, 90 commits in total); `YiJieqwq` made 3 further commits with `YiJieqwq@users.noreply.github.com`.
+- PRs opened but not merged: #5 (RGWS-LiuLai), #7 (HongSir6).
+- Counts cover the whole repository history (as of 2026-09-13) and **include merge commits**.
+- This list was verified against the GitHub API on 2026-09-13 (contributors incl. anonymous + all PR records); every entry matches the upstream records.
+- This list only covers changes to the document and its supporting files; it does **not** include community verbal feedback, nor does it attribute individual criteria — for per-item attribution please supply the corresponding item list.
