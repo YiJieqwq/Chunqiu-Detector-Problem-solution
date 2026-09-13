@@ -426,7 +426,7 @@
 
 > **检测方式**：读取 bootloader 锁定状态相关属性 / 认证结果。
 >
-> BL 已解锁，使用「密钥模块」隐藏(https://github.com/Enginex0/TEESimulator-RS)。
+> BL 已解锁，使用「密钥模块」隐藏。
 >
 > 需要配置 `/data/adb/tricky_store/` 目录下的 `target.txt` 文件，在其中添加软件包名（实时生效无需重启）。
 >
@@ -443,7 +443,7 @@
 
 > **检测方式**：读取 verified boot 状态（如 `ro.boot.verifiedbootstate`）与预期比对。
 >
-> BL 已解锁，使用「密钥模块」隐藏(https://github.com/Enginex0/TEESimulator-RS)。
+> BL 已解锁，使用「密钥模块」隐藏。
 >
 > 需要配置 `/data/adb/tricky_store/` 目录下的 `target.txt` 文件，在其中添加软件包名（实时生效无需重启）。
 > 社区在测试中的组合尝试：更新 密钥模块(-v307) + TS 插件 v5.0-beta1 → 管理器设置里关闭「卸载模块（内核级）」→ Zygisk 实现模块 设为「仅还原挂载」→ 冻结手机管家（小米可用按应用隐藏 / 冻结方案并打开「禁用环境检查」）→ 把属性隐藏脚本放入 `/data/adb/service.d/`。
