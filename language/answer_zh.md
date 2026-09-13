@@ -67,6 +67,8 @@
 
 > - 真解锁设备：**密钥模块 + Zygisk 实现模块 + 应用隐藏模块**
 > - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
+>
+> 对于 **APatch / FolkPatch** 用户，需要额外加载 **[NoHello.kpm](https://t.me/welikeandroid)** 以防侧信道检测；新版管理器可能内置 SELinux hook 功能（需要手动开启），旧版本用户可再额外加载 **[SELinux_Hook.kpm](https://t.me/APatch_nightly)**（链接见下方「相关模块推荐」）。
 
 ### 相关模块推荐（排名不分先后）
 
@@ -81,6 +83,11 @@
 >
 > **应用隐藏模块**
 > - [HMA-OSS](https://github.com/frknkrc44/HMA-OSS)：Zygisk 模块版 / Xposed 模块版双版本可选。
+>
+> **KernelPatch 隐藏模块**
+> - [NoHello.kpm](https://t.me/welikeandroid)：AP / FP 防侧信道检测模块。
+> - [SELinux_Hook.kpm](https://t.me/APatch_nightly)：AP / FP 的 SELinux hook 模块（新版本管理器可能已内置）。
+> - 春秋检测最新的 **Superkey 检测暂无应对模块**，若出现将第一时间更新。
 >
 > **元模块**
 > - 若设备 root 管理器自带元模块 API，可以考虑启用；
@@ -131,7 +138,7 @@
 > - 检测方式参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
 > - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
 >   - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像，或重新进行**免解（越狱）**后重启）；
->   - **内核级方案**：[selinux_hook](https://github.com/Admirepowered/selinux_hook) 一类 SELinux hook（KPM 或内核集成）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
+>   - **内核级方案**：SELinux_Hook.kpm 一类 SELinux hook（KPM 或内核集成；模块链接见序章「相关模块推荐」）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
 >   - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
 >
 > 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
