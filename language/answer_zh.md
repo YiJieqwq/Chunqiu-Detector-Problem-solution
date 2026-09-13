@@ -97,6 +97,7 @@
 >   界面上该条目的输出是**页级 kB 对照**（如 `No-read control: 0→0 kB, expected` / `Read control: 0→4 kB, expected` / `Target call: 0→4 kB, unexpected read`）与多轮一致性（`Consistency: n/n`），本质就是判断“该页是否被实际映射/读取”。
 > - **KernelSU**：框架用 Kprobe hook `newfstatat` / `faccessat`，使两者耗时显著变长，而 `statx` 不受影响；多次调用取总耗时做比值，`newfstatat : statx > 1.2` 即判定存在 KernelSU。
 > - 这也解释了为什么 nohello 一类 KPM 要“在 cmd 判断之前就拒绝鉴权”——不进入读取/校验 superkey 的路径，两种探测同时失效。
+> - 注意：另有一条 `发现APatch 的鉴权密钥` 测的是“内核在该 syscall 路径上是否多读了用户参数页”，**加排除列表对它无效**（读取发生在拦截点之前/之外），详见该条目。
 >
 > 检测到 KSU/APatch（侧信道检测）
 >
