@@ -1186,16 +1186,6 @@
 > 注意（待作者确认）：与 `Miscellaneous Check(3)` 互相牵制，见该条说明。
 </details>
 
-<details>
-<summary>证书链篡改(x)</summary>
-
-> **检测方式**：判据在 **Java 层** —— 读取系统属性 **`ro.secureboot.lockstate`**（该属性名与 `ro.lenovo.series`、`ro.lewa.version`、`ro.meizu.product.model`、`ro.miui.ui.version.name`、`ro.vivo.os.build.display.id` 等厂商 ROM 属性在同一张表里）；取到 `unlocked` 即命中。
->
-> 检测到 `ro.secureboot.lockstate=unlocked`。
-> `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
-> 关系：与 `密钥证明未完成或链不一致`、`TrustedCert 证书篡改`、`密钥篡改(128/q/b)` 同属证书链 / 密钥一致性族，处理方式相近（换 `keybox.xml`、配置 TS / 密钥模块）。
-</details>
-
 ---
 
 ## 附录
