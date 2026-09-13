@@ -755,7 +755,9 @@
 <details>
 <summary>无效的伪造信息(1)</summary>
 
-> **检测方式**：**触发条件**：Widevine（`MediaDrm`）报告 `securityLevel = L1`，但 `openSession()` 抛 `NotProvisionedException`，且 `getProvisionRequest().getData()` 返回长度 **0** 的数据。
+> **检测方式**：Widevine（`MediaDrm`）报告 `securityLevel = L1`、`openSession()` 抛 `NotProvisionedException`、且 `getProvisionRequest().getData()` 返回长度 **0** 的数据时命中。
+> 
+> 说明：**当设备报告为 L3 时，此检测点会被直接略过**（只有在 `securityLevel = L1` 时才会继续后续判定）。
 >
 > **现象**：设备显示 Widevine L1（DRM Info 与检测器“设备信息”都会显示 L1），但本条目仍判定“与 L1 不符”。该条目在界面上**没有展开详情**（属摘要型条目）。
 >
@@ -1043,19 +1045,17 @@
 </details>
 
 <details>
-<summary>附录 B：高危文件 / 目录（167 条）</summary>
+<summary>附录 B：可疑 / 外挂类文件与目录（68 条）</summary>
 
-> `/dev`、`/data`、`/data/local/tmp`、`/storage/emulated/0` 等位置的异常文件与外挂特征。
+> 只列出**可疑或外挂相关**的文件与目录（可按需清理）。
+> `/proc`、`/sys`、`/dev`、`/system` 等系统路径是检测器**读取**的对象，**不要删除**。
 
-- `/Android/obb/`
-- `/data/`
 - `/data/A内核.ini`
 - `/data/BingHPJY/pz.cfg`
 - `/data/BingPUBG`
 - `/data/Dit驱动`
 - `/data/HPX`
 - `/data/HPY`
-- `/data/adb`
 - `/data/encore/custom_default_cpu_gov`
 - `/data/encore/default_cpu_gov`
 - `/data/gpu_freq_table.conf`
@@ -1064,7 +1064,6 @@
 - `/data/local/MIO`
 - `/data/local/luckys`
 - `/data/local/stryker/`
-- `/data/local/tmp`
 - `/data/local/tmp denied`
 - `/data/local/tmp/A内核公益-和平精英0215x1`
 - `/data/local/tmp/A内核公益-和平精英0215x1(1)`
@@ -1085,14 +1084,12 @@
 - `/data/local/tmp/simpleHook`
 - `/data/local/tmp/yshell`
 - `/data/local/中野三玖`
-- `/data/misc`
 - `/data/nh.ko`
 - `/data/nh2`
 - `/data/nh3`
 - `/data/nh4`
 - `/data/nh5`
 - `/data/swap_config.conf`
-- `/data/system`
 - `/data/system/AppRetention`
 - `/data/system/Freezer/`
 - `/data/system/HPX`
@@ -1103,63 +1100,8 @@
 - `/data/system/xydriver.ko`
 - `/data/南瓜三角洲公益最新版本.sh`
 - `/data/物资.txt`
-- `/debug_ramdisk`
-- `/debug_ramdisk/`
 - `/dev/Bing`
-- `/dev/__properties__/`
-- `/dev/binder`
-- `/dev/binderfs`
-- `/dev/binderfs/%s`
-- `/dev/cpuset/AppOpt/`
-- `/dev/hwbinder`
-- `/dev/pts/`
-- `/dev/socket/logdw`
-- `/dev/vndbinder`
-- `/dex_crc.dat`
-- `/index`
-- `/jit-cache`
-- `/mnt/user/`
 - `/my_product/etc/permissions/oplus_google_cn_gms_features.xml`
-- `/odm/build.prop`
-- `/perms/`
-- `/proc/`
-- `/proc/%d`
-- `/proc/%d/attr/current`
-- `/proc/%d/cmdline`
-- `/proc/%d/comm`
-- `/proc/%d/ns/mnt`
-- `/proc/%d/status`
-- `/proc/%s/comm`
-- `/proc/%s/mountinfo`
-- `/proc/%s/status`
-- `/proc/1/mem`
-- `/proc/1/mountinfo`
-- `/proc/fs/ext4/`
-- `/proc/fs/jbd2`
-- `/proc/net/unix`
-- `/proc/self`
-- `/proc/self context match=`
-- `/proc/self context match=unavailable`
-- `/proc/self context mismatch`
-- `/proc/self/attr/current`
-- `/proc/self/clear_refs`
-- `/proc/self/cmdline`
-- `/proc/self/exe`
-- `/proc/self/fd`
-- `/proc/self/fd/%d`
-- `/proc/self/fd/%s`
-- `/proc/self/maps`
-- `/proc/self/mem`
-- `/proc/self/mountinfo`
-- `/proc/self/mounts`
-- `/proc/self/ns/mnt`
-- `/proc/self/smaps`
-- `/proc/self/status`
-- `/proc/self/task/%s/mem`
-- `/proc/sys/kernel/ns_last_pid`
-- `/proc/sys/kernel/osrelease`
-- `/proc/sys/kernel/pid_max`
-- `/product/build.prop`
 - `/sdcard/Download/com.niunaijun.blackdexa64_logcat.txt`
 - `/sdcard/Download/dexdump/`
 - `/sdcard/fart`
@@ -1176,45 +1118,6 @@
 - `/storage/emulated/0/弱隐.sh`
 - `/storage/emulated/0/落叶配置`
 - `/storage/emulated/elgg/`
-- `/sys/fs/cgroup`
-- `/sys/fs/cgroup/apps/uid_%d`
-- `/sys/fs/cgroup/apps/uid_%d/pid_%d/`
-- `/sys/fs/cgroup/system`
-- `/sys/fs/cgroup/system/uid_%d`
-- `/sys/fs/cgroup/system/uid_%d/pid_%d/`
-- `/sys/fs/cgroup/system/uid_0`
-- `/sys/fs/cgroup/uid_%d`
-- `/sys/fs/cgroup/uid_%d/pid_%d/`
-- `/sys/fs/cgroup/uid_0`
-- `/sys/fs/selinux`
-- `/sys/fs/selinux/access`
-- `/sys/fs/selinux/class/`
-- `/sys/fs/selinux/context`
-- `/sys/fs/selinux/enforce`
-- `/sys/fs/selinux/policy`
-- `/sys/fs/selinux/status`
-- `/sys/kernel/debug/binder`
-- `/sys/kernel/debug/binder/proc`
-- `/system/`
-- `/system/bin/adb`
-- `/system/bin/app_process`
-- `/system/bin/app_process64`
-- `/system/bin/encore_profiler`
-- `/system/bin/encore_utility`
-- `/system/bin/gmsc`
-- `/system/bin/imgbox`
-- `/system/bin/logcat`
-- `/system/bin/logcat -d`
-- `/system/bin/run_write.sh`
-- `/system/bin/scene_swap_module.sh`
-- `/system/bin/sh`
-- `/system/build.prop`
-- `/system/framework`
-- `/system/framework/framework.jar`
-- `/vendor/`
-- `/vendor/build.prop`
-- `/vendor/etc/selinux/vendor_sepolicy.cil`
-</details>
 
 <details>
 <summary>附录 C：被检查的系统属性（34 个）</summary>
