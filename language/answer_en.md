@@ -280,6 +280,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Detection method**: reads the GID list of this process (the app zygote child) and checks whether **GID 3009 (AID_READPROC)** is present (probe output `readproc_gid_3009=present/missing`) → a missing GID hits; it corresponds to modules that stripe it away via “restrict zygote permissions”.
 >
 > **Solution**: in the app-hiding module, disable the restriction on `INET_GID` / zygote permissions for the detector.
+>
+> Note: that switch strips **several AIDs at once** (including **3009 / `AID_READPROC`**), so as long as it is not enabled for the detector (or the corresponding entry is allowed), 3009 is restored. **This item only checks 3009**, which is a different GID from `INET_GID` (3003 / 3004).
 </details>
 
 <details>
@@ -559,7 +561,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Solution**: KSU · LKM — hide the path shown in the details with a matching PathMask and hot-reload; GKI + SUSFS — add the hidden path in SUSFS; GKI without SUSFS — follow the LKM approach; other managers have no method yet.
 > If the details contain **overlay**, change the metamodule; if a specific module clearly causes the mount, uninstall it.
 >
-> Relation: same mount family as `2222`, `Futile hide 04`, `Mount loophole`, `Magic Mount` and `Mount Gap`.
+> Relation: same mount family as the `/data/local/tmp` metadata anomaly family (incl. `2222`, `Futile hide 04`), `Mount loophole`, `Magic Mount` and `Mount Gap`.
 </details>
 
 <details>
