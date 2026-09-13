@@ -181,7 +181,7 @@
 > **解决办法（KernelSU 系）**：更新你的 KernelSU 管理器并重新修补（LKM 工作模式）或重新集成（GKI 和 Non-GKI 工作模式）。
 >
 > **解决办法（APatch 系）**：
-> 1. 嵌入/加载[Nohello KPM](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm)，并将检测器加入到排除列表，内核级隐藏 KPM 可以在 kernelpatch 判断 cmd 值之前判断发起鉴权请求的应用是否在排除列表内，如果是，则禁止鉴权。
+> 1. 嵌入 / 加载 **NoHello.kpm**（模块链接见序章「相关模块推荐」），并把检测器加入排除列表 —— 该 KPM 可以在 KernelPatch 判断 `cmd` 值之前先判断发起鉴权请求的应用是否在排除列表内，若是则禁止鉴权。
 > 2. 未来版本的 APatch 会引入基于签名的鉴权方法，对于不符合签名却发起了鉴权的应用直接拒绝鉴权请求。目前没有完全实现，需要再等一段时间。
 >
 > **解决办法（KPatch-Next）**：更新 KPatch-Next 驱动到 0.13.5-2。
@@ -225,7 +225,7 @@
 >
 > 检测到 APatch
 >
-> 更新 APatch 并加载 KPM 隐藏模块解决（比如 Nohello.kpm）
+> 更新 APatch，并加载 KernelPatch 隐藏模块（如 NoHello.kpm，见序章「相关模块推荐」）。
 </details>
 
 <details>
