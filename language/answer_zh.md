@@ -266,6 +266,8 @@
 >
 > 应用自身的 INET-GID 权能被限制。
 > 在应用隐藏模块中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
+>
+> 补充：该开关会**一次性剥离若干 AID**（其中包含 **3009 / `AID_READPROC`**），所以只要不对春秋检测启用它（或放行对应项），3009 就会恢复。**本条判据只检查 3009**，与 `INET_GID`（3003 / 3004）不是同一个 GID。
 </details>
 
 <details>
@@ -565,7 +567,7 @@
 
 > **检测方式**：挂载命名空间视图异常（`Mount namespace anomaly`）；与 `不一致的挂载/debug_ramdisk`、`挂载间隙` 相关但判据不同（这里比的是 namespace 视图，不是挂载表 / statfs）。
 >
-> 处理：同挂载类（Zygisk 实现模块「仅还原挂载」/ 更换元模块 元模块 / PathMask、SUSFS 隐藏）。
+> 处理：同挂载类（Zygisk 实现模块「仅还原挂载」/ 更换元模块（如 Hybrid-Mount）/ PathMask、SUSFS 隐藏）。
 </details>
 
 <details>
@@ -585,7 +587,7 @@
 > 检测到某些模块 / 应用的挂载。
 > **KSU · LKM**：按条目展开给出的 `/dev/block/xxx` 路径用 PathMask 隐藏后热重载；**GKI + SUSFS**：在 SUSFS 中写入对应隐藏路径；**GKI 无 SUSFS**：参考 LKM 方案；其它管理器暂无方案。
 > 若展开内容里出现 **overlay** 字样 → 更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）；若确定是某模块导致的挂载 → 卸载该模块。
-> 关系：与 `2222`、`Futile hide 04`、`Mount loophole`、`Magic Mount`、`挂载间隙` 同属挂载类；处理手段相同（Zygisk 实现模块「仅还原挂载」、换元模块 元模块、PathMask/SUSFS 隐藏）。
+> 关系：与 `/data/local/tmp 元数据异常族`（含 `2222`、`Futile hide 04`）、`Mount loophole`、`Magic Mount`、`挂载间隙` 同属挂载类；处理手段相同（Zygisk 实现模块「仅还原挂载」、换元模块（如 Hybrid-Mount）、PathMask/SUSFS 隐藏）。
 </details>
 
 <details>
