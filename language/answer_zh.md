@@ -1118,6 +1118,7 @@
 - `/storage/emulated/0/弱隐.sh`
 - `/storage/emulated/0/落叶配置`
 - `/storage/emulated/elgg/`
+</details>
 
 <details>
 <summary>附录 C：被检查的系统属性（34 个）</summary>
