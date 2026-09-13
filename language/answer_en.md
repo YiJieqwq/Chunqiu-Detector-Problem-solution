@@ -72,7 +72,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Key modules**
 > - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS): the best-known key module after TrickyStore, actively updated, no built-in WebUI.
-> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/): a newer module with a built-in WebUI, behaves closer to AOSP, possibly lower IO overhead than TEES-RS.
+> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/): behaves closer to AOSP, possibly lower IO overhead than TEES-RS.
+> - A **WebUI-enabled build** is available at [ITxiao6666/OhMyKeymint](https://github.com/ITxiao6666/OhMyKeymint), branch `Xiaomi_LeiJun`.
 > - [Tricky-addon-Enhanced](https://github.com/Enginex0/tricky-addon-enhanced): a WebUI add-on module for TS / TEES-RS.
 > - The original TrickyStore is not recommended: its last update was 2025-11-30 and some features lag far behind other key modules.
 >
