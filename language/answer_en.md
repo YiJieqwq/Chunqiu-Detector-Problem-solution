@@ -104,6 +104,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > - **APatch / KernelPatch**: ① *lazy-page probe* — the address of a lazily-allocated page is passed as the “superkey address”; when KernelPatch dereferences it, the page becomes **actually mapped**, and the detector checks whether that happened. ② *authorisation-latency probe* — an in-range `cmd` and an out-of-range `cmd` are issued, and the total measured time ratio (>~2) reveals the extra read/verify path.
 > - **KernelSU**: the framework Kprobe-hooks `newfstatat` / `faccessat` (but not `statx`); summing many calls, a ratio `newfstatat : statx > 1.2` indicates KernelSU.
 >   In the UI this item prints **page-level kB deltas** (e.g. `No-read control: 0→0 kB, expected` / `Read control: 0→4 kB, expected` / `Target call: 0→4 kB, unexpected read`) plus a consistency count — i.e. whether the page was actually mapped/read. That is also why “reject auth *before* the cmd check” (e.g. nohello) defeats both probes.
+>   Note: the separate `APatch SuperKey detected` entry measures *whether the kernel read the user argument page on that syscall path*; an exclusion list **does not** help there (the read happens before/outside the hook point).
 >
 > Detects KSU/APatch (side-channel detection).
 >
@@ -118,6 +119,23 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Solution (KPatch-Next)**: Update KPatch-Next driver to 0.13.5-2.
 >
 > Principle: Older KPatch-Next inherited KernelPatch authentication, making side-channel detection effective. The latest KPatch-Next authenticates via userland kpatch-android uid, bypassing side-channel detection.
+</details>
+
+<details>
+<summary>APatch SuperKey detected (发现APatch 的鉴权密钥)</summary>
+
+> **Detection method**: a side channel based on “**the syscall argument page was read extra times**”. The detector places the target call's arguments/buffer on a monitored user page and measures how many kB of that page the kernel read before/after the call:
+> - `No-read control`: a call that should *not* read the page → expected `0→0 kB`;
+> - `Read control`: a call that *should* read the page → expected `0→4 kB`;
+> - `Target call`: if it reports `0→4 kB, unexpected read`, the kernel touched user memory on that syscall path where it should not — i.e. that path is patched (KernelPatch / the APatch authorisation path).
+>
+> The item also prints `Argument layouts` (a probe of the register layout the kernel reads syscall arguments from), a consistency count (`Consistency: n/n`), `Page size` and `Probe duration` (seconds; the sampling is heavy).
+>
+> **Relation to `Abnormal Environment`**: both target the same “authorisation path” side channel — [File/Doc/ksu_kp_sidechannel_zh.md](/File/Doc/ksu_kp_sidechannel_zh.md) describes the *“is the lazy page mapped?”* and *“authorisation-latency ratio”* variants, while this one compares **page-read amounts**; they are variants of the same idea and corroborate each other.
+>
+> **Solution**: **no known module fixes this today.** KPMs such as nohello intercept *whether an authorisation request is processed*, whereas this item measures *whether the kernel read the user argument page on that syscall path* — that read happens **before/outside** the hook point, so adding the detector to nohello's exclusion list (or switching to a uid-based KPatch-Next) **does not** make this entry go away. It needs a fix on the KernelPatch / APatch side (so the patched syscall path no longer reads the user argument page extra times), or an adjustment of this check upstream.
+>
+> **Note**: this item currently has **no English title** in the English UI (it is shown in Chinese only).
 </details>
 
 <details>
