@@ -1,6 +1,7 @@
 * **文档列表 / Documents**
   * [中文解决方案](/language/answer_zh.md)
   * [English Solutions](/language/answer_en.md)
+  * [致谢清单 / Credits](/File/Doc/thanks.md)
 
 * **快速分类 / Categories**
   * [说明与反馈](#说明与反馈)

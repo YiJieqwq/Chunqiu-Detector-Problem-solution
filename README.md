@@ -35,6 +35,7 @@ Select one of the following languages to view the solution file.
 - `/file/shamiko_plus.sh` - 隐藏属性区空洞修改
 - `/file/bin/nohello-v1.8.2.9-83-b3e7d87-release.kpm` - APatch 隐藏 KPM 模块
 - `/file/doc/ksu_kp_sidechannel_zh.md` - KSU/APatch 侧信道检测原理说明
+- `File/Doc/thanks.md` - 致谢清单 / Credits list
 
 ---
 

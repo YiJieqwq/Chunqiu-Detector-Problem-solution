@@ -1,15 +1,17 @@
 # Chunqiu Detector Solutions (Latest Version) - English Version
-> Organized by: mingzun09(SuXiaoMing) | For reference only, results vary by device/environment.
-> Solutions with "?" at the end are uncertain.
+> Checked against version: 4.5.5(68) | Last updated: 2026-09-13
+> Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
 ## Table of Contents
 - [Help & Feedback](#help--feedback)
+- [Prologue](#prologue)
 - [Root Permissions & SELinux Detection](#root-permissions--selinux-detection)
 - [TEE & Key Attestation Detection](#tee--key-attestation-detection)
 - [Mounts & Namespaces Detection](#mounts--namespaces-detection)
 - [Environment, Processes & Files Detection](#environment-processes--files-detection)
 - [Kernel, Properties & System Characteristics Detection](#kernel-properties--system-characteristics-detection)
+- [Appendices](#appendices)
 
 ---
 
@@ -37,6 +39,77 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 ---
 
+## Prologue
+
+### Terminology & Conventions
+
+> **Genuinely Unlocked Device**: a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
+>
+> **Fake-Relocked Device**: on a genuinely unlocked device, a custom payload is injected and executed early in the boot chain (before the system and TEE read and latch the boot state) to rewrite the in-memory lock state and report it, so the device presents itself as “locked (locked & green)” and can return hardware-level “locked” attestation certificates — while it still actually loads patched boot / init_boot images (e.g. Qualcomm Snapdragon 8 Elite Gen 5 devices using the gbl_root_canoe project).
+>
+> **No-Unlock Device** (a.k.a. KSU jailbreak mode): the ABL stays genuinely locked (never unlocked) and root is obtained through an Android / userspace privilege-escalation vulnerability, usually with SELinux set to permissive. Such root is normally not persistent and must be re-obtained on every boot.
+>
+> **Self-Signed Device**: a device whose boot chain trusts a boot / init_boot signing key that third parties can obtain or reproduce, so the user can sign patched boot / init_boot / vbmeta images themselves and boot them while the ABL stays genuinely locked; the boot state and OEM unlock state still report “unlocked = no” (typical case: Lenovo Legion Y700 2nd / 3rd / 4th gen — images re-signed with the public TestKey can be flashed with root patches without unlocking).
+>
+> **Root manager**: a complete privilege-management component set — a user-facing Android app, a userspace daemon, plus persistent hooks or in-memory patches deployed in the kernel or ramdisk — used to control root access.
+>
+> **Metamodule**: a top-level module-manager type module that does not itself provide device spoofing or system patching; its core job is managing sub-modules and providing mount functionality. Only one metamodule can be installed at a time (see the [KernelSU documentation](https://kernelsu.org/zh_CN/guide/metamodule.html)).
+>
+> **Key module**: a module that intercepts / replaces the KeyMint attestation path inside the system keystore daemon (keystore2) and uses a keybox to produce fake “device is locked” proofs; most also spoof system properties.
+>
+> **Zygisk provider**: a module that provides the Zygisk runtime — it injects code into Zygote / app processes and exposes a Zygisk behaviour API, giving other Zygisk modules a runtime environment.
+>
+> **App-hiding module**: a module that operates on “package visibility” — it intercepts the package-query path inside a target process (or a system process) and hides selected apps from the configured target app.
+
+### Minimal Module Set for a Perfectly Hidden Environment
+
+> - Genuinely unlocked device: **key module + Zygisk provider + app-hiding module**
+> - Fake-relocked / no-unlock / self-signed device: **Zygisk provider + app-hiding module**
+>
+> For **APatch / FolkPatch** users, additionally load **[NoHello.kpm](https://t.me/welikeandroid)** to guard against the side-channel detection; newer managers may have a built-in SELinux hook (must be enabled manually), and users on older versions can additionally load **[SELinux_Hook.kpm](https://t.me/APatch_nightly)** (links are given in “Recommended Modules” below).
+
+### Recommended Modules (in no particular order)
+
+> **Key modules**
+> - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS): the best-known key module after TrickyStore, actively updated, no built-in WebUI.
+> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/): a newer module with a built-in WebUI, behaves closer to AOSP, possibly lower IO overhead than TEES-RS.
+> - [Tricky-addon-Enhanced](https://github.com/Enginex0/tricky-addon-enhanced): a WebUI add-on module for TS / TEES-RS.
+> - The original TrickyStore is not recommended: its last update was 2025-11-30 and some features lag far behind other key modules.
+>
+> **Zygisk provider**
+> - [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext): the most widely used standalone Zygisk implementation.
+>
+> **App-hiding modules**
+> - [HMA-OSS](https://github.com/frknkrc44/HMA-OSS): available in both Zygisk-module and Xposed-module flavours.
+>
+> **KernelPatch hiding modules**
+> - [NoHello.kpm](https://t.me/welikeandroid): side-channel detection guard for AP / FP.
+> - [SELinux_Hook.kpm](https://t.me/APatch_nightly): SELinux hook module for AP / FP (may already be built into newer managers).
+> - The newest SuperKey detection in Chunqiu currently has **no counter-module**; this section will be updated as soon as one appears.
+>
+> **Metamodules**
+> - If your root manager provides a metamodule API, consider enabling it;
+> - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount): a widely used third-party metamodule.
+
+### Correct Module Configuration
+
+> **Key module**
+> a. Add the target app to the package list (e.g. `/data/adb/tricky_store/target.txt` for TS / TEES, or configure it in the WebUI);
+> b. Set the security patch date correctly, or simply delete its config file (e.g. `/data/adb/tricky_store/security_patch.txt` — deleting it is the least trouble);
+> c. Set the boot hash correctly (it is normally set automatically).
+>
+> **Zygisk provider**
+> Enable “use Zygisk connector” and “use anonymous memory”; “restore mounts only” may conflict with your root manager's “kernel unmount modules”, so pick one of the two.
+>
+> **App-hiding module**
+> Usage varies; the following are terminology only (HMA-OSS as an example):
+> - **Blacklist mode**: apps with this mode enabled cannot see the apps contained in the blacklist template applied to them;
+> - **Blacklist template**: for an app this template is applied to, the apps inside the template become invisible;
+> - **Whitelist mode**: apps with this mode enabled can only see the apps contained in the whitelist template applied to them;
+> - **Whitelist template**: for an app this template is applied to, only the apps inside the template are visible.
+
+---
+
 ## Root Permissions & SELinux Detection
 
 <details>
@@ -52,23 +125,22 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>Suspicious SELinux Policy Detected / ROOT Detected</summary>
 
-> **Detection method**: Uses this process' own context (expected to be in the `app_zygote` domain) as a *carrier*, together with author-provisioned **sentinel contexts** (`…context_oracle_sentinel:s0` / `…_sentinel_file:s0`) to build positive / negative / file control groups. Queries go through a **raw selinuxfs write** (directly on `/sys/fs/selinux/access`, not via libselinux) and validate the kernel-returned `avdSeqNo`; results are then cross-checked with `selinux_check_access` / `getfilecon`, **re-checked after perturbation**, and validated for repeatability (`Repeatability`). It also probes whether root-related rules are still accepted by the live policy (`shell -> su` transition, `magisk` / `ksu` / `apatch` domains, `ksu_file` / `lsposed_file` / `magisk_file` reads, etc.) and checks the KSU context “bit-pair / split” consistency.
+> **Detection method**
+> 1. Uses this process' own context (expected to be in the `app_zygote` domain) as a *carrier*, together with author-provisioned **sentinel contexts** (`…context_oracle_sentinel:s0` / `…_sentinel_file:s0`) to build positive / negative / file control groups;
+> 2. Queries go through a **raw selinuxfs write** (directly on `/sys/fs/selinux/access`, not via libselinux) and validate the kernel-returned `avdSeqNo`;
+> 3. Cross-checks the raw result against `selinux_check_access` / `getfilecon`, **re-checks after perturbation**, and validates repeatability (`Repeatability`);
+> 4. Directly probes whether root-related rules are still accepted by the live policy (`shell -> su` transition, `magisk` / `ksu` / `apatch` domains, `ksu_file` / `lsposed_file` / `magisk_file` reads, etc.) and checks the KSU context “bit-pair / split” consistency.
 >
-> Detection method reference: https://github.com/LSPosed/DirtySepolicy
-> 
-> New SELinux feature detection (app zygote has access to `/sys/fs/selinux/access`).
-> 
-> **KSU users**: [Update KSU Manager](https://t.me/KernelSU_group/3234/482579), re-patch image, flash, reboot, then enable selinux_hide feature.
+> **Common cause family** (shown in the details when it hits): `enforcing is not 1`, `deny_unknown is not 1`, `unexpected version`, `sequence/policyload unexpected`, `direct syscall and libc views disagree (PLT-hook residue)`.
 >
-> **APatch/FolkPatch users**: [Load/embed this kpm](https://github.com/Admirepowered/selinux_hook)
+> **Solution**
+> - Detection method reference: [DirtySepolicy](https://github.com/LSPosed/DirtySepolicy);
+> - The decisive point is “the app zygote has permission to access `/sys/fs/selinux/access`”, so SELinux modifications must be hidden by the root manager or kernel side:
+>   - **Built into the root manager**: update to the latest version and enable “hide SELinux modifications” (KSU users must re-patch the image or re-run the no-unlock jailbreak, then reboot);
+>   - **Kernel side**: a SELinux hook such as SELinux_Hook.kpm (module links are in the Prologue's “Recommended Modules”). On kernels 4.19–6.12 it must be used in embedded mode (load mode masks nothing), 6.12 embedding has a high kernelpanic risk; on 4.14 embedding is recommended with a boot.img backup first (load mode falls back to weaker keyword filtering); on 4.9 embedding is recommended with no `context_struct_compute_av` emulation risk;
+>   - if the current manager has no such capability, consider switching to a kernel-level manager that does.
 >
-> **selinux_hook module instructions**:
-> 1. Kernel version 4.19-6.12 devices MUST embed this module to take effect; loading mode will not enable any spoofing methods.
->    *Note*: Due to machine instructions mismatch caused by compiler optimizations, 6.12 kernel devices should be careful when embedding this module as it has a high probability of causing a kernel panic. This will be fixed later.
-> 2. Kernel version 4.14 devices are recommended to embed the module. However, due to risks in simulating context_struct_compute_av, please backup original boot.img before embedding. Loading mode also works but uses keyword filtering fallback with worse results.
-> 3. Kernel version 4.9 devices are recommended to embed the module without context_struct_compute_av risks. Loading mode effect is identical to 4.14.
->
-> **Magisk**: Try switching to a kernel-level manager. Magisk may merge saving clean policy blob feature in the future, which would allow Magisk to pass this detection.
+> Relation: `SELinux status fingerprint suspicious`, `SELinux status channel inconsistency` and `ROOT access obtained / abnormal module` belong to the same family (different facets across versions) and **have been merged into this entry**.
 </details>
 
 <details>
@@ -79,6 +151,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > KSU detected in jailbreak mode, current device using KSU jailbreak mode ROOT method, or KSU processes detected, etc.
 >
 > Jailbreak mode is not recommended, so no solution is provided here.
+
+> KSU detected in **no-unlock (jailbreak) mode**, or KSU-related processes found.
+  > No-unlock mode is not recommended, so no solution is provided.
 </details>
 
 <details>
@@ -87,14 +162,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Detection method**: Looks for `su` or similar binaries in common paths.
 >
 > SU binary detected (ROOT detected).
-</details>
 
-<details>
-<summary>SU list (Deleted)</summary>
-
-> Detected a ROOT permission exclusion list similar to KSU's.
->
-> Unstable, appears occasionally (more common with KSU LKM mode).
+> iQoo / Vivo users: `/apex/com.android.virt/bin/su` gets flagged → move the file away or clear its executable bits.
+> General rule: **never grant root to the detector**.
 </details>
 
 <details>
@@ -119,6 +189,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Solution (KPatch-Next)**: Update KPatch-Next driver to 0.13.5-2.
 >
 > Principle: Older KPatch-Next inherited KernelPatch authentication, making side-channel detection effective. The latest KPatch-Next authenticates via userland kpatch-android uid, bypassing side-channel detection.
+
+> Community measurement: this item is **unstable / probabilistic** — the same manager version can hit on one device and not on another (try **downgrading the manager**); it also appears more often after enabling APatch's exclusion list.
 </details>
 
 <details>
@@ -146,6 +218,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > KSU detected.
 >
 > Update your manager and re-patch.
+
+> Update the manager and re-patch; or disable / change the metamodule.
 </details>
 
 <details>
@@ -155,7 +229,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > APatch detected.
 >
-> Update APatch and load a KPM hiding module (e.g., Nohello.kpm).
+> Update APatch and load a KernelPatch hiding module (e.g., NoHello.kpm — see the Prologue's “Recommended Modules”).
 </details>
 
 <details>
@@ -170,6 +244,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Use SusFS features or the ZN-AuditPatch module.
 >
 > Fixed in Android security update 2025/09/01 (not entirely accurate, but that's the observation).
+
+> Same origin as `Abnormal Process 0000 (pid)`; can hit on Lenovo / Google / niche models as false positives.
 </details>
 
 <details>
@@ -190,6 +266,34 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > False positives may occur.
 </details>
 
+<details>
+<summary>ROOT Manager Detected</summary>
+
+> **Detection method**: the native method `runRootManagerIntentChecks` probes whether a root manager is installed or responds, using intents / package visibility (`<queries>`) — matching the entries added to the new manifest (`me.bmax.apatch.magica.LAUNCH`, KSU `magica.LAUNCH`, `ksu://`, etc.).
+>
+> **Solution**: use an **app-hiding module** to hide the root manager from the detector (see “Recommended Modules” and “Correct Module Configuration”).
+>
+> Relation: the same “root traces” family as `Found ksu/No-unlock Device`, `Suspicious Surroundings`, `SU binary detected` and `Suspicious SELinux Policy Detected / ROOT Detected`; they can hit at the same time.
+</details>
+
+<details>
+<summary>Zygote Anomaly</summary>
+
+> **Detection method**: reads the GID list of this process (the app zygote child) and checks whether **GID 3009 (AID_READPROC)** is present (probe output `readproc_gid_3009=present/missing`) → a missing GID hits (**the cause of the missing GID is not yet confirmed**).
+>
+> **Solution**: in the app-hiding module, disable the restriction on `INET_GID` / zygote permissions for the detector.
+>
+> Note: that switch removes, as a **blacklist**, the extra GIDs the user ticks (the selectable set in HMA-OSS is 1015 / 1023 / 1032 / 1077 / 1078 / 1079 / 3003 / 9997 — **eight entries, not including 3009**). The **criterion** of this item is confirmed to be “GID 3009 missing”, but **whether this switch is the cause cannot be confirmed yet**.
+</details>
+
+<details>
+<summary>Current-app-root-domain-trace</summary>
+
+> **Detection method**: traverses every PID under `/proc` as `untrusted_app`, reading `attr/current`, `cmdline` and `comm` (normally all denied by SELinux), then searches `auditd` / `logcat` for AVC denied records; finding something like `tcontext=u:r:ksu:s0` hits (probe `proc_pid_avc_context_leak`).
+>
+> **Solution**: KSU · LKM — flash a matching PathMask and enable “isolation guard (procguard)”, or use an audit-log patching kernel-side approach (may leak other items); KSU · GKI — enable “AVC log spoofing” in the manager; temporary workaround: disable legacy su support, run the check once, then re-enable it.
+</details>
+
 ---
 
 ## TEE & Key Attestation Detection
@@ -197,28 +301,17 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>TEE Environment Untrusted</summary>
 
-> **Detection method**: Checks whether the Tencent Soter service program exists and what its service property state is; the two are cross-validated to detect a blocked Soter key (four-quadrant decision, see below).
+> **Detection method**: checks whether the Tencent Soter service program exists and what its service property state is; the two are cross-validated to decide whether a Soter key is blocked (four quadrants):
+> 1. service property abnormal + Soter program present → Soter is blocked (abnormal);
+> 2. service property abnormal + program absent → the device natively has no Soter (normal);
+> 3. service property normal + program present → the device supports Soter (normal);
+> 4. service property normal + program absent → impossible.
 >
-> [SoterService from Tencent](https://github.com/Tencent/soter)
-> Purpose: WeChat fingerprint payments, etc.
->
-> Detection method: Checks files to determine if Soter service programs exist and cross-validates with service point attribute status to determine if Soter key is blocked.
-> 1. Abnormal service point attributes + Soter program exists -> Soter is blocked (Abnormal)
-> 2. Abnormal service point attributes + Soter program absent -> This device natively does not support Soter (Normal)
-> 3. Normal service point attributes + Soter program exists -> Device supports Soter (Normal)
-> 4. Normal service point attributes + Soter program absent -> Impossible
->
-> **Solutions**:
-> - Wait for module updates (fixing SoterService is unlikely).
-> - Use SusFS or PathMask to hide related service paths, and use HMA-OSS to hide the Soter system service app from the detector to try resolving.
->
-> *Note*: PathMask is not focused on environment hiding, use with caution.
->
-> *Principle*: Currently we cannot technically simulate the Soter service, but we can hide Soter-related files to fake case #2.
+> **Solution**: **self-comfort** — hide the Soter service path with a kernel-level hiding solution, or hide the Soter system service app from the detector with an app-hiding module. Note that hiding Soter usually makes third-party checks worse.
 </details>
 
 <details>
-<summary>Tampered Attestation Key(X)</summary>
+<summary>Tampered Attestation Key(X) (incl. 16 / 31)</summary>
 
 > **Detection method**: Runs 20+ tag-consistency checks on the attestation certificate chain, e.g. leaf `KeyUsage` vs. extension `KeyPurpose`, leaf signature algorithm vs. issuer key algorithm, the security-patch tag inside the certificate vs. system properties, `APPLICATION_ID` present without a challenge, `USER_ID` appearing in `teeEnforced`, vendor placeholder tags still issuing keys, etc.
 >
@@ -237,6 +330,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > - 27: USER_ID appears in teeEnforced
 > - 29: APPLICATION_ID present without a challenge
 > - 30: Sensitive device identifier attestations not rejected (e.g., SERIAL)
+
+> Relation: labels 16 and 31 belong to the same check family — 16 to the HanAttest chain-inconsistency group, 31 to the security-patch-date group (usually false positives).
+> **Xiaomi / Redmi note**: on systems updated around 2026-03 the build time and the Android security patch date are simply different, so **(26) reports whether or not the device is rooted → ignore it**; modded key module builds / one-click hiding modules / some model-spoofing modules also cause it — switch back to the official module or uninstall them.
 </details>
 
 <details>
@@ -246,7 +342,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Timing side-channel (unstable). May disappear on re-open.
 >
-> Replace with [TEESimulator](https://github.com/JingMatrix/TEESimulator) module.
+> Replace with [key module](https://github.com/JingMatrix/TEESimulator) module.
 </details>
 
 <details>
@@ -254,9 +350,17 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: The chain is generated by a module (synthetic chain) and does not match real TEE chain characteristics.
 >
-> **Attempt 1**: Replace with [TEESimulator](https://github.com/JingMatrix/TEESimulator).
+> **Attempt 1**: Replace with [key module](https://github.com/JingMatrix/TEESimulator).
 >
 > **Attempt 2**: Delete `/data/adb/tricky_store/security_patch.txt`.
+</details>
+
+<details>
+<summary>TEE Spoofing (2)</summary>
+
+> **Detection method**: creates a key with both `SIGN` and `ATTEST_KEY` purposes via Keystore2 reflection — a normal device should reject this mixed use (e.g. with `-3`); if the key can sign but **both** sub-certificate issuances (with and without a challenge) fail (e.g. with `-49`), it is reported as TEE Spoofing (2).
+>
+> **Solution**: replace / update the key module (see “Recommended Modules” and “Correct Module Configuration”).
 </details>
 
 <details>
@@ -264,7 +368,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: Certificate chain / key attributes indicate that TEE behaviour is being simulated.
 >
-> Use the TEESimulator(RS) module with certificate chain generation mode to resolve.
+
 </details>
 
 <details>
@@ -272,13 +376,22 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: The TEE-side key / certificate chain is incomplete or unusable.
 >
-> Try using Tricky Store or the [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) module.
+> Try using Tricky Store or the [key module](https://github.com/Enginex0/TEESimulator-RS) module.
 >
 > Use with [TS-Plugin](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1).
 >
 > Reboot after flashing, then open the module's webUI to configure.
 >
 > For TEE-damaged devices, use certificate chain generation mode.
+
+> Add the detector's package name with `!` in `/data/adb/tricky_store/target.txt`, or use this one-liner:
+> ```
+> su
+> TRICKY_DATA="/data/adb/tricky_store"
+> { echo "com.google.android.gms!"; echo "com.android.vending!"; pm list packages -3 | sed 's/^package://;s/$/!/'; } > "$TRICKY_DATA/target.txt"
+> ```
+
+> Community note: use the key module's certificate-chain generation mode where applicable.
 </details>
 
 <details>
@@ -286,7 +399,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: The attestation certificate chain is incomplete or does not match the expected chain.
 >
-> Use [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) and configure it to try resolving.
+> Use [key module](https://github.com/Enginex0/TEESimulator-RS) and configure it to try resolving.
 </details>
 
 <details>
@@ -306,19 +419,21 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Boot image hash mismatch.
 >
-> Usually becomes `0000` after BL unlock. Use [Native detector](https://t.me/rootdetector/49) to get the correct hash, then use Tricky Store / [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) with [TS-Plugin](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) to configure the hash.
+> Usually becomes `0000` after BL unlock. Use [Native detector](https://t.me/rootdetector/49) to get the correct hash, then use Tricky Store / [key module](https://github.com/Enginex0/TEESimulator-RS) with [TS-Plugin](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) to configure the hash.
+
+> Open key attestation, copy the `VerifiedBootHash` value and write it with the TS add-on.
 </details>
 
 <details>
-<summary>Bootloader unlock</summary>
+<summary>Bootloader Unlock / Unlock Attributes</summary>
 
-> **Detection method**: Reads bootloader lock-state related properties / attestation results.
+> **Detection method**: reads bootloader lock-state properties / attestation results — `ro.boot.flash.locked`, `ro.boot.verifiedbootstate`, `ro.boot.vbmeta.device_state`, etc. (`0` / `orange` / `unlocked` means unlocked).
 >
-> BL unlocked. Use [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) to hide.
+> **Solution**
+> - **Genuinely unlocked device**: use the key module to hide the unlock state, and add the detector to the package list per “Correct Module Configuration” (the target list takes effect immediately, no reboot needed);
+> - **Fake-relocked / no-unlock / self-signed device**: the device already presents itself as locked (locked & green) — that state is provided by an early-boot-chain approach such as efisp — so this item normally should not fire.
 >
-> Configure `target.txt` in `/data/adb/tricky_store/` by adding the app package name (takes effect in real-time, no reboot needed).
->
-> Also recommended: [TS-Plugin](https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/tag/v5.0-beta.1) for visual package name configuration.
+> See `Abnormal Boot Status` for the community's combined attempt; there are also reports that iQoo / Vivo (OriginOS 5) do not hit while OriginOS 6 does (not confirmed as a false positive).
 </details>
 
 <details>
@@ -326,35 +441,11 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: Reads verified-boot state (e.g. `ro.boot.verifiedbootstate`) and compares it with expectations.
 >
-> BL unlocked. Use [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS) to hide.
+> BL unlocked. Use [key module](https://github.com/Enginex0/TEESimulator-RS) to hide.
 >
 > Configure `target.txt` in `/data/adb/tricky_store/` by adding the app package name (takes effect in real-time, no reboot needed).
-</details>
 
-<details>
-<summary>Key Tampering (128)</summary>
-
-> **Detection method**: Key / certificate-chain attribute consistency check failed (group 128).
->
-> Tricky Store uses "Key Chain Generation Mode" by default on OnePlus Qualcomm devices.
->
-> Try replacing with [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS).
-</details>
-
-<details>
-<summary>Key Tampering (q)</summary>
-
-> **Detection method**: Key / certificate-chain attribute consistency check failed (group q).
->
-> Unknown.
-</details>
-
-<details>
-<summary>Key Tampering (b)</summary>
-
-> **Detection method**: Key / certificate-chain attribute consistency check failed (group b).
->
-> Unknown.
+> Community combination attempt: update the key module (-v307) + TS add-on v5.0-beta1 → disable “unmount modules (kernel-level)” in the manager → set the Zygisk provider to “restore mounts only” → freeze the phone manager (on Xiaomi, use an app-hiding / freeze approach and enable “disable environment check”) → put the property-hiding script into `/data/adb/service.d/`.
 </details>
 
 <details>
@@ -366,19 +457,19 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 </details>
 
 <details>
-<summary>Key Tampering</summary>
+<summary>Key Tampering / Certificate Chain Tampering (x)</summary>
 
-> **Detection method**: Key / certificate-chain attribute consistency check failed.
+> **Detection method**
+> - Key tampering: key / certificate-chain attribute consistency check failed; the group number is shown in the details;
+> - **Certificate Chain Tampering (x)**: a Java-layer check of the system property `ro.secureboot.lockstate` (that property name sits in the same table as `ro.lenovo.series`, `ro.lewa.version`, `ro.meizu.product.model`, `ro.miui.ui.version.name`, `ro.vivo.os.build.display.id`); a value of `unlocked` hits.
 >
-> [Use TEESimulator-RS?](https://github.com/Enginex0/TEESimulator-RS)
-</details>
-
-<details>
-<summary>TrustedCert Certificate Tampering</summary>
-
-> **Detection method**: The certificate chain does not match the trusted root / expected chain.
+> **Groups**
+> - **128**: the most common — typically seen when a key module uses the “certificate-chain generation mode” by default on OnePlus / Qualcomm devices;
+> - other groups (q, b, …): reasons not published.
 >
-> Unknown.
+> **Solution**
+> - Key tampering: replace / update the key module and configure it per “Correct Module Configuration” (target list, security patch date, boot hash);
+> - Certificate Chain Tampering (x): `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked` (use `resetprop` on Magisk).
 </details>
 
 ---
@@ -393,29 +484,22 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Mount views obtained via two different methods are inconsistent, suggesting potential concealment. Sometimes a service doesn't process in time and triggers this (early mountinfo snapshot vs. late comparison).
 > 
 > Xiaomi devices often show this when opening the detector under high system load after boot.
+
+> A hit right after boot is usually snapshot timing: **wait 20 s – 5 min after boot before testing**.
 </details>
 
 <details>
-<summary>zygote test (1)</summary>
+<summary>zygote test (1) / App Zygote Fork Order Anomaly</summary>
 
 > **Detection method**: A fork-order probe inside the app_zygote: it opens the log socket (`/dev/socket/logdw`) to obtain identity / cookie and checks `prepare/parent/child`, parent/child liveness and fd close order to detect **Zygisk residue injected before the app-zygote**. Side-channel type; unstable.
 >
-> Enable ZygiskNext's linker function and anonymous memory function to try resolving.
+> Enable Zygisk provider's linker function and anonymous memory function to try resolving.
 > 
 > Exclusion list strategy — Restore mount only.
 > 
 > Unstable detection, occasional occurrence.
-</details>
 
-<details>
-<summary>Inconsistent mount</summary>
-
-> **Detection method**: Resolves mounts from `/proc/self/exe` and compares them with the filesystem type reported by `statfs`; a mismatch hits.
->
-> Parses part of the mount from `/proc/self/exe/`, then checks if file system types are consistent.
-> 
-> Some devices have unfixed false positives (fixed in version 3.4).
-</details>
+> Relation: the same probe as the community name “App Zygote Fork Order Anomaly” (fork order inside the app_zygote / Zygisk early-injection residue).</details>
 
 <details>
 <summary>Mount loophole</summary>
@@ -424,9 +508,11 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Magic Mount takes effect for system modification module mounts.
 > 
-> Mounting needs to be hidden by other modules (SusFS/ZygiskNext).
+> Mounting needs to be hidden by other modules (SusFS/Zygisk provider).
 > 
-> Use ZygiskNext's exclusion strategy > Restore mount only. Configure the exclusion list / enable default module unmounting to hide it.
+> Use Zygisk provider's exclusion strategy > Restore mount only. Configure the exclusion list / enable default module unmounting to hide it.
+
+> Use the Zygisk provider's “restore mounts only” policy, or change the metamodule.
 </details>
 
 <details>
@@ -436,27 +522,19 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Magic Mount detected.
 > 
-> Try excluding certain system-modifying modules. Use certain modules to hide this issue (e.g., ZygiskNext's exclusion strategy).
+> Try excluding certain system-modifying modules. Use certain modules to hide this issue (e.g., Zygisk provider's exclusion strategy).
+
+> Same as above: Zygisk provider “restore mounts only” / change the metamodule.
 </details>
 
 <details>
 <summary>Inconsistent mount / debug_ramdisk</summary>
 
-> **Detection method**: Checks whether `/debug_ramdisk` was unmounted / the mount view is inconsistent.
+> **Detection method**: resolves mounts from `/proc/self/exe` and compares them with the filesystem type reported by `statfs`; a mismatch hits. A `/debug_ramdisk` mount-view mismatch is another variant.
 >
-> `umount /debug_ramdisk`
-</details>
-
-<details>
-<summary>Futile hide 04</summary>
-
-> **Detection method**: Related to mount namespaces / mount anomalies.
+> **Solution**: `su -c umount /debug_ramdisk`.
 >
-> Principle: Mount namespace?
-> 
-> Mount abnormality detected.
-> 
-> Try replacing the "meta-module" to resolve.
+> Note: some devices show an unfixed false positive here (partly fixed in 3.4).
 </details>
 
 <details>
@@ -477,14 +555,56 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > If the problem persists, check system modules with bind mount functionality, and whether the system natively exhibits this phenomenon.
 > 
 > *Note*: A small number of ROMs natively exhibit this phenomenon. If this is the case, please ignore this item.
+
+> Change the metamodule / update the root manager and re-patch; if you use Scene, update Scene.
 </details>
 
 <details>
-<summary>2222</summary>
+<summary>Mount Anomaly (X)</summary>
 
-> **Detection method**: Mount anomaly (group ID / peer-group related).
+> **Detection method**: mount-table scanning (`verdict=hit: peer-group table inconsistency (hidden mount points)`, `suspicious mount entry`, overlay detection, etc.); when it hits, the expanded details contain the concrete `/dev/block/...` or module name.
 >
-> Mount abnormality detected.
+> **Solution**: KSU · LKM — hide the path shown in the details with a matching PathMask and hot-reload; GKI + SUSFS — add the hidden path in SUSFS; GKI without SUSFS — follow the LKM approach; other managers have no method yet.
+> If the details contain **overlay**, change the metamodule; if a specific module clearly causes the mount, uninstall it.
+>
+> Relation: same mount family as the `/data/local/tmp` metadata anomaly family (incl. `2222`, `Futile hide 04`), `Mount loophole`, `Magic Mount` and `Mount Gap`.
+</details>
+
+<details>
+<summary>/data/local/tmp metadata anomaly family (Futile hide / 1 / 2 / 04 / 2222)</summary>
+
+> **Detection method**: all of them judge anomalies in the **metadata** of the `/data/local/tmp` directory (timestamps / inode / owner / permissions); in the app they are five separate messages:
+> - `Futile hide`: the directory timestamp was modified;
+> - `Futile hide 1` / `Futile hide 2` / `Futile hide 04`: variants of the same metadata anomaly;
+> - `2222`: a mount / metadata related variant.
+>
+> **Solution**: `su -c rm -rf /data/local/tmp` → reboot → then fix per `Suspicious Surroundings (a)/(b)/(c)` (owner / inode / permissions); `Futile hide 1` may also simply disappear after a reboot.
+>
+> Relation: same family as `Suspicious Surroundings` and `/data/local/tmp denied`, with the same handling.
+</details>
+
+<details>
+<summary>UID Namespace mismatch（same UID namespace inconsistent）</summary>
+
+> **Detection method**: the user-namespace view differs for the same UID (`UID namespace mismatch for same UID`).
+>
+> **Solution**: check whether your hiding framework alters namespaces; re-test after replacing / updating the metamodule.
+</details>
+
+<details>
+<summary>Mount Namespace（mount namespace）/ Mount namespace anomaly</summary>
+
+> **Detection method**: abnormal mount-namespace view (`Mount namespace anomaly`); related to `Inconsistent mount / debug_ramdisk` and `Mount Gap` but a different criterion (namespace views, not the mount table / statfs).
+>
+> **Solution**: as with the mount family (Zygisk provider “restore mounts only” / change the metamodule / PathMask, SUSFS hiding).
+</details>
+
+<details>
+<summary>PID Namespace（process namespace）/ PID namespace anomaly</summary>
+
+> **Detection method**: abnormal process-namespace view (`PID namespace anomaly`).
+>
+> **Solution**: check what your hiding framework / metamodule changes about namespaces, update it and re-test.
 </details>
 
 ---
@@ -496,7 +616,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: A heuristic scan of page residency (`smaps` `Referenced`) combined with `MADV_COLD` / `clear_refs` to look for hidden mappings or Zygisk-like implementations; the current implementation has known problems and may fail or false-positive.
 >
-> Heuristic detection of Zygisk implementations (especially Zygisk-Next) via smaps scanning. However, the current implementation has issues that render the detection ineffective.
+> Heuristic detection of Zygisk implementations (especially Zygisk provider) via smaps scanning. However, the current implementation has issues that render the detection ineffective.
 > 
 > Please ignore this item until the detection method is fixed or removed.
 </details>
@@ -507,6 +627,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Detection method**: Reads the fd targets of this process (`/proc/self/fd` + `readlink`) and compares the fd graph (files / sockets / anonymous inodes) against expectations.
 >
 > Under analysis for reproduction, to be supplemented...
+
+> Some older kernels may show this item; the fix is currently unknown.
 </details>
 
 <details>
@@ -517,6 +639,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Suspected detection of old Scene_Hide-eBPF module behavior (cannot detect Scene app, but detects related services).
 > 
 > [Branch project / Pull update to rebuild module and flash / Download from Releases](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
+
+> If it is an old / cracked / unofficial Scene: see [Scene-Port-Hider-by-eBPF](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF); on the official Scene, simply update to the latest version.
+> (Note: HMA (Hide My Applist) and Scene are different modules with different purposes; this item and `Scene Port Occupied Detected` may appear together and should be handled separately.)
 </details>
 
 <details>
@@ -536,39 +661,32 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 </details>
 
 <details>
-<summary>Futile hide 1</summary>
+<summary>Risky Applications / Risk apps 'package name'</summary>
 
-> **Detection method**: `/data/local/tmp` metadata anomaly (timestamps, etc.).
+> **Detection method**: reads the directory names under `/storage/emulated/0/Android/data/` to obtain installed package names (normal apps do not have this permission), bypassing the read restriction with a **Unicode zero-width character** where that is possible (it is not a fixed method), then matches them against the risky list (see Appendix A).
 >
-> Rarely appears, cause unknown, no reliable solution yet.
-</details>
-
-<details>
-<summary>Risky Applications</summary>
-
-> **Detection method**: Matches against the risky package-name list (see Appendix A).
->
-> Means of detection unknown. Try using HMA-OSS to hide potentially risky apps from the detector.
+> **Solution**
+> - Effective combination: **app-hiding module blacklist mode + zero-width read fix** ([FuseFixer](https://github.com/5ec1cff/FuseFixer)); on some devices enabling the scope may cause a boot hang — turn the scope off in safe mode;
+> - To make only this item pass: in the app-hiding module enable “restrict zygote permissions” for the detector and turn on everything except `INET_GID`;
+> - For items whose criteria are unknown, you can also hide the suspicious app from the detector with the app-hiding module.
 </details>
 
 <details>
 <summary>Dirty Device(a)</summary>
 
-> **Detection method**: Dirty-device determination related to *key-replacement behaviour*; some versions additionally match `.sh` cheat files under `/storage/emulated/0`.
+> **Detection method**: detects folders / files whose names contain `sh` under `/storage/emulated/0/` (`/sdcard`), plus cheat-related files / drivers (some versions also combine this with “key-replacement behaviour”).
 >
-> Kernel interface detected? External sh detected?
-> 
-> Detects folders/files under `/storage/emulated/0/` with "sh" in their names.
->
-> Try restarting or reinstalling the system. Delete any folders/files with "sh" in their names under `/storage/emulated/0/`.
+> **Solution**: this item simply means “game-cheat files were found on the device” → **just delete them yourself**, then reboot and re-test.
 </details>
 
 <details>
 <summary>Environment Doubt 1 (Experimental Detection)</summary>
 
-> **Detection method**: Experimental environment-consistency check (community report: appears after enabling HMA-OSS blacklist mode with the “input method” preset checked).
+> **Detection method**: Experimental environment-consistency check (community report: appears after enabling app-hiding module blacklist mode with the “input method” preset checked).
 >
-> In HMA-OSS, if the "Input Method" option in preset settings is checked while hiding the detector in blacklist mode, this detection may appear?
+> In app-hiding module, if the "Input Method" option in preset settings is checked while hiding the detector in blacklist mode, this detection may appear?
+
+> Experimental environment-consistency check (community report: appears after enabling the app-hiding module's blacklist mode with the “input method” preset checked).
 </details>
 
 <details>
@@ -577,6 +695,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Detection method**: Checks for services / bindings belonging to LSPosed, Shizuku or other Xposed modules.
 >
 > Detection related to LSPosed, Shizuku, and some Xposed module modifications.
+
+> First check `/sdcard` and `/data/local/tmp` for stray files left behind by modules.
 </details>
 
 <details>
@@ -600,9 +720,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 <details>
 <summary>Device is an Emulator</summary>
 
-> **Detection method**: Checks emulator / virtualisation features such as `/dev/goldfish_pipe`, `/dev/qemu_pipe`, `/dev/socket/genyd`, `/sys/qemu_trace`, and model keywords `goldfish` / `ranchu` / `qemu` / `genymotion` / `bluestacks` / `ldplayer` / `nox` / `memu` / `ttvm` / `vbox` / `vmware`.
+> **Detection method**: emulator / virtualisation features (`/dev/goldfish_pipe`, `/dev/qemu_pipe`, `/dev/socket/genyd`, `/sys/qemu_trace`) plus model keywords (`goldfish`, `ranchu`, `qemu`, `genymotion`, `bluestacks`, `ldplayer`, `nox`, `memu`, `ttvm`, `vbox`, `vmware`); it also references `android/os/BatteryManager` and `android/telephony/TelephonyManager`, so **battery / charging state and SIM state** are taken into account.
 >
-> Current device is an emulator device.
+> **Solution**: uninstall and reinstall the detector first; avoid testing with **no SIM card + full battery + charging** (community measurement: it does hit in that state even without direct evidence).
 </details>
 
 <details>
@@ -632,7 +752,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Zygisk detected — usually Magisk's built-in Zygisk (disable it) or other causes.
 > 
-> Update the [ZygiskNext module](http://github.com/Dr-TSNG/ZygiskNext).
+> Update the [Zygisk provider module](http://github.com/Dr-TSNG/ZygiskNext).
+
+> Checks Zygisk injection traces (anonymous executable mappings, process environment, module entry, etc.).
 </details>
 
 <details>
@@ -643,6 +765,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Path: `/data/local/tmp` folder's group is abnormal.
 >
 > **Solution**: Change group to shell.
+
+> Community measurement: this item checks that `/data/local/tmp` is **owned by root**; change it to shell: `su -c chown shell:shell /data/local/tmp`.
 </details>
 
 <details>
@@ -655,6 +779,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Solutions**: Factory reset the device / Use SusFS to spoof inode value < 1000 / Try using the [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) script to resolve.
 >
 > If wired display projection (e.g. Scrcpy) becomes unavailable, use `su -c restorecon -RF /data/local/tmp` to resolve.
+
+> Tool: [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker) (just download and run it; use an older release if it fails).
 </details>
 
 <details>
@@ -665,18 +791,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > `/data/local/tmp` — permissions modified (default is 771).
 >
 > **Solution**: Reset permissions.
-</details>
 
-<details>
-<summary>Futile hide</summary>
-
-> **Detection method**: `/data/local/tmp` timestamps modified, etc.
->
-> The following solutions may be outdated:
-> 
-> The timestamp of `/data/local/tmp` has been modified.
-> 
-> Format the system, or delete the `tmp` folder and reboot (this reverts to states a/b/c above), then use sukisu's Kstat config (requires kernel-integrated SusFS) to add `/data/local/tmp` with a modified inode value (e.g., 7365). Keep `tmp` permissions at 771 and owner as shell.
+> Restore the default permissions: `su -c chmod 771 /data/local/tmp`.
 </details>
 
 <details>
@@ -685,6 +801,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Detection method**: Checks accessibility of `/data/local/tmp` (permissions / existence).
 >
 > Access to `/data/local/tmp` denied. Permission issue? Folder doesn't exist?
+
+> Same as above: delete the directory, reboot, then handle whatever new items appear.
 </details>
 
 <details>
@@ -703,16 +821,6 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Abnormal files: Detects the `mt2` folder in root directory, `boot.img` files, and `.xml` abnormal files.
 > 
 > Change the MT2 path in MT Manager settings (custom path) and delete the old folder.
-</details>
-
-<details>
-<summary>Risk apps 'package name'</summary>
-
-> **Detection method**: Reads directory names under `/storage/emulated/0/Android/data/` to obtain installed package names (normal apps usually lack this permission) and matches them against the risky list.
->
-> Risk apps detected > package name.
-> 
-> Install the [Unicode Zero-Width Repair Module](https://github.com/5ec1cff/FuseFixer) to fix readability of `/storage/emulated/0/Android/data/`, then use HMA-OSS to hide risky apps.
 </details>
 
 <details>
@@ -759,6 +867,66 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >    /data/swap_config.conf
 >    /data/local/tmp/resetprop
 >    ```
+
+> When it hits, the entry also prints the **actual matched path** (the community calls it “a path”); delete it as instructed.
+</details>
+
+<details>
+<summary>Suspicious Runtime Environment: Container / Clone</summary>
+
+> **Detection method**: validates the `/proc/self/cgroup` path against `^0::/uid_\d+/pid_\d+$` or `^0::/apps/uid_\d+/pid_\d+$` (both regexes are built in), together with parallel / clone probes (`parallel_ok=`, `signal_parallel_access_mismatch=`); an unexpected format or probe mismatch hits.
+>
+> **Solution**: uninstall and reinstall the detector; **never use app cloning / dual apps on the detector**.
+</details>
+
+<details>
+<summary>Suspicious Modules Detected</summary>
+
+> **Detection method**: hits the signatures of thermal / scheduler / optimisation modules — most commonly the **Encore Tweaks** family: the management app, `/system/bin/encore_profiler`, `/data/encore/default_cpu_gov`, `/data/encore/custom_default_cpu_gov`, `/data/local/tmp/encore_logo.png`; separate messages are reported (`Encore management app installed / Encore Tweaks module / Encore Tweaks possible`).
+>
+> **Solution**: find and uninstall the relevant module (these items are often probabilistic — reboot a few times and re-test).
+</details>
+
+<details>
+<summary>GMS Blocked</summary>
+
+> **Detection method**: checks ROM-side “GMS blocked” characteristic files / executables — `/my_product/etc/permissions/oplus_google_cn_gms_features.xml` (OPPO / OnePlus CN models; the detector directly `access`es this path) and `/system/bin/gmsc`; plus PIF-style properties `persist.sys.pihooks.disable.gms`, `persist.sys.pixelprops.gms`, `persist.sys.spoof.gms`.
+>
+> **Solution**: check whether your app-hiding module hides system components (Google services), or investigate ROM-side GMS issues.
+</details>
+
+<details>
+<summary>/dev/cpuset/AppOpt</summary>
+
+> **Detection method**: this path is the signature of “thread / scheduler module mounts” (same table as `/data/swap_config.conf`, `/data/encore/*_cpu_gov`, `/data/local/tmp/yshell`); its existence hits.
+>
+> **Solution**: uninstall the corresponding thread / scheduler module.
+</details>
+
+<details>
+<summary>/system/bin/fastboot and /system/bin/adb</summary>
+
+> **Detection method**: checks for abnormally present system executables (`/system/bin/adb` is confirmed to be in the signature table; `fastboot` is unconfirmed); typical of Xiaomi modified stock ROMs.
+>
+> **Solution**: flash back the official ROM, or hide the two files with a kernel-level path-hiding solution.
+</details>
+
+<details>
+<summary>OBB Directory Anomaly</summary>
+
+> **Detection method**: reads the app's **own OBB path** through several read-only methods and compares the results — `statx` / `newfstatat` / `openat_chain` (probes `self_obb_path_visible`, `inconsistent_read_only_views`) → inconsistent views (i.e. a module is intercepting / hiding that path) hit.
+>
+> **Solution**: find the module that blocks scanning / hides paths and uninstall it.
+</details>
+
+<details>
+<summary>USB Debugging Enabled</summary>
+
+> **Detection method**: the native method `runFormalUsbDebuggingCheck`; no `adb_enabled`-style settings string exists in the static artifacts, so it is presumed to relate to the `adbd` / `adbroot` / `adb_data_file` **SELinux rule family** (same origin as the SELinux rule probing); the exact criterion is still to be confirmed.
+>
+> **Solution**: turn off USB debugging (`su -c settings put global adb_enabled 0`); this can be placed in `/data/adb/service.d/` to disable it automatically on every boot.
+>
+> Relation: both this and `fdinfo mnt Sampling Anomaly (c)` involve USB debugging, but the criteria differ — that one looks at `mnt_id` residue in `/proc/*/fdinfo`.
 </details>
 
 ---
@@ -778,10 +946,12 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > 1. Play content that **requires L1** (Netflix / Disney+ / Prime in HD / 1080p+):
 >    - HD / 1080p+ plays fine ⇒ L1 itself is healthy and this entry is **very likely a false positive** (known to hit on Xiaomi devices, including **locked** ones); you can ignore it and wait for an update;
 >    - only SD plays ⇒ continue with step 2.
-> 2. Check “L1-spoofing” modules: TrickyStore / TEESimulator(-RS) target list, `keybox.xml`, security-patch sync, and PIF / property-spoofing modules; disable them one by one, **reboot**, and re-scan.
+> 2. Check “L1-spoofing” modules: TrickyStore / key module(-RS) target list, `keybox.xml`, security-patch sync, and PIF / property-spoofing modules; disable them one by one, **reboot**, and re-scan.
 > 3. Only as a **last resort** consider the “remote RKP key (RKPConfig)”: it usually does nothing if the device already uses RKP, and currently it generally does not help on Xiaomi devices.
 >
 > ⚠️ **Security note**: RKPConfig-type apps make the device request an RKP key from Google and therefore **change the device's key-provisioning / attestation state**; verify the source and reversibility before installing.
+
+> Community measurement: **fake-relocked / no-unlock / completely unrooted devices can also hit this**, so it may simply be ignored; to investigate, follow “Step 1” above first.
 </details>
 
 <details>
@@ -799,7 +969,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Principle: Checks for holes in the property area — if holes exist, properties have been modified.
 > 
-> To hide modified properties, add the [shamiko_Plus.sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh) file to `/data/adb/service.d/` and reboot to try resolving.
+> To hide modified properties, add the [the repo's property-hiding script](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh) file to `/data/adb/service.d/` and reboot to try resolving.
+
+> Note: `the repo's property-hiding script` writes properties early with `resetprop -n`; run it from `/data/adb/service.d/` and **do not persist**, otherwise it may create new property-area holes.
 </details>
 
 <details>
@@ -810,16 +982,20 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Abnormal avb version.
 > 
 > Certain modules can cause this, such as device model changers. Troubleshoot yourself.
+
+> If it still hits after removing the model-spoofing module: `su -c resetprop -n ro.boot.avb_version 1.3`.
 </details>
 
 <details>
-<summary>Tampered kernel</summary>
+<summary>Tampered Kernel / Spoofed Kernel</summary>
 
-> **Detection method**: Reads the kernel uname (version, build time) and compares it against a preset list / baseline.
+> **Detection method**: reads the kernel uname (version string, build time) and compares it against a preset list / baseline; the consistency check after the kernel information has been spoofed (e.g. by SUSFS) also belongs here.
 >
-> Kernel information checksum abnormal (kernel version string, kernel build time).
-> 
-> Try using SusFS to hide it or restore the unmodified boot.img.
+> **Solution**
+> - Hide the kernel name with a kernel-level solution (e.g. SUSFS); when spoofing the kernel, set the start stage to `post-fs-data`;
+> - Or restore the unmodified boot.img.
+>
+> Developer's own words: on a stock system booting in LKM mode, a hit here is a false positive.
 </details>
 
 <details>
@@ -850,6 +1026,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Device modification detection?
 > 
 > The following solution may be outdated: Did you enable HMA's "Vold app data isolation"?
+
+> Note (to be confirmed by the author): this item and `Vold isolation enabled` pull against each other — enabling HMA / app-hiding module Vold appdata isolation may clear this item but triggers `Vold isolation enabled` (that property gets written); choose whichever is more important to you.
 </details>
 
 <details>
@@ -861,16 +1039,6 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 </details>
 
 <details>
-<summary>Spoofed Kernel</summary>
-
-> **Detection method**: Consistency check after kernel information has been spoofed (e.g. by SusFS).
->
-> Ineffective use of SusFS to spoof the kernel.
->
-> Select `post-fs-data` during the kernel spoofing startup phase.
-</details>
-
-<details>
 <summary>Third-party Kernel</summary>
 
 > **Detection method**: Kernel version information matches a preset signature list.
@@ -878,6 +1046,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Kernel information matches a preset list.
 > 
 > Resolve by spoofing kernel information.
+
+> Use a kernel-level hidden solution (e.g. SUSFS) to spoof the kernel name.
 </details>
 
 <details>
@@ -890,6 +1060,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Kernel version suffix contains `-Dirty`.
 >
 > Resolve by spoofing kernel information.
+
+> Use a kernel-level hidden solution (e.g. SUSFS) to spoof the kernel name.
 </details>
 
 <details>
@@ -910,6 +1082,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Some characteristics match known custom ROMs.
 >
 > Try spoofing.
+
+> Use a kernel-level hidden solution (e.g. SUSFS) to spoof the kernel name.
 </details>
 
 <details>
@@ -922,6 +1096,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > This detection is triggered after flashing ZN-Audit Patch or similar modules.
 >
 > Uninstall the ZN-Audit Patch module.
+
+> Trigger surfaces differ by case: ① it fires after flashing an audit-log patching kernel-side approach (see below); ② reports also point to **property-spoofing modules** (`persist.sys.pihooks_*`, `persist.sys.pixelprops.*`, `persist.sys.spoof.gms`, … — to be confirmed). A useful self-check is whether PIF / IntegrityFix / PixelProps related modules appear in this process' maps.
 </details>
 
 <details>
@@ -929,7 +1105,6 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: This check itself did not complete (environment limits / timeout, etc.) — **it is not a hit**; retry or ignore it.
 >
-> 2333333
 </details>
 
 <details>
@@ -948,18 +1123,23 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > Some detections related to emulator/virtual machine characteristics, device modification behavior, or third-party/ported ROMs.
 > 
 > False positives on international devices like Poco/Samsung (to be fixed).
+
+> Community reports: false positives on Poco / Samsung devices abroad; some devices using Scene also hit.
+> If it still hits after uninstalling the model-spoofing module, it is usually module residue / an irreversible action.
 </details>
 
 <details>
 <summary>Vold isolation enabled</summary>
 
-> **Detection method**: Reads `persist.sys.vold_app_data_isolation_enabled` (HMA / HMA-OSS Vold appdata isolation writes this property).
+> **Detection method**: Reads `persist.sys.vold_app_data_isolation_enabled` (HMA / app-hiding module Vold appdata isolation writes this property).
 >
 > Disable "Vold app data isolation" in HMA/HMAOSS settings.
 > 
 > If `persist.sys.vold_app_data_isolation_enabled=0` still exists after rebooting:
 >
 > Execute `resetprop -p --delete persist.sys.vold_app_data_isolation_enabled` in su shell, then reboot.
+
+> Note (to be confirmed by the author): pulls against `Miscellaneous Check (3)`; see that entry.
 </details>
 
 ---
