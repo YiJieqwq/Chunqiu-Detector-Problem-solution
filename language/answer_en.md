@@ -132,7 +132,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > **Relation to `Abnormal Environment`**: both target the same “authorisation path” side channel — [File/Doc/ksu_kp_sidechannel_zh.md](/File/Doc/ksu_kp_sidechannel_zh.md) describes the *“is the lazy page mapped?”* and *“authorisation-latency ratio”* variants, while this one compares **page-read amounts**; they are variants of the same idea and corroborate each other.
 >
-> **Solution**: on APatch / KernelPatch use a KPM such as [nohello](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm) and add the detector to its exclusion list (rejecting authorisation *before* the `cmd` check means the probe cannot observe the authorisation path); or use the latest KPatch-Next that authenticates by uid; otherwise wait for an upstream fix.
+> **Solution**: **no known module fixes this today.** KPMs such as nohello intercept *whether an authorisation request is processed*, whereas this item measures *whether the kernel read the user argument page on that syscall path* — that read happens **before/outside** the hook point, so adding the detector to nohello's exclusion list (or switching to a uid-based KPatch-Next) **does not** make this entry go away. It needs a fix on the KernelPatch / APatch side (so the patched syscall path no longer reads the user argument page extra times), or an adjustment of this check upstream.
 >
 > **Note**: this item currently has **no English title** in the English UI (it is shown in Chinese only).
 </details>
