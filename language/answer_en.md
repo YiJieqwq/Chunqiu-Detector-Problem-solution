@@ -1,4 +1,5 @@
 # Chunqiu Detector Solutions (Latest Version) - English Version
+> Checked against version: 4.5.5(68) | Last updated: 2026-09-13
 > Organized by: mingzun09(SuXiaoMing) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
