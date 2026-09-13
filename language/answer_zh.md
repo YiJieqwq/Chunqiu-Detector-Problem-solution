@@ -92,7 +92,11 @@
 <details>
 <summary>Abnormal Environment</summary>
 
-> **检测方式**：**页引用计数侧信道**：把系统调用参数放在一块受监控的用户页上，用 `clear_refs` + `smaps` 的 `Referenced:` 计数比较调用前后该页被内核读取的 kB。先建立两组对照——“不该读（期望 0→0 kB）”与“应该读（期望 0→4 kB）”，再对目标调用取一次；若目标调用**意外**读了该页（0→4 kB），说明内核 syscall 路径被额外处理（root 方案的鉴权 / 拦截路径），并做多轮一致性校验。
+> **检测方式**（与仓库内 [KSU/APatch 侧信道说明](/File/Doc/ksu_kp_sidechannel_zh.md) 一致）：
+> - **APatch / KernelPatch**：①**“懒分配页”探测**——把一个“懒分配”（只占虚拟地址、尚未映射物理页）的页地址当作 superkey 所在地址发起鉴权请求，KernelPatch 解引用该地址时会把该页**实际映射/读入**，检测器随后检查该页是否被映射即可判定 KernelPatch 是否存在；②**鉴权时延探测**——提前拟定一个“范围内 cmd”和一个“范围外 cmd”，分别发起鉴权，多次测量取总和使比值稳定，两者耗时比值大于约 2 即判定存在。
+>   界面上该条目的输出是**页级 kB 对照**（如 `No-read control: 0→0 kB, expected` / `Read control: 0→4 kB, expected` / `Target call: 0→4 kB, unexpected read`）与多轮一致性（`Consistency: n/n`），本质就是判断“该页是否被实际映射/读取”。
+> - **KernelSU**：框架用 Kprobe hook `newfstatat` / `faccessat`，使两者耗时显著变长，而 `statx` 不受影响；多次调用取总耗时做比值，`newfstatat : statx > 1.2` 即判定存在 KernelSU。
+> - 这也解释了为什么 nohello 一类 KPM 要“在 cmd 判断之前就拒绝鉴权”——不进入读取/校验 superkey 的路径，两种探测同时失效。
 >
 > 检测到 KSU/APatch（侧信道检测）
 >
@@ -768,7 +772,7 @@
 <details>
 <summary>Found property</summary>
 
-> **检测方式**：属性区 / 属性值被动态改写的痕迹（resetprop 类）。
+> **检测方式**：检查 `persist.logd.size` / `persist.logd.size.crash` / `persist.logd.size.system` / `persist.logd.size.main` 是否被设置为**非空**（非空即命中；这几个属性是日志缓冲区设置，部分模块/脚本会写入）。
 >
 > 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决。
 </details>
@@ -894,7 +898,7 @@
 <details>
 <summary>环境伪造</summary>
 
-> **检测方式**：检查伪装类属性（`persist.sys.pihooks_*`、`persist.sys.pixelprops.*`、`persist.sys.spoof.gms` 等），以及本进程 maps 中是否出现 PIF / IntegrityFix / PixelProps 一类模块的痕迹。
+> **检测方式**：不同复现条件下触发面不同——① 刷入 ZN-Audit Patch 一类审计补丁后触发（见下）；② 也有反馈指向**属性伪装类模块**（`persist.sys.pihooks_*`、`persist.sys.pixelprops.*`、`persist.sys.spoof.gms` 等，待验证）；自查线索：本进程 maps 中是否出现 PIF / IntegrityFix / PixelProps 相关模块。
 >
 > 旧设备（4系内核）可能误报？
 >
