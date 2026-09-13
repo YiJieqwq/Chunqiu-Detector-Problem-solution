@@ -1138,7 +1138,7 @@
 <details>
 <summary>证书链篡改(x)</summary>
 
-> **检测方式**：判据尚未恢复（可能读取 `ro.secureboot.lockstate` 一类属性或做证书链一致性校验），待确认。
+> **检测方式**：判据在 **Java 层** —— 读取系统属性 **`ro.secureboot.lockstate`**（该属性名与 `ro.lenovo.series`、`ro.lewa.version`、`ro.meizu.product.model`、`ro.miui.ui.version.name`、`ro.vivo.os.build.display.id` 等厂商 ROM 属性在同一张表里）；取到 `unlocked` 即命中。
 >
 > 检测到 `ro.secureboot.lockstate=unlocked`。
 > `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
@@ -1147,7 +1147,7 @@
 <details>
 <summary>USB 调试已开启</summary>
 
-> **检测方式**：native 层未见判据串，推测在 Java 层读取 `adb_enabled`（Settings.Global）等设置项。
+> **检测方式**：native 方法 **`runFormalUsbDebuggingCheck`** 实现，走 **SELinux 规则/上下文族**判断 USB 调试链路是否存在 —— 同族串有 `u:r:adbd:s0`、`u:r:adbroot:s0`、`adbd -> adbroot binder`、`zygote -> adb_data_file search`、`u:object_r:adb_data_file:s0`（即查 `adbd` / `adbroot` / `adb_data_file` 相关规则是否被接受），**不是**读 `adb_enabled`。
 >
 > 检测到 USB 调试处于开启状态。
 > 关闭 USB 调试：`su -c settings put global adb_enabled 0`；可写入 `/data/adb/service.d/` 实现开机自动关闭。
@@ -1170,6 +1170,37 @@
 > 检测到某些模块 / 应用的挂载。
 > **KSU · LKM**：按条目展开给出的 `/dev/block/xxx` 路径用 PathMask 隐藏后热重载；**GKI + SUSFS**：在 SUSFS 中写入对应隐藏路径；**GKI 无 SUSFS**：参考 LKM 方案；其它管理器暂无方案。
 > 若展开内容里出现 **overlay** 字样 → 更换元模块（推荐 mountify）；若确定是某模块导致的挂载 → 卸载该模块。
+</details>
+<details>
+<summary>发现 ROOT 管理器</summary>
+
+> 检测到设备上安装了 ROOT 管理器（Magisk / APatch / KernelSU 等）。
+> 原理：native 方法 **`runRootManagerIntentChecks`** —— 用 **Intent / 包可见性（`<queries>`）**探测管理器应用是否安装或能否响应（对应新版 manifest 新增的 `me.bmax.apatch.magica.LAUNCH`、KSU `magica.LAUNCH`、`ksu://` 等条目）。
+> 解决：对检测器隐藏管理器应用（HMA-OSS 等），或使用不暴露 LAUNCH Intent 的管理器版本。
+</details>
+
+<details>
+<summary>命名空间不一致（UID / Mount / PID）</summary>
+
+> 同一 UID 下的命名空间视图不一致。相关条目：**UID Namespace mismatch（同 UID 命名空间不一致）**、**Mount Namespace（挂载命名空间）/ Mount namespace anomaly**、**PID Namespace（进程命名空间）/ PID namespace anomaly**。
+> 原理：比对同一 UID 进程（或应用自身与 zygote）的 `/proc/<pid>/ns/user|mnt|pid` 视图是否一致 —— 隐藏方案在 namespace 上做手脚时会出现不一致。
+> 解决：更换/更新元模块、检查隐藏框架是否改动了 namespace（本项多为侧信道，可能不稳定）。
+</details>
+
+<details>
+<summary>SELinux 状态通道不一致</summary>
+
+> 检测到 SELinux 状态通过不同通道读到不一致的结果。
+> 原理：与 `检测SELinux Policy时发现可疑问题` 同族 —— 对 selinuxfs 做 stat / 只读读取，并与 libselinux 等其它通道的读数交叉比对（`SELinux status channel inconsistency`），出现差异即命中。
+> 解决：同「检测 SELinux Policy 时发现问题」（隐藏 SELinux 修改 / selinux-hook 类方案）。
+</details>
+
+<details>
+<summary>云手机检测</summary>
+
+> 检测到应用运行在云手机 / 虚拟终端环境。
+> 原理：native 方法 **`runCloudPhoneChecks`**（判据细节待补充）。
+> 解决：暂按误报或环境不兼容处理；请提供设备/云机信息反馈。
 </details>
 ---
 
