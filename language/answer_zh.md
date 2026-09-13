@@ -562,6 +562,31 @@
 </details>
 
 <details>
+<summary>UID Namespace mismatch（同 UID 命名空间不一致）</summary>
+
+> **检测方式**：同一 UID 下的 user namespace 视图不一致（`UID namespace mismatch for same UID`）。
+>
+> 处理：检查隐藏框架是否改动了 namespace；更换 / 更新元模块后重测。
+</details>
+
+<details>
+<summary>Mount Namespace（挂载命名空间）/ Mount namespace anomaly</summary>
+
+> **检测方式**：挂载命名空间视图异常（`Mount namespace anomaly`）；与 `不一致的挂载/debug_ramdisk`、`挂载间隙` 相关但判据不同（这里比的是 namespace 视图，不是挂载表 / statfs）。
+>
+> 处理：同挂载类（ZygiskNext「仅还原挂载」/ 更换元模块 mountify / PathMask、SUSFS 隐藏）。
+</details>
+
+<details>
+<summary>PID Namespace（进程命名空间）/ PID namespace anomaly</summary>
+
+> **检测方式**：进程命名空间视图异常（`PID namespace anomaly`）。
+>
+> 处理：检查隐藏框架 / 元模块对 namespace 的改动，更新后重测。
+</details>
+
+
+<details>
 <summary>挂载异常(X)</summary>
 
 > **检测方式**：挂载表扫描（`verdict=hit: peer-group table inconsistency (hidden mount points)`、`suspicious mount entry`、overlay 检测等），命中后会把具体 `/dev/block/...` 或模块名放进展开详情。
