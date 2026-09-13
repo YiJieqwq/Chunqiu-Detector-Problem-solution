@@ -74,7 +74,8 @@
 
 > **密钥模块**
 > - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)：继 TrickyStore 后最知名的密钥模块，更新较勤，不自带 WebUI。
-> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/)：自带 WebUI 的新模块，行为更接近 AOSP，IO 开销可能比 TEES-RS 更低。
+> - [OhMyKeymint](https://github.com/qwq233/OhMyKeymint/)：行为更接近 AOSP，IO 开销可能比 TEES-RS 更低。
+> - **带 WebUI 的版本**在 [ITxiao6666/OhMyKeymint](https://github.com/ITxiao6666/OhMyKeymint) 的 `Xiaomi_LeiJun` 分支。
 > - [Tricky-addon-Enhanced](https://github.com/Enginex0/tricky-addon-enhanced)：TS / TEES-RS 可用的 WebUI 拓展模块。
 > - 不推荐原版 TrickyStore：其最后更新为 2025-11-30，部分功能已严重落后于其他密钥模块。
 >
