@@ -121,6 +121,23 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 </details>
 
 <details>
+<summary>APatch SuperKey detected (发现APatch 的鉴权密钥)</summary>
+
+> **Detection method**: a side channel based on “**the syscall argument page was read extra times**”. The detector places the target call's arguments/buffer on a monitored user page and measures how many kB of that page the kernel read before/after the call:
+> - `No-read control`: a call that should *not* read the page → expected `0→0 kB`;
+> - `Read control`: a call that *should* read the page → expected `0→4 kB`;
+> - `Target call`: if it reports `0→4 kB, unexpected read`, the kernel touched user memory on that syscall path where it should not — i.e. that path is patched (KernelPatch / the APatch authorisation path).
+>
+> The item also prints `Argument layouts` (a probe of the register layout the kernel reads syscall arguments from), a consistency count (`Consistency: n/n`), `Page size` and `Probe duration` (seconds; the sampling is heavy).
+>
+> **Relation to `Abnormal Environment`**: both target the same “authorisation path” side channel — [File/Doc/ksu_kp_sidechannel_zh.md](/File/Doc/ksu_kp_sidechannel_zh.md) describes the *“is the lazy page mapped?”* and *“authorisation-latency ratio”* variants, while this one compares **page-read amounts**; they are variants of the same idea and corroborate each other.
+>
+> **Solution**: on APatch / KernelPatch use a KPM such as [nohello](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm) and add the detector to its exclusion list (rejecting authorisation *before* the `cmd` check means the probe cannot observe the authorisation path); or use the latest KPatch-Next that authenticates by uid; otherwise wait for an upstream fix.
+>
+> **Note**: this item currently has **no English title** in the English UI (it is shown in Chinese only).
+</details>
+
+<details>
 <summary>KernelSU loop device</summary>
 
 > **Detection method**: Checks for KernelSU-specific loop-device mounts.
