@@ -262,9 +262,9 @@
 <details>
 <summary>Zygote 存在异常</summary>
 
-> **检测方式**：读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中；对应应用隐藏模块的「限制 zygote 权限」把它去掉了。
+> **检测方式**：读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中（**该 GID 缺失的致因尚不能确认**）。
 >
-> 应用自身的 INET-GID 权能被限制。
+> （社区说法）应用自身 zygote 的补充 GID 被限制。
 > 在应用隐藏模块中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
 >
 > 补充：该开关按**黑名单**移除用户勾选的补充 GID（HMA-OSS 的可选项为 1015 / 1023 / 1032 / 1077 / 1078 / 1079 / 3003 / 9997 共 8 项，**不含 3009**）。本条的**判据**确定为「GID 3009 缺失」，但**致因是否来自该开关尚不能确认**。
