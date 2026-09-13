@@ -10,6 +10,7 @@
 - [Mounts & Namespaces Detection](#mounts--namespaces-detection)
 - [Environment, Processes & Files Detection](#environment-processes--files-detection)
 - [Kernel, Properties & System Characteristics Detection](#kernel-properties--system-characteristics-detection)
+- [Appendices](#appendices)
 
 ---
 
@@ -470,6 +471,10 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > - Certificate Chain Tampering (x): `su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked` (use `resetprop` on Magisk).
 </details>
 
+---
+
+## Mounts & Namespaces Detection
+
 <details>
 <summary>mountinfo</summary>
 
@@ -562,6 +567,19 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > If the details contain **overlay**, change the metamodule; if a specific module clearly causes the mount, uninstall it.
 >
 > Relation: same mount family as the `/data/local/tmp` metadata anomaly family (incl. `2222`, `Futile hide 04`), `Mount loophole`, `Magic Mount` and `Mount Gap`.
+</details>
+
+<details>
+<summary>/data/local/tmp metadata anomaly family (Futile hide / 1 / 2 / 04 / 2222)</summary>
+
+> **Detection method**: all of them judge anomalies in the **metadata** of the `/data/local/tmp` directory (timestamps / inode / owner / permissions); in the app they are five separate messages:
+> - `Futile hide`: the directory timestamp was modified;
+> - `Futile hide 1` / `Futile hide 2` / `Futile hide 04`: variants of the same metadata anomaly;
+> - `2222`: a mount / metadata related variant.
+>
+> **Solution**: `su -c rm -rf /data/local/tmp` → reboot → then fix per `Suspicious Surroundings (a)/(b)/(c)` (owner / inode / permissions); `Futile hide 1` may also simply disappear after a reboot.
+>
+> Relation: same family as `Suspicious Surroundings` and `/data/local/tmp denied`, with the same handling.
 </details>
 
 <details>
@@ -915,6 +933,10 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > Relation: both this and `fdinfo mnt Sampling Anomaly (c)` involve USB debugging, but the criteria differ — that one looks at `mnt_id` residue in `/proc/*/fdinfo`.
 </details>
+
+---
+
+## Kernel, Properties & System Characteristics Detection
 
 <details>
 <summary>Invalid forged info (1)</summary>
@@ -1334,17 +1356,4 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 - `ro.build.version.sdk`
 - `ro.product.brand`
 - `ro.product.brand=`
-</details>
-
-<details>
-<summary>/data/local/tmp metadata anomaly family (Futile hide / 1 / 2 / 04 / 2222)</summary>
-
-> **Detection method**: all of them judge anomalies in the **metadata** of the `/data/local/tmp` directory (timestamps / inode / owner / permissions); in the app they are five separate messages:
-> - `Futile hide`: the directory timestamp was modified;
-> - `Futile hide 1` / `Futile hide 2` / `Futile hide 04`: variants of the same metadata anomaly;
-> - `2222`: a mount / metadata related variant.
->
-> **Solution**: `su -c rm -rf /data/local/tmp` → reboot → then fix per `Suspicious Surroundings (a)/(b)/(c)` (owner / inode / permissions); `Futile hide 1` may also simply disappear after a reboot.
->
-> Relation: same family as `Suspicious Surroundings` and `/data/local/tmp denied`, with the same handling.
 </details>
