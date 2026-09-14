@@ -6,7 +6,7 @@
 
 ---
 
-<details open>
+<details>
 <summary><b>⚠️ Disclaimer / 声明 (please read before use)</b></summary>
 
 ## Disclaimer
@@ -64,7 +64,8 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 ## Prologue
 
-### Terminology & Conventions
+<details open>
+<summary><b>Terminology & Conventions</b></summary>
 
 > **Genuinely Unlocked Device**: a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
 >
@@ -83,15 +84,17 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Zygisk provider**: a module that provides the Zygisk runtime — it injects code into Zygote / app processes and exposes a Zygisk behaviour API, giving other Zygisk modules a runtime environment.
 >
 > **App-hiding module**: a module that operates on “package visibility” — it intercepts the package-query path inside a target process (or a system process) and hides selected apps from the configured target app.
-
-### Minimal Module Set for a Perfectly Hidden Environment
+</details>
+<details open>
+<summary><b>Minimal Module Set for a Perfectly Hidden Environment</b></summary>
 
 > - Genuinely unlocked device: **key module + Zygisk provider + app-hiding module**
 > - Fake-relocked / no-unlock / self-signed device: **Zygisk provider + app-hiding module**
 >
 > For **APatch / FolkPatch** users, additionally load **[NoHello.kpm](https://t.me/welikeandroid)** to guard against the side-channel detection; newer managers may have a built-in SELinux hook (must be enabled manually), and users on older versions can additionally load **[SELinux_Hook.kpm](https://t.me/APatch_nightly)** (links are given in “Recommended Modules” below).
-
-### Recommended Modules (in no particular order)
+</details>
+<details open>
+<summary><b>Recommended Modules (in no particular order)</b></summary>
 
 > **Key modules**
 > - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS): the best-known key module after TrickyStore, actively updated, no built-in WebUI.
@@ -114,8 +117,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **Metamodules**
 > - If your root manager provides a metamodule API, consider enabling it;
 > - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount): a widely used third-party metamodule.
-
-### Correct Module Configuration
+</details>
+<details open>
+<summary><b>Correct Module Configuration</b></summary>
 
 > **Key module**
 > a. Add the target app to the package list (e.g. `/data/adb/tricky_store/target.txt` for TS / TEES, or configure it in the WebUI);
@@ -131,6 +135,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > - **Blacklist template**: for an app this template is applied to, the apps inside the template become invisible;
 > - **Whitelist mode**: apps with this mode enabled can only see the apps contained in the whitelist template applied to them;
 > - **Whitelist template**: for an app this template is applied to, only the apps inside the template are visible.
+</details>
 
 ---
 
