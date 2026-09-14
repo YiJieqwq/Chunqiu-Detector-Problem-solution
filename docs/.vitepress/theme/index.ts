@@ -11,7 +11,7 @@ import type { EnhanceAppContext } from 'vitepress'
  *     - 跳转锚点自动展开目标；右下角「全部展开 / 全部折叠」
  *  3. 进度条与「移动端点条目后收起抽屉」由 config.mts 的 head 脚本负责
  */
-const STORE_KEY = 'cq-fold-state'
+const STORE_KEY = 'cq-fold-v2'
 
 type State = Record<string, boolean>
 
@@ -63,13 +63,12 @@ function init() {
   }
 
   /** 该 H3 属于哪个 H2 章节 */
+  /** 该元素属于哪个 H2 章节：取“位于它之前且最近的 H2” */
   const sectionOf = (el: HTMLElement) => {
-    let prev = el.previousElementSibling
-    const start = el
-    const all = Array.from(doc.querySelectorAll('h2'))
     let owner = ''
-    for (const h2 of all) {
-      if (h2.compareDocumentPosition(start) & Node.DOCUMENT_POSITION_FOLLOWING) owner = (h2.textContent || '').trim()
+    for (const h2 of Array.from(doc.querySelectorAll('h2'))) {
+      // rel 含 PRECEDING ⇒ h2 在 el 之前
+      if (el.compareDocumentPosition(h2) & Node.DOCUMENT_POSITION_PRECEDING) owner = (h2.textContent || '').trim()
       else break
     }
     return owner
@@ -130,7 +129,8 @@ function init() {
       // 同时展开其所属章节
       const secs = Array.from(doc.querySelectorAll('h2'))
       let owner: HTMLElement | null = null
-      for (const s of secs) if (s.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING) owner = s as HTMLElement
+      for (const s of secs) if (h.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_PRECEDING) owner = s as HTMLElement
+      else break
       if (owner) {
         state[owner.id] = true
         writeState(state)
