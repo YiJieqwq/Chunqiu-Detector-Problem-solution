@@ -167,7 +167,6 @@ html[data-theme="light"] .md3-badge { color: var(--md-on-primary-container); }
 .md3-badge.must { background: var(--md-error-container); color: #fff; }
 
 /* ---------- 5. 正文容器（大圆角卡片） ---------- */
-.content { left: 0; padding: 0; }
 .markdown-section {
   max-width: 920px !important; margin: 24px auto 64px !important;
   padding: 36px 40px !important;
@@ -240,16 +239,20 @@ html[data-theme="light"] .md3-badge { color: var(--md-on-primary-container); }
 .markdown-section summary::-webkit-details-marker { display: none; }
 .markdown-section summary:hover { background: var(--md-surface-3); }
 .markdown-section summary::after {
-  content: "expand_more"; font-family: "Material Symbols Outlined", "Material Icons", sans-serif;
-  position: absolute; right: 16px; top: 50%; transform: translateY(-50%) rotate(0);
-  color: var(--md-on-surface-variant); font-size: 20px; transition: transform .2s, color .2s;
+  content: ""; position: absolute; right: 20px; top: 50%;
+  width: 9px; height: 9px; border-right: 2px solid var(--md-on-surface-variant);
+  border-bottom: 2px solid var(--md-on-surface-variant);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform .2s, border-color .2s;
 }
-.markdown-section details[open] > summary::after { transform: translateY(-50%) rotate(180deg); color: var(--md-primary); }
+.markdown-section details[open] > summary::after {
+  transform: translateY(-30%) rotate(225deg); border-color: var(--md-primary);
+}
 .markdown-section details > *:not(summary) { padding-left: 18px; padding-right: 18px; }
 .markdown-section details > *:last-child { padding-bottom: 16px; }
 .markdown-section details blockquote { margin-left: 0 !important; margin-right: 0 !important; }
-.markdown-section details details summary::after { content: "chevron_right"; }
-.markdown-section details details[open] > summary::after { transform: translateY(-50%) rotate(90deg); }
+.markdown-section details details summary::after { transform: translateY(-70%) rotate(-45deg); }
+.markdown-section details details[open] > summary::after { transform: translateY(-30%) rotate(135deg); }
 
 /* 搜索命中高亮 */
 .search-highlight { animation: md3-pulse 1.6s ease-out; }
