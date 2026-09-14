@@ -38,11 +38,16 @@ function init() {
   const state = readState()
   const heads = Array.from(doc.querySelectorAll('h2, h3')) as HTMLElement[]
 
-  /** 取标题后、下一个同级或更高级标题之前的所有元素 */
+  const level = (el: Element) => (/^H([1-6])$/.test(el.tagName) ? Number(el.tagName[1]) : 0)
+
+  /** 取标题后、遇到“同级或更高级标题”为止的所有元素（H2 含其下 H3，H3 到下一个 H3/H2 为止） */
   const bodyOf = (h: HTMLElement) => {
+    const lv = Number(h.tagName[1])
     const out: HTMLElement[] = []
     let el = h.nextElementSibling as HTMLElement | null
-    while (el && !/^H1$|^H2$/.test(el.tagName) && !(h.tagName === 'H2' && el.tagName === 'H2')) {
+    while (el) {
+      const l = level(el)
+      if (l && l <= lv) break
       out.push(el)
       el = el.nextElementSibling as HTMLElement | null
     }
@@ -68,14 +73,16 @@ function init() {
     let owner = ''
     for (const h2 of Array.from(doc.querySelectorAll('h2'))) {
       // rel 含 PRECEDING ⇒ h2 在 el 之前
-      if (el.compareDocumentPosition(h2) & Node.DOCUMENT_POSITION_PRECEDING) owner = (h2.textContent || '').trim()
+      if (el.compareDocumentPosition(h2) & Node.DOCUMENT_POSITION_PRECEDING) owner = titleOf(h2 as HTMLElement)
       else break
     }
     return owner
   }
 
+  const titleOf = (h: HTMLElement) => (h.textContent || '').replace(/[\u200b-\u200f\ufeff]/g, '').trim()
+
   const defaultOpen = (h: HTMLElement) => {
-    const title = (h.textContent || '').trim()
+    const title = titleOf(h)
     if (h.tagName === 'H2') return !SECTION_CLOSED.includes(title)
     const sec = sectionOf(h)
     return PROLOGUE.some((p) => sec.startsWith(p))
