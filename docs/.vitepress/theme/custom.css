@@ -6,6 +6,7 @@
   --vp-c-brand-3: #7c3aed;
   --vp-c-brand-soft: rgba(139, 92, 246, .16);
   --vp-nav-height: 48px;      /* 统一顶栏高度：侧边栏/内容偏移都会跟着变 */
+  --vp-sidebar-width: 250px;  /* 必须改变量，否则内容区仍按 272px 留白 → 错位 */
   --cq-radius: 12px;
   --cq-radius-sm: 10px;
   --cq-gap: 10px;
@@ -30,11 +31,17 @@
 .vp-doc th, .vp-doc td { padding: 6px 10px; }
 .vp-doc div[class*='language-'] { margin: 10px 0; border-radius: var(--cq-radius-sm); }
 .vp-doc :not(pre) > code { font-size: 12px; padding: 1px 5px; }
-.VPDoc .content-container { max-width: 760px !important; }
+.VPDoc .content-container { max-width: 760px !important; width: 100%; }
 .VPDoc.has-aside .content-container { max-width: 760px !important; }
+@media (max-width: 1279px) {                     /* 窄屏：隐藏右侧「本页目录」，避免横向溢出 */
+  .VPDoc .aside { display: none; }
+  .VPDoc .content-container, .VPDoc.has-aside .content-container { max-width: 100% !important; }
+}
+/* 长串（正则/长路径/URL）不再撑破横向 */
+.vp-doc p, .vp-doc li, .vp-doc td, .vp-doc blockquote { overflow-wrap: anywhere; word-break: break-word; }
 
 /* 侧边栏 */
-.VPSidebar { width: 250px !important; }
+.VPSidebar { width: var(--vp-sidebar-width) !important; }
 /* 注意：VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，
    所以这里必须写显式值；移动端抽屉保持 VitePress 原逻辑 */
 @media (min-width: 960px) {
@@ -50,6 +57,12 @@
 .VPNavBar .title { font-size: 14px; }
 .VPNavBarMenuLink { font-size: 13px; line-height: 20px; }
 .VPLocalSearchBox .shell { --vp-local-search-result-max-height: 60vh; }
+
+/* 搜索按钮：加宽，别缩成一小条 */
+.VPNavBarSearch { flex: 0 1 auto; }
+.DocSearch-Button { min-width: 230px; max-width: 380px; flex: 1 1 auto; }
+.DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; }
+@media (max-width: 1100px) { .DocSearch-Button-Keys { display: none; } }
 
 /* VPLocalNav（移动端「目录 / 回到顶部」浮条）在有侧边栏时隐藏，避免与侧边栏左下角重叠 */
 .VPLocalNav { display: none !important; }
