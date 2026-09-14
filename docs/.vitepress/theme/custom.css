@@ -156,13 +156,22 @@
   z-index: 100; transition: width .08s linear;
 }
 
-/* ================= v5：补回被合并丢掉的三条布局规则 ================= */
-:root {
-  --vp-nav-height: 48px;        /* 顶栏高度（统一走变量，勿硬写 .VPNavBar height） */
-  --vp-sidebar-width: 250px;    /* 必须改变量：VitePress 用它算内容区左侧留白，只改 width 会错位 */
+/* ================= v6：标准标题层级（H2 章节 / H3 条目 / H4 条目内小节） ================= */
+.VPDoc.has-aside .aside { display: block; }
+
+/* H2：大章节 */
+.vp-doc h2 { font-size: 19px; margin: 30px 0 10px; padding-top: 18px; }
+/* H3：条目（用细分隔线区隔，看起来像"卡片标题"） */
+.vp-doc h3 {
+  font-size: 15px; font-weight: 650; margin: 20px 0 6px; padding: 10px 0 0;
+  border-top: 1px solid var(--vp-c-divider);
 }
-.VPSidebar { width: var(--vp-sidebar-width) !important; }
-@media (min-width: 960px) {
-  /* 注意：VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，这里必须写显式值 */
-  .VPSidebar { padding-top: 60px !important; }
+.vp-doc h3:first-of-type { border-top: 0; padding-top: 0; }
+/* H4：条目内小节（检测方式 / 解决办法 / 术语 …） */
+.vp-doc h4 {
+  font-size: 12.5px; font-weight: 650; letter-spacing: .02em;
+  color: var(--vp-c-brand-1); margin: 12px 0 4px;
 }
+.vp-doc h4 + p, .vp-doc h4 + ol, .vp-doc h4 + ul, .vp-doc h4 + blockquote { margin-top: 4px; }
+/* 条目之间的呼吸感 */
+.vp-doc h3 + p, .vp-doc h3 + ul, .vp-doc h3 + ol, .vp-doc h3 + blockquote { margin-top: 4px; }
