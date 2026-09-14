@@ -2,6 +2,9 @@
 > Checked against version: 4.5.5(68) | Last updated: 2026-09-13
 > Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
+> Some entries include a **Detection method** section (compiled from community testing and observed behaviour; it may differ from the implementation and is meant only to help locate the problem).
+
+---
 
 <details open>
 <summary><b>⚠️ Disclaimer / 声明 (please read before use)</b></summary>
