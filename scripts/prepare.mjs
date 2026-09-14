@@ -30,76 +30,48 @@ const GROUP_ICON = ['📖', '🧭', '🔐', '🔑', '🗂️', '🧪', '⚙️',
 rmSync(join(DOCS, 'public', 'File'), { recursive: true, force: true })
 if (existsSync(join(ROOT, 'File'))) cpSync(join(ROOT, 'File'), join(DOCS, 'public', 'File'), { recursive: true })
 
-// 2) 解析 Markdown：按 ## 分类聚合 <details> 条目，注入锚点
-// 规范化：</details> 独占一行且其前有空行（避免 Markdown 懒续行把闭合标签吞进引用段落）
-function normalizeDetails(md) {
-  const out = []
-  for (const l of md.split('\n')) {
-    const t = l.trim()
-    if (t === '</details>') {
-      if (out.length && out[out.length - 1].trim() !== '' && out[out.length - 1].trim() !== '</details>') out.push('')
-      out.push(l); continue
-    }
-    if (l.includes('</details>')) {
-      const pre = l.slice(0, l.indexOf('</details>')).trimEnd()
-      if (pre) { out.push(pre, '') }
-      out.push('</details>')
-      const rest = l.slice(l.indexOf('</details>') + '</details>'.length).trim()
-      if (rest) out.push(rest)
-      continue
-    }
-    out.push(l)
-  }
-  return out.join('\n')
+// 2) 解析 Markdown：## 分类 + ### 条目（标准标题层级），生成侧边栏数据
+function vpSlug(str) {
+  return String(str).normalize('NFKD')
+    .replace(/[\u0300-\u036F]/g, '')
+    .replace(/[\u0000-\u001f]/g, '')
+    .replace(/[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'“”‘’<>,.?/]+/g, '-')
+    .replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '').toLowerCase()
 }
 
 function convert(md, lang) {
-  md = normalizeDetails(md)
   const lines = md.split('\n')
-  const out = []
   const groups = []
   let current = null
-  let lastDetailsIdx = -1
+  const used = new Map()
   for (const line of lines) {
     const h2 = line.match(/^##\s+(.+?)\s*$/)
     if (h2) {
       const name = plainTitle(h2[1])
       current = (['目录', 'Table of Contents', '声明', 'Disclaimer'].includes(name))
         ? { skip: true }
-        : {
-            text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`,
-            collapsed: true,
-            items: [],
-            ...(/序章|Prologue/i.test(name) ? { badge: { text: '必读', type: 'info' } } : {})
-          }
+        : { text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`, collapsed: true, items: [] }
       groups.push(current)
-      out.push(line)
       continue
     }
-    if (/^<details\b/.test(line)) { lastDetailsIdx = out.length }
-    const sum = line.match(/^<summary>(.*?)<\/summary>\s*$/)
-    if (sum && current && !current.skip) {
-      const title = plainTitle(sum[1])
-      if (title && title !== '目录' && !title.includes('声明') && !title.includes('Disclaimer')) {
-        const id = `item-${groups.length}-${current.items.length}`
-        const b = badgeFor(title)
-        current.items.push(b ? { text: title, link: `/${lang}/#${id}`, badge: b } : { text: title, link: `/${lang}/#${id}` })
-        // 把 id 打到紧邻的 <details> 标签上（避免多出一个空行把标题挤下去）
-        if (lastDetailsIdx >= 0 && !/\sid=/.test(out[lastDetailsIdx])) {
-          out[lastDetailsIdx] = out[lastDetailsIdx].replace(/^<details/, `<details id="${id}"`)
-        }
-        lastDetailsIdx = -1
-      }
+    const h3 = line.match(/^###\s+(.+?)\s*$/)
+    if (h3 && current && !current.skip) {
+      const title = plainTitle(h3[1])
+      let slug = vpSlug(title)
+      const n = (used.get(slug) || 0)
+      used.set(slug, n + 1)
+      if (n) slug = `${slug}-${n}`         // 与 markdown-it-anchor 的去重规则一致
+      current.items.push({ text: title, link: `/${lang}/#${slug}` })
     }
-    out.push(line)
   }
   // 站点里把附件指向渲染页；并转义裸尖括号（如 "value < 1000"），避免 Vue 模板解析报错
-  const text = out.join('\n')
+  const text = md
     .replace(/\(\/File\/Doc\/thanks\.md\)/g, '(/thanks)')
     .replace(/<(?=\s|\d|=|\.|,|%|\))/g, '&lt;')
   return { text, sidebar: groups.filter(g => g.items && g.items.length) }
 }
 
+// 2.5) 生成站点页面
 const zh = convert(readFileSync(join(ROOT, 'language/answer_zh.md'), 'utf8'), 'zh')
 const en = convert(readFileSync(join(ROOT, 'language/answer_en.md'), 'utf8'), 'en')
 ensure(join(DOCS, 'zh/index.md')); writeFileSync(join(DOCS, 'zh/index.md'), zh.text, 'utf8')
