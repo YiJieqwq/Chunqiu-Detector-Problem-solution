@@ -246,3 +246,6 @@
 .vp-doc h3.cq-collapsed::after { transform: translateY(-40%) rotate(-45deg); }
 .vp-doc h2.cq-foldable:hover::after,
 .vp-doc h3.cq-foldable:hover::after { border-color: var(--vp-c-brand-1); }
+
+/* ================= v10：隐藏移动端局部导航条（它会在桌面模式下浮在正文上） ================= */
+.VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; }
