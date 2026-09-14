@@ -48,7 +48,7 @@ function convert(md, lang) {
     const h2 = line.match(/^##\s+(.+?)\s*$/)
     if (h2) {
       const name = plainTitle(h2[1])
-      current = (['目录', 'Table of Contents', '声明', 'Disclaimer'].includes(name))
+      current = (['目录', 'Table of Contents', '声明', 'Disclaimer', '检测项正文', 'Detection Items'].includes(name))
         ? { skip: true }
         : { text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`, collapsed: true, items: [] }
       groups.push(current)
