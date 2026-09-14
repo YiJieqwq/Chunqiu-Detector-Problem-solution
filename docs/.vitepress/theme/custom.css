@@ -341,3 +341,25 @@
 }
 .DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; font-size: 13px !important; }
 @media (max-width: 1120px) { .DocSearch-Button-Keys { display: none !important; } }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：正文分割标题 + 折叠策略样式
+   ===================================================================== */
+
+/* 「检测项正文 / Detection Items」：作为序章与正文之间的自然分割 */
+.vp-doc h2#检测项正文,
+.vp-doc h2#detection-items {
+  margin: 52px 0 20px; padding-top: 26px; text-align: center;
+  border-top: 1px solid var(--vp-c-divider); border-bottom: 0;
+  font-size: 13px; font-weight: 600; letter-spacing: .34em; color: var(--vp-c-text-3);
+}
+.vp-doc h2#检测项正文 .header-anchor,
+.vp-doc h2#detection-items .header-anchor { display: none; }
+
+/* 不可折叠的标题：不显示箭头、不显示手型 */
+.vp-doc h2:not(.cq-foldable), .vp-doc h3:not(.cq-foldable), .vp-doc h4:not(.cq-foldable) { cursor: text; }
+.vp-doc h2:not(.cq-foldable)::after, .vp-doc h3:not(.cq-foldable)::after, .vp-doc h4:not(.cq-foldable)::after { content: none; }
+
+/* H4 小节的折叠箭头稍小，且不换行 */
+.vp-doc h4.cq-foldable { padding-right: 22px; }
+.vp-doc h4.cq-foldable::after { width: 6px; height: 6px; right: 6px; }
