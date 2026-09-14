@@ -150,6 +150,8 @@ Usage varies; the following are terminology only (HMA-OSS as an example):
 
 ---
 
+## Detection Items
+
 ## Root Permissions & SELinux Detection
 
 ### Module Modifying Chunqiu Detected
