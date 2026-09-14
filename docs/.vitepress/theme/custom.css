@@ -207,3 +207,26 @@
 }
 .DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; font-size: 13px !important; }
 @media (max-width: 1120px) { .DocSearch-Button-Keys { display: none !important; } }
+
+
+/* ================= v8：右侧「本页目录」只在足够宽的屏幕显示，彻底消除叠字 =================
+   说明：桌面模式手机常见视口宽度 ≈1280px，会命中 VitePress 的 "≥1280 显示 aside" 断点，
+   而 aside 是绝对/固定定位，会浮在正文之上 → 把门槛提到 1440px。 */
+@media (max-width: 1439px) {
+  .VPDoc .aside,
+  .VPDoc.has-aside .aside { display: none !important; }
+}
+@media (min-width: 1440px) {
+  .VPDoc .aside { display: block; }
+}
+/* 正文栏继续自适应，永远不与 aside 相撞 */
+.VPDoc .content-container,
+.VPDoc.has-aside .content-container {
+  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 360px)) !important;
+}
+@media (max-width: 1439px) {
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
+  }
+}
