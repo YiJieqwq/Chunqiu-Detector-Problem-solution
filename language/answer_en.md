@@ -3,16 +3,23 @@
 > Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
-<details>
-<summary>Disclaimer / 声明</summary>
+<details open>
+<summary><b>⚠️ Disclaimer / 声明 (please read before use)</b></summary>
 
-> **Disclaimer**
+## Disclaimer
+
 > 1. Chunqiu Detector is provided to Root enthusiasts as an environment-detection tool, for technical study and research discussion only. It is strictly forbidden to use this detector, or any solution in this document, to bypass anti-cheat, evade risk control, cheat in games, or for any other illegal or non-compliant purpose; all consequences of such use are borne solely by the user.
+>
 > 2. All operations, scripts and module configurations described here are technical references only. Modifying system images, replacing keys, embedding kernel modules, running root shell commands and similar operations carry irreversible risks and may render the device unbootable or cause data loss; all risk is borne by the user, and the document author accepts no liability for device damage or data loss.
+>
 > 3. These solutions are compiled from community testing and are affected by ROM version, kernel, root manager and module combinations; detection items may produce false positives or hit only intermittently. The solutions given here are not guaranteed to work, and detection results are for debugging reference only — not an absolute basis for judgement.
+>
 > 4. Third-party modules, scripts and external project links referenced in this document are public community resources; the author is not responsible for the safety or reliability of third-party tools — please verify their sources yourself.
+>
 > 5. The “risky / blacklisted package names” and “suspicious / cheat-related files and directories” listed in Appendix A and Appendix B come from the detector's built-in datasets, with classification based on public community information and project release pages; they are for environment-detection and anti-cheat reference only and do not constitute an absolute conclusion.
+>
 > 6. The device-type definitions added in this document (Genuinely Unlocked Device, Fake-Relocked Device, No-Unlock Device, Self-Signed Device) are the first standardised definitions in this community, intended to promote uniform terminology; they carry no legal authority and are technical references only.
+>
 > 7. The modules in the recommendation list are the editors' subjective technical recommendations with no commercial interest involved; for reference only.
 </details>
 
@@ -141,8 +148,11 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**
 > 1. Uses this process' own context (expected to be in the `app_zygote` domain) as a *carrier*, together with author-provisioned **sentinel contexts** (`…context_oracle_sentinel:s0` / `…_sentinel_file:s0`) to build positive / negative / file control groups;
+>
 > 2. Queries go through a **raw selinuxfs write** (directly on `/sys/fs/selinux/access`, not via libselinux) and validate the kernel-returned `avdSeqNo`;
+>
 > 3. Cross-checks the raw result against `selinux_check_access` / `getfilecon`, **re-checks after perturbation**, and validates repeatability (`Repeatability`);
+>
 > 4. Directly probes whether root-related rules are still accepted by the live policy (`shell -> su` transition, `magisk` / `ksu` / `apatch` domains, `ksu_file` / `lsposed_file` / `magisk_file` reads, etc.) and checks the KSU context “bit-pair / split” consistency.
 >
 > **Common cause family** (shown in the details when it hits): `enforcing is not 1`, `deny_unknown is not 1`, `unexpected version`, `sequence/policyload unexpected`, `direct syscall and libc views disagree (PLT-hook residue)`.
@@ -198,6 +208,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > **Solution (APatch)**:
 > 1. Install [nohello kpm](/File/Bin/Nohello-v1.8.2.9-83-b3e7d87-release.kpm), and add the detector to the exclusion list. Nohello can check whether the app initiating the authentication request is in the exclusion list before kernelpatch evaluates the cmd value, and if so, deny the authentication.
+>
 > 2. Future versions of APatch will introduce signature-based authentication, directly rejecting authentication requests from apps whose signatures do not match. This is not fully implemented yet and requires some waiting.
 >
 > **Solution (KPatch-Next)**: Update KPatch-Next driver to 0.13.5-2.
@@ -317,8 +328,11 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 > **Detection method**: checks whether the Tencent Soter service program exists and what its service property state is; the two are cross-validated to decide whether a Soter key is blocked (four quadrants):
 > 1. service property abnormal + Soter program present → Soter is blocked (abnormal);
+>
 > 2. service property abnormal + program absent → the device natively has no Soter (normal);
+>
 > 3. service property normal + program present → the device supports Soter (normal);
+>
 > 4. service property normal + program absent → impossible.
 >
 > **Solution**: **self-comfort** — hide the Soter service path with a kernel-level hiding solution, or hide the Soter system service app from the detector with an app-hiding module. Note that hiding Soter usually makes third-party checks worse.
@@ -854,6 +868,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 >
 > **Detection paths**: `/dev` and `/data/local/tmp`
 > 1. Rename or delete relevant directory files.
+>
 > 2. Investigate and delete the following high-risk paths:
 >    ```text
 >    /data/local/stryker
@@ -960,7 +975,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > 1. Play content that **requires L1** (Netflix / Disney+ / Prime in HD / 1080p+):
 >    - HD / 1080p+ plays fine ⇒ L1 itself is healthy and this entry is **very likely a false positive** (known to hit on Xiaomi devices, including **locked** ones); you can ignore it and wait for an update;
 >    - only SD plays ⇒ continue with step 2.
+>
 > 2. Check “L1-spoofing” modules: TrickyStore / key module(-RS) target list, `keybox.xml`, security-patch sync, and PIF / property-spoofing modules; disable them one by one, **reboot**, and re-scan.
+>
 > 3. Only as a **last resort** consider the “remote RKP key (RKPConfig)”: it usually does nothing if the device already uses RKP, and currently it generally does not help on Xiaomi devices.
 >
 > ⚠️ **Security note**: RKPConfig-type apps make the device request an RKP key from Google and therefore **change the device's key-provisioning / attestation state**; verify the source and reversibility before installing.
