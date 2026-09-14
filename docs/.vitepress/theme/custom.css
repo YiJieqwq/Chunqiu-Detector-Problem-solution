@@ -249,3 +249,95 @@
 
 /* ================= v10：隐藏移动端局部导航条（它会在桌面模式下浮在正文上） ================= */
 .VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; }
+
+/* =====================================================================
+   CQ ESSENTIALS —— 关键规则区块（请勿删除；合并冲突时请整体保留）
+   ===================================================================== */
+
+/* 1. 布局基准：顶栏高度 / 侧边栏宽度（必须改变量，否则内容区留白错位） */
+:root {
+  --vp-nav-height: 48px;
+  --vp-sidebar-width: 250px;
+}
+.VPSidebar { width: var(--vp-sidebar-width) !important; }
+@media (min-width: 960px) {
+  /* VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，故写显式值 */
+  .VPSidebar { padding-top: 60px !important; }
+}
+
+/* 2. 顶栏不透明（避免左侧透出侧边栏颜色） */
+:root, .dark { --vp-nav-bg-color: var(--vp-c-bg); }
+.VPNavBar,
+.VPNavBar.has-sidebar .content,
+.VPNavBar.has-sidebar .content-body {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
+}
+.VPNavBar { border-bottom: 1px solid var(--vp-c-divider); }
+
+/* 3. 右侧「本页目录」只在 ≥1440px 显示；窄屏（含桌面模式手机 ≈1280px）必须隐藏，否则浮层叠字 */
+@media (max-width: 1439px) { .VPDoc .aside, .VPDoc.has-aside .aside { display: none !important; } }
+@media (min-width: 1440px) { .VPDoc .aside { display: block; } }
+.VPDoc .content-container,
+.VPDoc.has-aside .content-container {
+  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
+  width: 100%;
+}
+
+/* 4. 移动端局部导航条（会在桌面模式下浮在正文上） */
+.VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; }
+
+/* 5. 文档里的 --- 会与卡片边框叠成双线，站点内隐藏 */
+.vp-doc hr { display: none; }
+
+/* 6. 断行：正文按词断，仅代码允许任意断 */
+.vp-doc p, .vp-doc li, .vp-doc td, .vp-doc blockquote { overflow-wrap: break-word; word-break: normal; }
+.vp-doc :not(pre) > code, .vp-doc a { overflow-wrap: anywhere; }
+
+/* 7. 字号：条目标题 16px；条目内小节 14px（必须大于正文 13.5px） */
+.vp-doc { font-size: 13.5px; }
+.vp-doc h3 { font-size: 16px; font-weight: 650; }
+.vp-doc h4 { font-size: 14px; font-weight: 650; color: var(--vp-c-brand-1); margin: 14px 0 5px; }
+
+/* 8. 灰色圆角卡片（主题脚本把每个条目正文包进 .cq-card） */
+.vp-doc .cq-card {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 8px 0 16px;
+}
+.vp-doc .cq-card > *:first-child { margin-top: 0; }
+.vp-doc .cq-card > *:last-child { margin-bottom: 0; }
+.vp-doc .cq-card blockquote {
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: 10px; padding: 8px 11px !important;
+}
+
+/* 9. 折叠箭头（H2 章节 / H3 条目通用） */
+.vp-doc h2.cq-foldable, .vp-doc h3.cq-foldable { cursor: pointer; position: relative; padding-right: 28px; }
+.vp-doc h2.cq-foldable:hover, .vp-doc h3.cq-foldable:hover { color: var(--vp-c-brand-1); }
+.vp-doc h2.cq-foldable::after, .vp-doc h3.cq-foldable::after {
+  content: ""; position: absolute; right: 8px; top: 50%; width: 7px; height: 7px;
+  border-right: 1.8px solid var(--vp-c-text-3); border-bottom: 1.8px solid var(--vp-c-text-3);
+  transform: translateY(-60%) rotate(45deg); transition: transform .18s ease, border-color .18s ease;
+}
+.vp-doc h2.cq-collapsed::after, .vp-doc h3.cq-collapsed::after { transform: translateY(-40%) rotate(-45deg); }
+
+/* 10. 右下角「全部展开 / 全部折叠」 */
+#cq-fold-all {
+  position: fixed; right: 16px; bottom: 18px; z-index: 40;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 12.5px;
+  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-soft); color: var(--vp-c-text-1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+#cq-fold-all:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+
+/* 11. 搜索框加宽 */
+.VPNavBarSearch { flex: 1 1 auto !important; max-width: 540px; }
+.VPNavBarSearch .DocSearch-Button, .DocSearch-Button {
+  min-width: 260px !important; width: 100% !important; max-width: 540px; flex: 1 1 auto !important;
+}
+.DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; font-size: 13px !important; }
+@media (max-width: 1120px) { .DocSearch-Button-Keys { display: none !important; } }
