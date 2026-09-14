@@ -7,6 +7,22 @@ const DOCS = join(ROOT, 'docs')
 const ensure = p => mkdirSync(dirname(p), { recursive: true })
 const plainTitle = s => s.replace(/<[^>]+>/g, '').trim()
 
+// 条目徽标规则（按标题关键字，中英通用）
+const BADGE_RULES = [
+  { re: /无效的伪造信息|Invalid forged info/i, badge: { text: '误报', type: 'warning' } },
+  { re: /zygote test|App Zygote|Zygote 存在异常|Zygote Anomaly/i, badge: { text: '误报', type: 'warning' } },
+  { re: /Tampered Attestation Key|Tampered Attention/i, badge: { text: '含误报', type: 'warning' } },
+  { re: /Abnormal Environment|异常环境/i, badge: { text: '侧信道', type: 'tip' } },
+  { re: /检测SELinux Policy|Suspicious SELinux Policy/i, badge: { text: '常见', type: 'info' } },
+  { re: /mountinfo|Inconsistent mount|Mount Anomaly|挂载异常|不一致的挂载/i, badge: { text: '常见', type: 'info' } },
+  { re: /Current-app-root-domain-trace|设备获取 Root|ROOT access obtained/i, badge: { text: '需 Root', type: 'info' } },
+  { re: /发现APatch|APatch SuperKey/i, badge: { text: '暂无解', type: 'danger' } }
+]
+const badgeFor = t => {
+  const hit = BADGE_RULES.find(r => r.re.test(t))
+  return hit ? hit.badge : undefined
+}
+
 // 分类图标（按出现顺序套用；中英各 8 组）
 const GROUP_ICON = ['📖', '🧭', '🔐', '🔑', '🗂️', '🧪', '⚙️', '📎']
 
@@ -50,7 +66,12 @@ function convert(md, lang) {
       const name = plainTitle(h2[1])
       current = (['目录', 'Table of Contents', '声明', 'Disclaimer'].includes(name))
         ? { skip: true }
-        : { text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`, collapsed: true, items: [] }
+        : {
+            text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`,
+            collapsed: true,
+            items: [],
+            ...(/序章|Prologue/i.test(name) ? { badge: { text: '必读', type: 'info' } } : {})
+          }
       groups.push(current)
       out.push(line)
       continue
@@ -61,7 +82,8 @@ function convert(md, lang) {
       const title = plainTitle(sum[1])
       if (title && title !== '目录' && !title.includes('声明') && !title.includes('Disclaimer')) {
         const id = `item-${groups.length}-${current.items.length}`
-        current.items.push({ text: title, link: `/${lang}/#${id}` })
+        const b = badgeFor(title)
+        current.items.push(b ? { text: title, link: `/${lang}/#${id}`, badge: b } : { text: title, link: `/${lang}/#${id}` })
         // 把 id 打到紧邻的 <details> 标签上（避免多出一个空行把标题挤下去）
         if (lastDetailsIdx >= 0 && !/\sid=/.test(out[lastDetailsIdx])) {
           out[lastDetailsIdx] = out[lastDetailsIdx].replace(/^<details/, `<details id="${id}"`)
