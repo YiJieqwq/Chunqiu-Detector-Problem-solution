@@ -155,3 +155,14 @@
   background: linear-gradient(90deg, var(--vp-c-brand-2), var(--vp-c-brand-1));
   z-index: 100; transition: width .08s linear;
 }
+
+/* ================= v5：补回被合并丢掉的三条布局规则 ================= */
+:root {
+  --vp-nav-height: 48px;        /* 顶栏高度（统一走变量，勿硬写 .VPNavBar height） */
+  --vp-sidebar-width: 250px;    /* 必须改变量：VitePress 用它算内容区左侧留白，只改 width 会错位 */
+}
+.VPSidebar { width: var(--vp-sidebar-width) !important; }
+@media (min-width: 960px) {
+  /* 注意：VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，这里必须写显式值 */
+  .VPSidebar { padding-top: 60px !important; }
+}
