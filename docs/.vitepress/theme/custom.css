@@ -1,15 +1,11 @@
-/* ============ 春秋检测器解决方案 · 站点微调（VitePress + MD3 观感 · 紧凑版） ============ */
+/* ============ 春秋检测器解决方案 · 站点微调（VitePress + MD3 观感） ============ */
 
 :root {
   --vp-c-brand-1: #a78bfa;
   --vp-c-brand-2: #8b5cf6;
   --vp-c-brand-3: #7c3aed;
   --vp-c-brand-soft: rgba(139, 92, 246, .16);
-  --vp-nav-height: 48px;      /* 统一顶栏高度：侧边栏/内容偏移都会跟着变 */
-  --vp-sidebar-width: 250px;  /* 必须改变量，否则内容区仍按 272px 留白 → 错位 */
-  --cq-radius: 12px;
-  --cq-radius-sm: 10px;
-  --cq-gap: 10px;
+  --cq-radius: 16px;
 }
 .dark {
   --vp-c-bg: #141218;
@@ -19,145 +15,113 @@
   --vp-c-gutter: #2b2930;
 }
 
-/* ---------- 整体尺寸收紧 ---------- */
-.vp-doc { font-size: 13.5px; line-height: 1.68; }
-.vp-doc h1 { font-size: 22px; letter-spacing: .2px; margin-bottom: 10px; }
-.vp-doc h2 { font-size: 17px; padding-top: 18px; margin: 20px 0 8px; border-top-width: 1px; }
-.vp-doc h3 { font-size: 14.5px; margin: 16px 0 6px; }
-.vp-doc p, .vp-doc li { margin: 6px 0; }
-.vp-doc ul, .vp-doc ol { padding-left: 18px; }
-.vp-doc hr { margin: 18px 0; }
-.vp-doc table { font-size: 12.5px; }
-.vp-doc th, .vp-doc td { padding: 6px 10px; }
-.vp-doc div[class*='language-'] { margin: 10px 0; border-radius: var(--cq-radius-sm); }
-.vp-doc :not(pre) > code { font-size: 12px; padding: 1px 5px; }
-.VPDoc .content-container { max-width: 760px !important; width: 100%; }
-.VPDoc.has-aside .content-container { max-width: 760px !important; }
-@media (max-width: 1279px) {                     /* 窄屏：隐藏右侧「本页目录」，避免横向溢出 */
-  .VPDoc .aside { display: none; }
-  .VPDoc .content-container, .VPDoc.has-aside .content-container { max-width: 100% !important; }
+/* 首页 hero */
+.VPHero .name { background: linear-gradient(120deg, #c4b5fd, #f0abfc 60%, #a78bfa); -webkit-background-clip: text; background-clip: text; }
+.VPHero .tagline { font-size: 15px; line-height: 1.8; }
+
+/* 首页卡片 */
+.VPFeature {
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: var(--cq-radius) !important;
+  background: var(--vp-c-bg-alt) !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-/* 长串（正则/长路径/URL）不再撑破横向 */
-.vp-doc p, .vp-doc li, .vp-doc td, .vp-doc blockquote { overflow-wrap: anywhere; word-break: break-word; }
+.VPFeature:hover { transform: translateY(-2px); border-color: var(--vp-c-brand-1) !important; box-shadow: 0 10px 28px rgba(0,0,0,.28); }
+.VPFeature .title { font-size: 15.5px; }
+.VPFeature .details { font-size: 13.5px; line-height: 1.7; color: var(--vp-c-text-2); }
 
-/* 侧边栏 */
-.VPSidebar { width: var(--vp-sidebar-width) !important; }
-/* 注意：VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，
-   所以这里必须写显式值；移动端抽屉保持 VitePress 原逻辑 */
-@media (min-width: 960px) {
-  .VPSidebar { padding-top: 60px !important; }   /* 顶栏 48px + 12px 间距 */
-}
-.VPSidebar .nav { padding-bottom: 56px !important; }
-.VPSidebarItem .text { font-size: 12.5px; line-height: 1.5; }
-.VPSidebarItem.level-0 > .item > .text { font-size: 11.5px; letter-spacing: .03em; }
-.VPSidebarItem.level-1 .item, .VPSidebarItem.level-2 .item { padding: 3px 0; }
-.VPSidebarItem .item { min-height: 0; }
-
-/* 顶栏（高度用 --vp-nav-height 控制，勿再硬写 height） */
-.VPNavBar .title { font-size: 14px; }
-.VPNavBarMenuLink { font-size: 13px; line-height: 20px; }
-.VPLocalSearchBox .shell { --vp-local-search-result-max-height: 60vh; }
-
-/* 搜索按钮：加宽，别缩成一小条 */
-.VPNavBarSearch { flex: 0 1 auto; }
-.DocSearch-Button { min-width: 230px; max-width: 380px; flex: 1 1 auto; }
-.DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; }
-@media (max-width: 1100px) { .DocSearch-Button-Keys { display: none; } }
-
-/* VPLocalNav（移动端「目录 / 回到顶部」浮条）在有侧边栏时隐藏，避免与侧边栏左下角重叠 */
-.VPLocalNav { display: none !important; }
-
-/* ---------- 检测项卡片 ---------- */
+/* 正文里的检测项卡片（details/summary） */
 .vp-doc details {
   background: var(--vp-c-bg-alt);
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--cq-radius);
-  margin: var(--cq-gap) 0;
+  margin: 10px 0;
   overflow: hidden;
-  transition: border-color .16s ease, box-shadow .16s ease;
+  transition: box-shadow .18s ease, border-color .18s ease;
 }
+.vp-doc details:hover { box-shadow: 0 8px 24px rgba(0,0,0,.25); border-color: var(--vp-c-brand-1); }
 .vp-doc details[open] { background: var(--vp-c-bg-soft); }
-.vp-doc details[open] > summary { border-bottom: 1px solid var(--vp-c-divider); }  /* 标题与内容的分隔线 */
-@media (hover: hover) {                                  /* 桌面端才做 hover 高亮，触摸端不残留边框 */
-  .vp-doc details:hover { border-color: var(--vp-c-brand-2); }
+.vp-doc summary {
+  cursor: pointer; padding: 13px 18px; font-weight: 600; font-size: 14.5px;
+  list-style: none; position: relative; transition: background .15s ease;
 }
-.vp-doc details > summary {
-  cursor: pointer; list-style: none; position: relative;
-  padding: 9px 34px 9px 13px; font-weight: 600; font-size: 13.5px; line-height: 1.5;
-  transition: background .15s ease;
-}
-.vp-doc details > summary::-webkit-details-marker { display: none; }
-.vp-doc details > summary::after {
-  content: ""; position: absolute; right: 15px; top: 50%;
-  width: 7px; height: 7px;
-  border-right: 1.8px solid var(--vp-c-text-3); border-bottom: 1.8px solid var(--vp-c-text-3);
+.vp-doc summary::-webkit-details-marker { display: none; }
+.vp-doc summary::after {
+  content: ""; position: absolute; right: 20px; top: 50%; width: 8px; height: 8px;
+  border-right: 2px solid var(--vp-c-text-3); border-bottom: 2px solid var(--vp-c-text-3);
   transform: translateY(-70%) rotate(45deg); transition: transform .2s ease, border-color .2s ease;
 }
 .vp-doc details[open] > summary::after { transform: translateY(-30%) rotate(225deg); border-color: var(--vp-c-brand-1); }
-.vp-doc details > summary { border-radius: 0; }
-.vp-doc details > summary:hover { background: var(--vp-c-bg-soft); }
-/* 内容区：用统一内边距，避免块级元素高度/边框错位 */
-.vp-doc details > *:not(summary) { padding-left: 13px; padding-right: 13px; }
-.vp-doc details > *:not(summary):first-of-type { margin-top: 0; }
-.vp-doc details > *:last-child { padding-bottom: 12px; margin-bottom: 0; }
-.vp-doc details details { margin: 6px 0; }
-.vp-doc details details > summary { font-size: 13px; padding: 7px 30px 7px 11px; }
-.vp-doc details details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
-.vp-doc details details > summary::after { width: 6px; height: 6px; }
+.vp-doc summary:hover { background: var(--vp-c-bg-soft); }
+.vp-doc details > *:not(summary) { padding-left: 18px; padding-right: 18px; }
+.vp-doc details > *:last-child { padding-bottom: 14px; }
+.vp-doc details details summary::after { transform: translateY(-70%) rotate(-45deg); }
+.vp-doc details details[open] > summary::after { transform: translateY(-30%) rotate(135deg); }
 
-/* ---------- 提示条：改成整块圆角卡片（去掉高度不一致的左侧竖条） ---------- */
+/* 引用块 → 提示条 */
 .vp-doc blockquote {
-  margin: 8px 0 !important;
-  padding: 8px 11px !important;
-  background: var(--vp-c-bg-alt);
-  border: 1px solid var(--vp-c-divider) !important;
-  border-radius: var(--cq-radius-sm);
+  border-left: 4px solid var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+  border-radius: 12px;
+  padding: 12px 16px;
 }
-.vp-doc blockquote > p { margin: 4px 0; font-size: 13px; color: var(--vp-c-text-2); }
-.vp-doc blockquote > p:first-child { margin-top: 0; }
-.vp-doc blockquote > p:last-child { margin-bottom: 0; }
-.vp-doc details > blockquote { margin: 2px 13px 8px !important; padding: 8px 11px !important; }
-.vp-doc details > blockquote:last-of-type { margin-bottom: 10px !important; }
+.vp-doc blockquote > p { color: var(--vp-c-text-2); font-size: 13.5px; }
 
-/* ---------- 首页 ---------- */
-.VPHero .name { font-size: 30px; }
-.VPHero .text { font-size: 22px; }
-.VPHero .tagline { font-size: 13px; line-height: 1.7; }
-.VPHero .actions { margin-top: 18px; }
-.VPButton { font-size: 13px; padding: 0 16px; line-height: 34px; }
-.VPFeature { padding: 14px 16px !important; border-radius: var(--cq-radius) !important; }
-.VPFeature .icon { font-size: 20px; margin-bottom: 6px; }
-.VPFeature .title { font-size: 13.5px; }
-.VPFeature .details { font-size: 12.5px; line-height: 1.65; }
-.VPFeatures { margin-top: 24px !important; }
+/* 表格 / 代码 */
+.vp-doc table { border-radius: 12px; overflow: hidden; }
+.vp-doc th { background: var(--vp-c-bg-soft); }
+.vp-doc div[class*='language-'] { border-radius: 12px; border: 1px solid var(--vp-c-divider); }
+
+/* 侧边栏：分组更像折叠树 */
+.VPSidebarItem.level-0 > .item > .text { font-size: 12px; letter-spacing: .04em; }
 
 /* 页脚版权卡 */
 .cq-copyright {
-  max-width: 760px; margin: 18px auto 30px; padding: 12px 16px;
+  max-width: 1152px; margin: 24px auto 40px; padding: 18px 22px;
   border: 1px solid var(--vp-c-divider); border-radius: var(--cq-radius);
-  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 12px; line-height: 1.8;
+  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 13px; line-height: 1.9;
 }
 .cq-copyright strong { color: var(--vp-c-text-1); }
 .cq-copyright a { color: var(--vp-c-brand-1); }
 
-/* 首页语言入口卡 */
-.cq-lang { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-width: 760px; margin: 6px auto 0; }
+/* 首页里的语言入口卡片 */
+.cq-lang { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; max-width: 900px; margin: 8px auto 0; }
 .cq-lang a {
-  display: block; padding: 12px 14px; border-radius: var(--cq-radius);
-  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-alt); text-decoration: none !important;
-  transition: transform .16s ease, border-color .16s ease;
+  display: block; padding: 18px 20px; border-radius: var(--cq-radius);
+  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-alt);
+  text-decoration: none !important; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
-.cq-lang a:hover { transform: translateY(-1px); border-color: var(--vp-c-brand-1); }
-.cq-lang .t { font-size: 13.5px; font-weight: 650; color: var(--vp-c-text-1); }
-.cq-lang .d { margin-top: 4px; font-size: 12px; color: var(--vp-c-text-2); line-height: 1.65; }
+.cq-lang a:hover { transform: translateY(-2px); border-color: var(--vp-c-brand-1); box-shadow: 0 10px 26px rgba(0,0,0,.26); }
+.cq-lang .t { font-size: 15px; font-weight: 650; color: var(--vp-c-text-1); }
+.cq-lang .d { margin-top: 6px; font-size: 13px; color: var(--vp-c-text-2); line-height: 1.7; }
 
-/* ---------- 窄屏再收一档 ---------- */
-@media (max-width: 768px) {
-  .vp-doc { font-size: 13px; }
-  .vp-doc h1 { font-size: 20px; }
-  .vp-doc h2 { font-size: 16px; }
-  .vp-doc details > summary { font-size: 13px; padding: 8px 30px 8px 11px; }
-  .vp-doc details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
-  .VPHero .name { font-size: 25px; }
-  .VPHero .text { font-size: 19px; }
+/* ================= v3 修正（顶栏 / 分割线 / 卡片内观感） ================= */
+
+/* 1) 顶栏完全不透明：左侧不再透出侧边栏颜色 */
+:root, .dark { --vp-nav-bg-color: var(--vp-c-bg); }
+.VPNavBar,
+.VPNavBar.has-sidebar .content,
+.VPNavBar.has-sidebar .content-body {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
 }
+.VPNavBar { border-bottom: 1px solid var(--vp-c-divider); }
+
+/* 2) 文档里的 --- 分隔线会与卡片边框叠成“双分割线”，站点里隐藏 */
+.vp-doc hr { display: none; }
+
+/* 3) 锚点就在 <details> 上：滚动/跳转时给固定顶栏留出偏移 */
+.vp-doc details[id] { scroll-margin-top: calc(var(--vp-nav-height) + 18px); }
+
+/* 4) 卡片内部统一为纯文本（不再有的项套框、有的项没框） */
+.vp-doc details blockquote {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0;
+  margin: 6px 0 !important;
+}
+.vp-doc details > blockquote { margin: 2px 13px 8px !important; }
+.vp-doc details blockquote > p { color: var(--vp-c-text-2); font-size: 13px; margin: 4px 0; }
+.vp-doc details blockquote > p:first-child { margin-top: 0; }
+.vp-doc details blockquote > p:last-child { margin-bottom: 0; }
