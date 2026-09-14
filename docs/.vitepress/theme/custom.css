@@ -5,6 +5,7 @@
   --vp-c-brand-2: #8b5cf6;
   --vp-c-brand-3: #7c3aed;
   --vp-c-brand-soft: rgba(139, 92, 246, .16);
+  --vp-nav-height: 48px;      /* 统一顶栏高度：侧边栏/内容偏移都会跟着变 */
   --cq-radius: 12px;
   --cq-radius-sm: 10px;
   --cq-gap: 10px;
@@ -33,17 +34,23 @@
 .VPDoc.has-aside .content-container { max-width: 760px !important; }
 
 /* 侧边栏 */
-.VPSidebar { width: 250px !important; padding-top: 16px !important; }
+.VPSidebar {
+  width: 250px !important;
+  padding-top: calc(var(--vp-nav-height) + 10px) !important;  /* 让开固定顶栏 */
+}
+.VPSidebar .nav { padding-bottom: 56px !important; }
 .VPSidebarItem .text { font-size: 12.5px; line-height: 1.5; }
 .VPSidebarItem.level-0 > .item > .text { font-size: 11.5px; letter-spacing: .03em; }
 .VPSidebarItem.level-1 .item, .VPSidebarItem.level-2 .item { padding: 3px 0; }
 .VPSidebarItem .item { min-height: 0; }
 
-/* 顶栏 */
-.VPNavBar { height: 48px; }
+/* 顶栏（高度用 --vp-nav-height 控制，勿再硬写 height） */
 .VPNavBar .title { font-size: 14px; }
 .VPNavBarMenuLink { font-size: 13px; line-height: 20px; }
 .VPLocalSearchBox .shell { --vp-local-search-result-max-height: 60vh; }
+
+/* VPLocalNav（移动端「目录 / 回到顶部」浮条）在有侧边栏时隐藏，避免与侧边栏左下角重叠 */
+.VPLocalNav { display: none !important; }
 
 /* ---------- 检测项卡片 ---------- */
 .vp-doc details {
@@ -54,8 +61,11 @@
   overflow: hidden;
   transition: border-color .16s ease, box-shadow .16s ease;
 }
-.vp-doc details:hover { border-color: var(--vp-c-brand-1); box-shadow: 0 6px 18px rgba(0,0,0,.22); }
 .vp-doc details[open] { background: var(--vp-c-bg-soft); }
+.vp-doc details[open] > summary { border-bottom: 1px solid var(--vp-c-divider); }  /* 标题与内容的分隔线 */
+@media (hover: hover) {                                  /* 桌面端才做 hover 高亮，触摸端不残留边框 */
+  .vp-doc details:hover { border-color: var(--vp-c-brand-2); }
+}
 .vp-doc details > summary {
   cursor: pointer; list-style: none; position: relative;
   padding: 9px 34px 9px 13px; font-weight: 600; font-size: 13.5px; line-height: 1.5;
@@ -69,6 +79,7 @@
   transform: translateY(-70%) rotate(45deg); transition: transform .2s ease, border-color .2s ease;
 }
 .vp-doc details[open] > summary::after { transform: translateY(-30%) rotate(225deg); border-color: var(--vp-c-brand-1); }
+.vp-doc details > summary { border-radius: 0; }
 .vp-doc details > summary:hover { background: var(--vp-c-bg-soft); }
 /* 内容区：用统一内边距，避免块级元素高度/边框错位 */
 .vp-doc details > *:not(summary) { padding-left: 13px; padding-right: 13px; }
