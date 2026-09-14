@@ -6,7 +6,7 @@
 
 ---
 
-<details open>
+<details>
 <summary><b>⚠️ 声明 / Disclaimer（使用前请阅读）</b></summary>
 
 ## 声明
@@ -63,7 +63,8 @@
 
 ## 序章
 
-### 用语介绍与规范
+<details open>
+<summary><b>用语介绍与规范</b></summary>
 
 > **真解锁设备**：ABL 解锁标志真实置位，放行未经签名校验的镜像并允许刷写，且解锁状态如实反映在系统属性与 KeyMint attestation 上的设备。
 >
@@ -82,15 +83,17 @@
 > **Zygisk 实现模块**：提供 Zygisk runtime 的模块，负责把代码注入 Zygote / app 进程，并对外暴露一套 Zygisk 行为的 API，为真正干活的其他 Zygisk 模块提供加载运行环境。
 >
 > **应用隐藏模块**：以“包可见性”为操作对象，在目标进程（或系统进程）里拦截包查询链路，进而按照用户的配置，对目标应用隐藏选中应用可见性的模块。
-
-### 最小完美隐藏环境所需模块集合
+</details>
+<details open>
+<summary><b>最小完美隐藏环境所需模块集合</b></summary>
 
 > - 真解锁设备：**密钥模块 + Zygisk 实现模块 + 应用隐藏模块**
 > - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
 >
 > 对于 **APatch / FolkPatch** 用户，需要额外加载 **[NoHello.kpm](https://t.me/welikeandroid)** 以防侧信道检测；新版管理器可能内置 SELinux hook 功能（需要手动开启），旧版本用户可再额外加载 **[SELinux_Hook.kpm](https://t.me/APatch_nightly)**（链接见下方「相关模块推荐」）。
-
-### 相关模块推荐（排名不分先后）
+</details>
+<details open>
+<summary><b>相关模块推荐（排名不分先后）</b></summary>
 
 > **密钥模块**
 > - [TEESimulator-RS](https://github.com/Enginex0/TEESimulator-RS)：继 TrickyStore 后最知名的密钥模块，更新较勤，不自带 WebUI。
@@ -113,8 +116,9 @@
 > **元模块**
 > - 若设备 root 管理器自带元模块 API，可以考虑启用；
 > - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount)：比较广泛使用的第三方元模块。
-
-### 模块正确配置
+</details>
+<details open>
+<summary><b>模块正确配置</b></summary>
 
 > **密钥模块**
 > a. 将目标应用添加到包名列表内（如 TS / TEES 的 `/data/adb/tricky_store/target.txt`，或使用 WebUI 配置）；
@@ -130,6 +134,7 @@
 > - **黑名单模板**：对于被应用此模板的应用，模板内的应用不可见；
 > - **白名单工作模式**：被开启此模式的应用，将只可见其被应用白名单模板内的应用；
 > - **白名单模板**：对于被应用此模板的应用，只可见模板内的应用。
+</details>
 
 ---
 
