@@ -39,8 +39,10 @@ function convert(md, lang) {
     }
     out.push(line)
   }
-  // 站点里把附件指向渲染页
-  const text = out.join('\n').replace(/\(\/File\/Doc\/thanks\.md\)/g, '(/thanks)')
+  // 站点里把附件指向渲染页；并转义裸尖括号（如 "value < 1000"），避免 Vue 模板解析报错
+  const text = out.join('\n')
+    .replace(/\(\/File\/Doc\/thanks\.md\)/g, '(/thanks)')
+    .replace(/<(?=\s|\d|=|\.|,|%|\))/g, '&lt;')
   return { text, sidebar: groups.filter(g => g.items && g.items.length) }
 }
 
