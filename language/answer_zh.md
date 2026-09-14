@@ -24,6 +24,7 @@
 > 6. 本文档新增的设备类型定义（真解锁设备、假回锁设备、免解设备、自签设备）为社区圈内首次规范化整理定义，旨在推动设备分类术语的统一使用；不具备法律层面权威性，仅作技术参考。
 >
 > 7. 模块推荐列表内的模块均为编者主观技术推荐，不存在任何商业利益关联，仅供参考。
+
 </details>
 
 ## 目录
@@ -44,6 +45,7 @@
 <summary>自行尝试但仍然无法通过的检测</summary>
 
 请开 Issues 并提供你的模块列表信息 + 使用了哪些 Xposed 模块等详细修改，我有时间会回复/帮助。
+
 </details>
 
 <details>
@@ -57,6 +59,7 @@
 6. 少数条目属**侧信道 / 不稳定检测**：同一环境多次扫描结果可能不一致，先排除偶发再定位。
 
 > ⚠️ **安全提示**：任何“更换 keybox / 更换 RKP 密钥 / 改回锁状态 / 改安全补丁同步”的操作都会改变设备的密钥与认证（attestation）状态，**不一定可逆**；操作前请评估风险，必要时先备份相关目录。
+
 </details>
 
 ---
@@ -83,6 +86,7 @@
 > **Zygisk 实现模块**：提供 Zygisk runtime 的模块，负责把代码注入 Zygote / app 进程，并对外暴露一套 Zygisk 行为的 API，为真正干活的其他 Zygisk 模块提供加载运行环境。
 >
 > **应用隐藏模块**：以“包可见性”为操作对象，在目标进程（或系统进程）里拦截包查询链路，进而按照用户的配置，对目标应用隐藏选中应用可见性的模块。
+
 </details>
 <details open>
 <summary><b>最小完美隐藏环境所需模块集合</b></summary>
@@ -91,6 +95,7 @@
 > - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
 >
 > 对于 **APatch / FolkPatch** 用户，需要额外加载 **[NoHello.kpm](https://t.me/welikeandroid)** 以防侧信道检测；新版管理器可能内置 SELinux hook 功能（需要手动开启），旧版本用户可再额外加载 **[SELinux_Hook.kpm](https://t.me/APatch_nightly)**（链接见下方「相关模块推荐」）。
+
 </details>
 <details open>
 <summary><b>相关模块推荐（排名不分先后）</b></summary>
@@ -116,6 +121,7 @@
 > **元模块**
 > - 若设备 root 管理器自带元模块 API，可以考虑启用；
 > - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount)：比较广泛使用的第三方元模块。
+
 </details>
 <details open>
 <summary><b>模块正确配置</b></summary>
@@ -134,6 +140,7 @@
 > - **黑名单模板**：对于被应用此模板的应用，模板内的应用不可见；
 > - **白名单工作模式**：被开启此模式的应用，将只可见其被应用白名单模板内的应用；
 > - **白名单模板**：对于被应用此模板的应用，只可见模板内的应用。
+
 </details>
 
 ---
@@ -147,6 +154,7 @@
 > 使用 IsolPolicy 模块后出现，关闭作用域或者卸载模块解决。
 > 
 > 并不是只有模块，比如旧版ksu启用了隐藏SELinux修改也算，请尝试跟进相关 root 管理器最新 CI 来解决此问题。
+
 </details>
 
 <details>
@@ -171,6 +179,7 @@
 >   - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
 >
 > 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
+
 </details>
 
 <details>
@@ -181,6 +190,7 @@
 > 发现 KSU 处于**免解（越狱）模式**，或发现 ksu 相关进程等因素。
 > 
 > 不推荐使用**免解（越狱）模式**，因此不提供解决方案。
+
 </details>
 
 <details>
@@ -191,6 +201,7 @@
 > 检测到 SU 二进制文件（检测到 ROOT）
 > iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走该文件或去掉其执行位。
 > 通用原则：**不要给春秋检测 root 权限**。
+
 </details>
 
 <details>
@@ -218,6 +229,7 @@
 >
 > 原理：旧版 KPatch-Next 完全继承了 KernelPatch 的鉴权方式，所以在 APatch 上可行的侧信道检测方法在旧版 KPatch-Next 上也同样可行；但最新版 KPatch-Next 以判断用户态 kpatch-android 组件的 uid 实现鉴权，不再会被侧信道检测。
 > 社区实测：这一条**不稳定、概率出现**，同版本管理器在不同设备可能一报一不报（可尝试**降级管理器**）；APatch 开启排除列表后也容易出现。
+
 </details>
 
 <details>
@@ -235,6 +247,7 @@
 > **解决办法**：**目前暂无可用模块**。这类内核级隐藏 KPM 拦截的是“鉴权请求是否被处理”，而本条测量的是“内核在该 syscall 路径上是否**额外读取了用户参数页**”——该读取发生在拦截点**之前/之外**，因此把检测器加入该 KPM 的 排除列表（或改用按 uid 鉴权的 KPatch-Next）**并不能**让本条消失。需要等待 KernelPatch / APatch 侧修复（让被补丁的 syscall 路径不再额外读取用户参数页），或上游调整该检测项。
 >
 > **备注**：该条目在英文界面下目前**没有对应的英文标题**（仅中文显示）。
+
 </details>
 
 <details>
@@ -246,6 +259,7 @@
 > 
 > 更新你的管理器并重新修补
 > 更新管理器并重新修补；或关闭/更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）。
+
 </details>
 
 <details>
@@ -256,6 +270,7 @@
 > 检测到 APatch
 >
 > 更新 APatch，并加载 KernelPatch 隐藏模块（如 NoHello.kpm，见序章「相关模块推荐」）。
+
 </details>
 
 <details>
@@ -270,6 +285,7 @@
 > 可使用内核级隐藏功能（SusFS 等）或审计日志补丁类内核方案
 >
 > Android 安全更新 2025/09/01 已修复（不准确但结果是这样的）
+
 </details>
 
 <details>
@@ -288,6 +304,7 @@
 > 双开应用有时可以使此检测方案失效，但不会实质上解决此安全漏洞，所以双开应用不应被视为可行的方法。
 >
 > 会有误报现象
+
 </details>
 
 <details>
@@ -299,6 +316,7 @@
 > 在应用隐藏模块中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
 >
 > 补充：该开关按**黑名单**移除用户勾选的补充 GID（HMA-OSS 的可选项为 1015 / 1023 / 1032 / 1077 / 1078 / 1079 / 3003 / 9997 共 8 项，**不含 3009**）。本条的**判据**确定为「GID 3009 缺失」，但**致因是否来自该开关尚不能确认**。
+
 </details>
 
 <details>
@@ -310,6 +328,7 @@
 > **KSU · LKM**：刷入对应版本的 PathMask 并开启「隔离防护（procguard）」，或刷入 审计日志补丁类内核方案（可能导致其它检测项泄露）；
 > **KSU · GKI**：在管理器设置中打开「AVC 日志欺骗」；
 > 临时办法：禁用传统 su 支持，过一遍检测后再打开。
+
 </details>
 
 <details>
@@ -320,6 +339,7 @@
 > **解决办法**：使用**应用隐藏模块**把 root 管理器对检测器隐藏即可（见「相关模块推荐」与「模块正确配置」）。
 >
 > 关系：与 `Found ksu/免解设备`、`Suspicious Surroundings`、`SU binary detected`、`检测SELinux Policy时发现可疑问题 / 检测到ROOT权限` 同属“ROOT 痕迹”类，可能同时命中。
+
 </details>
 
 ---
@@ -336,6 +356,7 @@
 > 创建时正常拒绝混合用途（如正常机的 -3），或两种能力都正常，都不会报。
 >
 > **解决办法**：更换 / 更新密钥模块（见序章「相关模块推荐」与「模块正确配置」），配置后重启复测。
+
 </details>
 
 <details>
@@ -362,6 +383,7 @@
 > *注意*：PathMask 并不专注于环境隐藏，请慎用。
 >
 > *原理*：目前在技术上我们无法模拟 Soter 服务，但可以隐藏 Soter 相关文件来伪造第 2 种情况。
+
 </details>
 
 <details>
@@ -386,6 +408,7 @@
 > - **26**：[执行此脚本](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Tampered%20Attestation%20Key(26)Pass.sh) 写入 `/data/adb/tricky_store/security_patch.txt`；
 > - **小米 / 红米注意**：2026-03 前后更新的系统，其构建时间与安全补丁时间本身就不一致，**不管是否 root 都会报（26）→ 无视即可**；魔改版密钥模块、一键隐藏模块、部分改机模块也会导致，换回原版或卸载；
 > - **16 / 31**：纯误报居多（假回锁、未 root 也可能概率命中）→ 重测或直接无视。
+
 </details>
 
 <details>
@@ -396,6 +419,7 @@
 > 侧信道（不稳定）重新打开或许消失
 >
 > 更换密钥模块（如 TEESimulator-RS / OhMyKeymint）
+
 </details>
 
 <details>
@@ -406,6 +430,7 @@
 > **尝试1**：更换密钥模块（如 TEESimulator-RS / OhMyKeymint）
 >
 > **尝试2**：把 `/data/adb/tricky_store/security_patch.txt` 文件删除
+
 </details>
 
 <details>
@@ -414,6 +439,7 @@
 > **检测方式**：证书链 / 密钥属性显示 TEE 行为被模拟。
 >
 > 使用密钥模块解决（证书链生成模式）。
+
 </details>
 
 <details>
@@ -432,6 +458,7 @@
 > TRICKY_DATA="/data/adb/tricky_store"
 > { echo "com.google.android.gms!"; echo "com.android.vending!"; pm list packages -3 | sed 's/^package://;s/$/!/'; } > "$TRICKY_DATA/target.txt"
 > ```
+
 </details>
 
 <details>
@@ -440,6 +467,7 @@
 > **检测方式**：密钥证明证书链不完整或与预期链不一致。
 >
 > 使用密钥模块并配置后尝试解决
+
 </details>
 
 <details>
@@ -450,6 +478,7 @@
 > 更换 `/data/adb/tricky_store/` 目录下的 `keybox.xml` 文件。
 >
 > 也可选择刷入 TS 插件，重启后打开模块的 webUI 界面进行密钥配置。
+
 </details>
 
 <details>
@@ -461,6 +490,7 @@
 >
 > 通常**真解锁设备**的 hash 会变成 0000，使用 [Native detector](https://t.me/rootdetector/49) 获取正确的 hash 后使用密钥模块并使用 TS 插件 配置 hash 解决。
 > 打开密钥认证，取 `VerifiedBootHash` 的值，用 TS 插件写入。
+
 </details>
 
 <details>
@@ -473,6 +503,7 @@
 > - **假回锁 / 免解 / 自签设备**：设备对外本就是“已锁定（locked & green）”，通常不会命中此项（该状态由启动链早期方案，如 efisp 一类提供）。
 >
 > 组合方案见 `启动状态异常`；另有反馈 iQoo/Vivo 橘子 5 不报、橘子 6 报（未确认是否误报）。
+
 </details>
 
 <details>
@@ -482,6 +513,7 @@
 >
 > **真解锁设备**：使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）。
 > 社区在测试中的组合尝试：更新 密钥模块(-v307) + TS 插件 v5.0-beta1 → 管理器设置里关闭「卸载模块（内核级）」→ Zygisk 实现模块 设为「仅还原挂载」→ 冻结手机管家（小米可用按应用隐藏 / 冻结方案并打开「禁用环境检查」）→ 把属性隐藏脚本放入 `/data/adb/service.d/`。
+
 </details>
 
 
@@ -493,6 +525,7 @@
 > **检测方式**：证书序列号命中吊销列表（本地静态库或在线查询）。
 >
 > 更换 `/data/adb/tricky_store/` 目录下的 `keybox.xml` 文件
+
 </details>
 
 <details>
@@ -511,6 +544,7 @@
 > - 证书链篡改(x)：`su -c '/data/adb/ksud' resetprop ro.secureboot.lockstate locked`（Magisk 用 `resetprop`）。
 >
 > 关系：与 `密钥证明未完成或链不一致` 同属证书链 / 密钥一致性族。
+
 </details>
 
 ---
@@ -525,6 +559,7 @@
 > 
 > 小米设备通常在开机后系统高占用时，打开检测器会出现此检测项。
 > 刚开机时命中多半是快照期误差：**开机后等 20 秒~5 分钟再测**。
+
 </details>
 
 <details>
@@ -533,6 +568,7 @@
 > **检测方式**：app_zygote（应用 zygote）内的 fork 顺序探针 —— 用 `/dev/socket/logdw` 打开日志 socket 取 identity / cookie，按 `prepare/parent/child`、父子存活与 fd 关闭顺序判断是否存在 **Zygisk 早于 app-zygote 注入** 的残留；属侧信道类，不稳定。
 >
 > **解决办法**：打开 Zygisk 实现模块的「链接器功能」与「匿名内存功能」；排除列表策略设为「仅还原挂载」；不稳定时可直接重测。
+
 </details>
 
 <details>
@@ -543,6 +579,7 @@
 > **解决办法**：`su -c umount /debug_ramdisk`。
 >
 > 备注：部分设备存在暂未修复的误报现象（3.4 版本已修复其中一部分）。
+
 </details>
 
 <details>
@@ -556,6 +593,7 @@
 > 
 > 使用 Zygisk 实现模块 的排除策略 > 仅还原挂载，并配置排除列表 / 开启默认卸载模块对其实施隐藏。
 > 使用 Zygisk 实现模块 排除策略「仅还原挂载」；或更换元模块（社区推荐 **元模块**）。
+
 </details>
 
 <details>
@@ -567,6 +605,7 @@
 > 
 > 请尝试排除某些针对系统修改的模块，使用某些模块隐藏这个问题（比如 Zygisk 实现模块 中的排除策略）。
 > 同上：Zygisk 实现模块「仅还原挂载」/ 更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）。
+
 </details>
 
 <details>
@@ -586,6 +625,7 @@
 >
 > *注意*：在少数 ROM 中原生存在此现象，如果属于这种情况请忽略此条目。
 > 更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）/ 更新 root 管理器并重新修补；使用 Scene 的话请更新 Scene。
+
 </details>
 
 <details>
@@ -594,6 +634,7 @@
 > **检测方式**：同一 UID 下的 user namespace 视图不一致（`UID namespace mismatch for same UID`）。
 >
 > 处理：检查隐藏框架是否改动了 namespace；更换 / 更新元模块后重测。
+
 </details>
 
 <details>
@@ -602,6 +643,7 @@
 > **检测方式**：挂载命名空间视图异常（`Mount namespace anomaly`）；与 `不一致的挂载/debug_ramdisk`、`挂载间隙` 相关但判据不同（这里比的是 namespace 视图，不是挂载表 / statfs）。
 >
 > 处理：同挂载类（Zygisk 实现模块「仅还原挂载」/ 更换元模块（如 Hybrid-Mount）/ PathMask、SUSFS 隐藏）。
+
 </details>
 
 <details>
@@ -610,6 +652,7 @@
 > **检测方式**：进程命名空间视图异常（`PID namespace anomaly`）。
 >
 > 处理：检查隐藏框架 / 元模块对 namespace 的改动，更新后重测。
+
 </details>
 
 
@@ -622,6 +665,7 @@
 > **KSU · LKM**：按条目展开给出的 `/dev/block/xxx` 路径用 PathMask 隐藏后热重载；**GKI + SUSFS**：在 SUSFS 中写入对应隐藏路径；**GKI 无 SUSFS**：参考 LKM 方案；其它管理器暂无方案。
 > 若展开内容里出现 **overlay** 字样 → 更换元模块（如 Hybrid-Mount，见序章「相关模块推荐」）；若确定是某模块导致的挂载 → 卸载该模块。
 > 关系：与 `/data/local/tmp 元数据异常族`（含 `2222`、`Futile hide 04`）、`Mount loophole`、`Magic Mount`、`挂载间隙` 同属挂载类；处理手段相同（Zygisk 实现模块「仅还原挂载」、换元模块（如 Hybrid-Mount）、PathMask/SUSFS 隐藏）。
+
 </details>
 
 <details>
@@ -635,6 +679,7 @@
 > **解决办法**：`su -c rm -rf /data/local/tmp` → 重启 → 再按 `Suspicious Surroundings (a)/(b)/(c)`（属主 / inode / 权限）逐项修复；`Futile hide 1` 也可以先重启再测。
 >
 > 关系：与 `Suspicious Surroundings`、`/data/local/tmp denied` 同一族，处理手段相同。
+
 </details>
 
 ---
@@ -648,6 +693,7 @@
 > 通过扫描 smaps 启发式探测 Zygisk 实现（特别是 Zygisk 实现模块），但目前的实现方式存在问题，导致检测失效。
 > 
 > 在检测方法被修复或移除前请忽略此条目。
+
 </details>
 
 <details>
@@ -657,6 +703,7 @@
 >
 > 暂时未知
 > 部分老内核可能出现此检测项，修复方法暂时未知。
+
 </details>
 
 <details>
@@ -669,6 +716,7 @@
 > [分支项目/拉取更新重新构建模块并刷入/从Releases中下载](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)
 > 若为老版本/破解版/非官方 Scene：参考 [Scene-Port-Hider-by-eBPF](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)；官方版 Scene 更新到最新即可。
 > （注：HMA（隐藏应用列表）与 Scene 是两个不同用途的模块，本条与「检测到 Scene 端口占用」可能同时出现，分别处理。）
+
 </details>
 
 <details>
@@ -677,6 +725,7 @@
 > **检测方式**：读取 `/proc/*/fdinfo` 中的 `mnt_id` 做抽样统计，与挂载视图交叉验证；USB 调试残留或临时挂载容易触发。
 >
 > 大概率为检测到 USB 调试痕迹，小概率误报。可使用脚本[调试痕迹消除](https://github.com/YiJieqwq/ADB-Trace-Cleaner/releases)尝试解决。
+
 </details>
 
 <details>
@@ -685,6 +734,7 @@
 > **检测方式**：页驻留 / 软脏位类探针（`clear_refs`、`smaps`、`MADV_COLD`），用于发现隐藏或异常映射。
 >
 > 清除检测器数据后若还存在，那么请开 Issues 并提供你的模块列表信息以及使用了哪些 xp 模块，我有时间会研究的。
+
 </details>
 
 <details>
@@ -696,6 +746,7 @@
 > - 有效组合：**应用隐藏模块黑名单模式 + 零宽读取修复方案**（[FuseFixer](https://github.com/5ec1cff/FuseFixer)）；部分机型开启作用域后可能卡开机，安全模式关掉即可；
 > - 只想让春秋这一项通过：在应用隐藏模块里对检测春秋检测打开「限制 zygote 权限」，除 `INET_GID` 外全开；
 > - 这类判定手段未知的条目，也可用应用隐藏模块把可疑应用对检测器隐藏。
+
 </details>
 
 <details>
@@ -704,6 +755,7 @@
 > **检测方式**：检测 `/storage/emulated/0/`（`/sdcard`）下**名字含 `sh`** 的文件夹 / 文件，以及外挂相关的文件 / 驱动（部分版本还会结合“替换密钥行为”一起判定）。
 >
 > **解决办法**：这条的含义就是「检测到设备上存在**游戏外挂**相关文件」→ **自己删掉即可**；删除后重启再测。
+
 </details>
 
 <details>
@@ -712,6 +764,7 @@
 > **检测方式**：实验性环境一致性判定（社区反馈：应用隐藏模块 黑名单模式 + 勾选“输入法”预设时出现）。
 >
 > 在 应用隐藏模块 中对检测器开启黑名单模式隐藏后，若勾选了设置预设中的“输入法”选项后，此检测项就会出现？
+
 </details>
 
 <details>
@@ -721,6 +774,7 @@
 >
 > 关于 lsp, shizuku 还有一些 xp 模块的修改检测。
 > 先排查 `/sdcard` 与 `/data/local/tmp` 下模块释放的异常文件。
+
 </details>
 
 <details>
@@ -729,6 +783,7 @@
 > **检测方式**：检查 dex2oat 相关标志（如 `dalvik.vm.dex2oat-flags`）；LSP / Xposed 类模块往往会修改它们。
 >
 > 检测到 dex2oat（通常是 LSP 的问题，更换/更新 LSP 模块）。
+
 </details>
 
 <details>
@@ -739,6 +794,7 @@
 > (zygisk/riru/xposed)
 > 
 > 检测到 HOOK，自行排查原因，因素过多。
+
 </details>
 
 <details>
@@ -747,6 +803,7 @@
 > **检测方式**：检查模拟器 / 虚拟化特征，如 `/dev/goldfish_pipe`、`/dev/qemu_pipe`、`/dev/socket/genyd`、`/sys/qemu_trace` 等，以及 `goldfish` / `ranchu` / `qemu` / `genymotion` / `bluestacks` / `ldplayer` / `nox` / `memu` / `ttvm` / `vbox` / `vmware` 等机型关键字；同时引用 `android/os/BatteryManager` 与 `android/telephony/TelephonyManager`，即也会参考**电量 / 充电状态与 SIM 状态**。
 >
 > **解决办法**：先卸载重装检测器；避免在**未插 SIM 卡 + 满电 + 充电**的状态下测试。
+
 </details>
 
 <details>
@@ -757,6 +814,7 @@
 > 检测到 LSPHook Framework
 > 
 > 某些 xp 模块修改导致，也可卸载更换 LSP 模块。
+
 </details>
 
 <details>
@@ -767,6 +825,7 @@
 > 请查看此[项目](https://github.com/Andrea-lyz/Scene-Port-Hider-by-eBPF)并尝试解决。
 > 
 > 无视此检测项，或者关闭 scene 的无障碍权限，或将 scene 更新到 9.3.1 以上。
+
 </details>
 
 <details>
@@ -777,6 +836,7 @@
 > 检测到 Zygisk，通常是 magisk 自带的 zygisk 导致（关闭解决）或者其他原因。
 > 
 > 升级 Zygisk 实现模块(http://github.com/Dr-TSNG/ZygiskNext)。
+
 </details>
 
 <details>
@@ -788,6 +848,7 @@
 >
 > **解决方案**：所有组改为 shell。
 > 社区实测：该条判的是 `/data/local/tmp` 的**属主 / 属组异常**（原文档写的“所有组异常”与之对应）；统一改回 shell 即可：`su -c chown shell:shell /data/local/tmp`。
+
 </details>
 
 <details>
@@ -803,6 +864,7 @@
 > 3. 使用 [Inode-Hijacker](https://github.com/YiJieqwq/Inode-Hijacker/releases) 脚本（下载执行即可；执行不了的换老 release）。
 >
 > 注意：**使用 Inode-Hijacker 之后，如果出现有线投屏（如 Scrcpy）不可用**，执行 `su -c restorecon -RF /data/local/tmp` 恢复即可。
+
 </details>
 
 <details>
@@ -814,6 +876,7 @@
 > 
 > **解决方案**：重新设置权限。
 > 权限改回默认：`su -c chmod 771 /data/local/tmp`。
+
 </details>
 
 <details>
@@ -823,6 +886,7 @@
 >
 > 目录 `/data/local/tmp` 拒绝访问，文件夹权限设置问题? 文件夹不存在?
 > 同上：删除该目录后重启，再按新出现的条目处理。
+
 </details>
 
 <details>
@@ -831,6 +895,7 @@
 > **检测方式**：检查是否存在 pty（终端模拟）痕迹。
 >
 > 检测 Pty。
+
 </details>
 
 <details>
@@ -841,6 +906,7 @@
 > 异常文件：检测到根目录下的“mt2”文件夹与 boot.img / “.xml”异常文件。
 > 
 > “mt2”可在 MT 管理器设置中对 MT2 路径自定义修改解决（记得删除旧文件夹）。
+
 </details>
 
 <details>
@@ -851,6 +917,7 @@
 > 检测到 Thanox 服务。
 > 
 > 可以使用这个 xp 模块来隐藏：[hideThanox](https://t.me/Suxiaomingpd/125)。
+
 </details>
 
 <details>
@@ -889,6 +956,7 @@
 >    /data/local/tmp/resetprop
 >    ```
 > 命中后，条目会把**实际命中的路径**直接给出（社区称“一条路径”），按提示删除即可。
+
 </details>
 
 <details>
@@ -898,6 +966,7 @@
 >
 > 检测到应用处于多开 / 沙盒 / 容器环境。
 > 卸载重装春秋检测；**不要对春秋检测使用应用双开**。
+
 </details>
 
 <details>
@@ -906,6 +975,7 @@
 > **检测方式**：命中温控 / 调度 / 优化类模块的特征签名，其中最常见的是 **Encore Tweaks** 家族：管理端应用、`/system/bin/encore_profiler`、`/data/encore/default_cpu_gov`、`/data/encore/custom_default_cpu_gov`、`/data/local/tmp/encore_logo.png`；命中时会分别报 `Encore 管理端已安装 / Encore Tweaks 模块 / Encore Tweaks 可能` 等文案。
 >
 > **解决办法**：排查并卸载相关模块（此类条目多为概率命中，可多重启几次再测）。
+
 </details>
 
 <details>
@@ -914,6 +984,7 @@
 > **检测方式**：检查 ROM 侧“屏蔽 GMS”的特征文件与可执行文件 —— `/my_product/etc/permissions/oplus_google_cn_gms_features.xml`（OPPO / 一加国内机型，检测器会直接 `access` 该路径）、`/system/bin/gmsc`；另有 PIF 类属性 `persist.sys.pihooks.disable.gms`、`persist.sys.pixelprops.gms`、`persist.sys.spoof.gms`。
 >
 > **解决办法**：检查是否用应用隐藏模块隐藏了系统组件（Google 服务套件），或排查 ROM 侧 GMS 问题。
+
 </details>
 
 <details>
@@ -923,6 +994,7 @@
 >
 > 检测到线程 / 调度类模块的挂载。
 > 卸载对应线程模块。
+
 </details>
 
 <details>
@@ -932,6 +1004,7 @@
 >
 > 检测到异常可执行文件（常见于小米官改包）。
 > 刷回官方包；或用 PathMask 隐藏这两个文件。
+
 </details>
 
 
@@ -942,6 +1015,7 @@
 >
 > 安装了试图阻止检测器扫盘的模块。
 > 暂按**误报**理解；可在 应用隐藏模块 中对春秋检测开启「限制 zygote 权限」（除 `INET_GID` 外全开）。
+
 </details>
 
 <details>
@@ -952,6 +1026,7 @@
 > **解决办法**：关闭 USB 调试（`su -c settings put global adb_enabled 0`）；可写入 `/data/adb/service.d/` 实现开机自动关闭。
 >
 > 关系：与 `fdinfo mnt 采样异常（c）` 都涉及 USB 调试，但判据不同——那条看的是 `/proc/*/fdinfo` 的 `mnt_id` 残留。
+
 </details>
 
 ---
@@ -977,6 +1052,7 @@
 >
 > ⚠️ **安全提示**：RKPConfig 类应用会让设备向 Google 请求 RKP 密钥下发，会**改变设备的密钥供应 / 认证状态**；安装前请确认来源可信与可撤销性。
 > 社区实测补充：**假回锁 / 免解 / 完全没有 root 的机器也会概率命中**，可直接忽略；若要尝试，仍建议先按上面的「第一步」判断 L1 是否真的可用。
+
 </details>
 
 <details>
@@ -985,6 +1061,7 @@
 > **检测方式**：检查 `persist.logd.size` / `persist.logd.size.crash` / `persist.logd.size.system` / `persist.logd.size.main` 是否被设置为**非空**（非空即命中；这几个属性是日志缓冲区设置，部分模块/脚本会写入）。
 >
 > 执行[此sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/Found%20property.sh)尝试解决。
+
 </details>
 
 <details>
@@ -994,6 +1071,7 @@
 >
 > 隐藏被修改的属性可使用仓库提供的 [shamiko_Plus.sh](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/blob/main/File/shamiko_Plus.sh) 文件添加并移动到 `/data/adb/service.d/` 目录下，确认该脚本有执行权限后重启，尝试解决。
 > 注意：`shamiko_Plus.sh` 是用 `resetprop -n` 在早期写属性，需放在 `/data/adb/service.d/` 执行且**不要持久化**，否则反而可能产生新的属性区空洞。
+
 </details>
 
 <details>
@@ -1005,6 +1083,7 @@
 > 
 > 某些模块会造成此问题，比如改机型模块，自行排查模块尝试解决。
 > 若已卸载改机模块仍报，可尝试：`su -c resetprop -n ro.boot.avb_version 1.3`。
+
 </details>
 
 <details>
@@ -1017,6 +1096,7 @@
 > - 也可还原未修改的 boot.img。
 >
 > 开发者原话：原厂系统 + LKM 模式下出现即为误报。
+
 </details>
 
 <details>
@@ -1027,6 +1107,7 @@
 > resetprop 被修改。
 > 
 > 未知。
+
 </details>
 
 <details>
@@ -1037,6 +1118,7 @@
 > 检测设备篡改/机型篡改。
 > 
 > 改机型模块导致? 自行排查。
+
 </details>
 
 <details>
@@ -1048,6 +1130,7 @@
 >
 > 以下方案可能过时：开启过“隐藏应用列表(HMA)”的 Vold appdata 隔离？
 > 注意（待作者确认）：本项与 `Vold隔离已开启` 互相牵制——开启 HMA/应用隐藏模块 的 Vold appdata 隔离可能解本项，但会触发 `Vold隔离已开启`（该属性被写入）；请按更优先的一条取舍。
+
 </details>
 
 <details>
@@ -1056,6 +1139,7 @@
 > **检测方式**：以普通应用身份向 netlink `sock_diag` 发一次查询：正常策略下应被拒绝；若拿到响应，说明 netlink 策略被改写（常见于 root 隐藏方案对该接口的放行）。
 >
 > 暂时未知
+
 </details>
 
 <details>
@@ -1067,6 +1151,7 @@
 > 
 > 伪装内核信息解决。
 > 用 SUSFS 伪装内核名称。
+
 </details>
 
 <details>
@@ -1080,6 +1165,7 @@
 >
 > 伪装内核信息解决。
 > 用 SUSFS 伪装内核名称。
+
 </details>
 
 <details>
@@ -1088,6 +1174,7 @@
 > **检测方式**：第三方 ROM 特征（第二组）。
 >
 > 暂时未知
+
 </details>
 
 <details>
@@ -1101,6 +1188,7 @@
 >
 > 可自行尝试伪装。
 > 用 SUSFS 伪装内核名称。
+
 </details>
 
 <details>
@@ -1114,6 +1202,7 @@
 > - 刷入审计日志补丁类内核方案后触发 → 卸载该模块；
 > - **属性伪装类模块**（PIF / pihooks / pixelprops / spoof 类）也可能触发（待验证）→ 用 `getprop | grep -iE "pihooks|pixelprops|spoof"` 检查是否存在属性伪装残留，定位到对应模块后处理，或对检测器隐藏相关属性；
 > - 部分自定义 / 移植 ROM 自带的机型或属性伪装也可能触发。
+
 </details>
 
 <details>
@@ -1121,6 +1210,7 @@
 
 > **检测方式**：该条检测本身未成功完成（环境限制 / 超时等），**不是“命中”**；可重试或忽略。
 >
+
 </details>
 
 <details>
@@ -1129,6 +1219,7 @@
 > **检测方式**：内部异常 / 未分类命中。
 >
 > 未知
+
 </details>
 
 <details>
@@ -1141,6 +1232,7 @@
 > 在国外设备 Poco/三星误报情况（待修复）。
 > 社区反馈：海外机型 Poco / 三星有误报；部分设备使用 Scene 也会报。
 > 卸载改机模块后仍报，多是模块残留/行为不可逆导致。
+
 </details>
 
 <details>
@@ -1154,6 +1246,7 @@
 > 
 > su shell执行 `resetprop -p --delete persist.sys.vold_app_data_isolation_enabled` 然后重启即可
 > 注意（待作者确认）：与 `Miscellaneous Check(3)` 互相牵制，见该条说明。
+
 </details>
 
 ---
@@ -1249,6 +1342,7 @@
 - `xzr.hkf`
 - `xzr.konabess`
 - `zako.zako.zako`
+
 </details>
 
 <details>
@@ -1325,6 +1419,7 @@
 - `/storage/emulated/0/弱隐.sh`
 - `/storage/emulated/0/落叶配置`
 - `/storage/emulated/elgg/`
+
 </details>
 
 <details>
@@ -1364,4 +1459,5 @@
 - `ro.build.version.sdk`
 - `ro.product.brand`
 - `ro.product.brand=`
+
 </details>
