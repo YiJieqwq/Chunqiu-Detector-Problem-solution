@@ -11,11 +11,34 @@ export default defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: true,
   head: [
-    ['style', {}, '#cq-progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,#8b5cf6,#a78bfa);z-index:100;transition:width .08s linear}'],
     ['meta', { name: 'theme-color', content: '#141218' }],
     ['meta', { property: 'og:title', content: '春秋检测器解决方案' }],
-    ['meta', { property: 'og:description', content: '社区实测整理的检测项说明与处置方案 · 中英双语' }]
-    ['script', {}, `(function(){function a(){var d=document.getElementById('cq-progress');if(!d){d=document.createElement('div');d.id='cq-progress';document.body.appendChild(d);}var h=document.documentElement;var m=h.scrollHeight-h.clientHeight;d.style.width=(m>0?(h.scrollTop||document.body.scrollTop)/m*100:0)+'%';}document.addEventListener('scroll',a,{passive:true});window.addEventListener('resize',a);document.addEventListener('DOMContentLoaded',a);})();`]
+    ['meta', { property: 'og:description', content: '社区实测整理的检测项说明与处置方案 · 中英双语' }],
+    ['style', {}, '#cq-progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,#8b5cf6,#a78bfa);z-index:100;transition:width .08s linear}'],
+    ['script', {}, `(function(){
+  /* 顶部阅读进度条 */
+  function prog(){
+    var d=document.getElementById('cq-progress');
+    if(!d){d=document.createElement('div');d.id='cq-progress';document.body.appendChild(d);}
+    var h=document.documentElement, m=h.scrollHeight-h.clientHeight;
+    d.style.width=(m>0?(h.scrollTop||document.body.scrollTop)/m*100:0)+'%';
+  }
+  document.addEventListener('scroll',prog,{passive:true});
+  window.addEventListener('resize',prog);
+  document.addEventListener('DOMContentLoaded',prog);
+
+  /* 移动端：点击侧边栏里的链接后自动收起侧边栏（点分类标题只展开/折叠，不收起） */
+  document.addEventListener('click',function(e){
+    if(window.innerWidth>=960) return;
+    var t=e.target;
+    var a=t.closest && t.closest('.VPSidebar a');
+    if(!a) return;
+    var backdrop=document.querySelector('.VPBackdrop');
+    if(backdrop){ backdrop.click(); return; }
+    var ham=document.querySelector('.VPNavBarHamburger');
+    if(ham) ham.click();
+  },true);
+})();`]
   ],
   themeConfig: {
     logo: '/logo.svg',
