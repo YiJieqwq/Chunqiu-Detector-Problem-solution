@@ -4,8 +4,19 @@
 >
 > 您可以在下方选择语言查看此文档，或访问我们的在线交互文档平台（支持实时关键词搜索）。
 
-## 🌐 交互式在线文档 / Interactive Web Site (GitHub Pages)
-👉 **[点击访问在线文档平台 (支持搜索框与信息展开/折叠)](https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/)**
+## 🌐 在线文档 / Online Docs (GitHub Pages)
+👉 **[https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/](https://mingzun09.github.io/Chunqiu-Detector-Problem-solution/)**
+
+站点使用 **VitePress** 构建：侧边栏按分类折叠并列出全部检测项、支持中文分词搜索、深色/浅色主题。
+文档内容仍维护在本仓库的 `language/answer_zh.md` 与 `language/answer_en.md`（**无需改站点文件**，提交后自动构建）。
+
+```bash
+npm install          # 安装依赖（Node 20+）
+npm run docs:dev     # 本地预览 http://localhost:5173/Chunqiu-Detector-Problem-solution/
+npm run docs:build   # 构建到 docs/.vitepress/dist
+```
+> 站点源码在 `docs/`（配置 `docs/.vitepress/config.mts`），构建前由 `scripts/prepare.mjs` 自动：
+> 拷贝 `File/` 附件、把两份 markdown 转成页面并注入条目锚点、生成侧边栏数据。
 
 ---
 
