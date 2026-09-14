@@ -157,6 +157,7 @@
 }
 
 /* ================= v6：标准标题层级（H2 章节 / H3 条目 / H4 条目内小节） ================= */
+.VPDoc.has-aside .aside { display: block; }
 
 /* H2：大章节 */
 .vp-doc h2 { font-size: 19px; margin: 30px 0 10px; padding-top: 18px; }
@@ -175,6 +176,34 @@
 /* 条目之间的呼吸感 */
 .vp-doc h3 + p, .vp-doc h3 + ul, .vp-doc h3 + ol, .vp-doc h3 + blockquote { margin-top: 4px; }
 
+/* ================= v7：条目折叠 UI + 搜索框加宽 ================= */
 
-/* 保险：窄屏必须隐藏右侧「本页目录」，否则会浮层盖住正文 */
-@media (max-width: 1279px) { .VPDoc .aside, .VPDoc.has-aside .aside { display: none !important; } }
+/* H3 条目：可点击折叠（右侧加号/箭头） */
+.vp-doc h3.cq-foldable { cursor: pointer; position: relative; padding-right: 26px; transition: color .15s; }
+.vp-doc h3.cq-foldable:hover { color: var(--vp-c-brand-1); }
+.vp-doc h3.cq-foldable::after {
+  content: ""; position: absolute; right: 8px; top: 50%; width: 7px; height: 7px;
+  border-right: 1.8px solid var(--vp-c-text-3); border-bottom: 1.8px solid var(--vp-c-text-3);
+  transform: translateY(-60%) rotate(45deg); transition: transform .18s ease, border-color .18s ease;
+}
+.vp-doc h3.cq-collapsed::after { transform: translateY(-40%) rotate(-45deg); }
+.vp-doc h3.cq-foldable:hover::after { border-color: var(--vp-c-brand-1); }
+
+/* 右下角「全部展开 / 全部折叠」 */
+#cq-fold-all {
+  position: fixed; right: 16px; bottom: 18px; z-index: 40;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 12.5px;
+  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-soft); color: var(--vp-c-text-1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+#cq-fold-all:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+
+/* 搜索框：加宽并占满可用空间（VitePress 默认偏窄） */
+.VPNavBarSearch { flex: 1 1 auto !important; max-width: 540px; }
+.VPNavBarSearch .DocSearch-Button,
+.DocSearch-Button {
+  min-width: 260px !important; width: 100% !important; max-width: 540px;
+  flex: 1 1 auto !important;
+}
+.DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; font-size: 13px !important; }
+@media (max-width: 1120px) { .DocSearch-Button-Keys { display: none !important; } }
