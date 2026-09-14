@@ -3,6 +3,19 @@
 > Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 
+<details>
+<summary>Disclaimer / 声明</summary>
+
+> **Disclaimer**
+> 1. Chunqiu Detector is provided to Root enthusiasts as an environment-detection tool, for technical study and research discussion only. It is strictly forbidden to use this detector, or any solution in this document, to bypass anti-cheat, evade risk control, cheat in games, or for any other illegal or non-compliant purpose; all consequences of such use are borne solely by the user.
+> 2. All operations, scripts and module configurations described here are technical references only. Modifying system images, replacing keys, embedding kernel modules, running root shell commands and similar operations carry irreversible risks and may render the device unbootable or cause data loss; all risk is borne by the user, and the document author accepts no liability for device damage or data loss.
+> 3. These solutions are compiled from community testing and are affected by ROM version, kernel, root manager and module combinations; detection items may produce false positives or hit only intermittently. The solutions given here are not guaranteed to work, and detection results are for debugging reference only — not an absolute basis for judgement.
+> 4. Third-party modules, scripts and external project links referenced in this document are public community resources; the author is not responsible for the safety or reliability of third-party tools — please verify their sources yourself.
+> 5. The “risky / blacklisted package names” and “suspicious / cheat-related files and directories” listed in Appendix A and Appendix B come from the detector's built-in datasets, with classification based on public community information and project release pages; they are for environment-detection and anti-cheat reference only and do not constitute an absolute conclusion.
+> 6. The device-type definitions added in this document (Genuinely Unlocked Device, Fake-Relocked Device, No-Unlock Device, Self-Signed Device) are the first standardised definitions in this community, intended to promote uniform terminology; they carry no legal authority and are technical references only.
+> 7. The modules in the recommendation list are the editors' subjective technical recommendations with no commercial interest involved; for reference only.
+</details>
+
 ## Table of Contents
 - [Help & Feedback](#help--feedback)
 - [Prologue](#prologue)
