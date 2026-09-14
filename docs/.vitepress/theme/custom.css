@@ -1,11 +1,13 @@
-/* ============ 春秋检测器解决方案 · 站点微调（VitePress + MD3 观感） ============ */
+/* ============ 春秋检测器解决方案 · 站点微调（VitePress + MD3 观感 · 紧凑版） ============ */
 
 :root {
   --vp-c-brand-1: #a78bfa;
   --vp-c-brand-2: #8b5cf6;
   --vp-c-brand-3: #7c3aed;
   --vp-c-brand-soft: rgba(139, 92, 246, .16);
-  --cq-radius: 16px;
+  --cq-radius: 12px;
+  --cq-radius-sm: 10px;
+  --cq-gap: 10px;
 }
 .dark {
   --vp-c-bg: #141218;
@@ -15,82 +17,121 @@
   --vp-c-gutter: #2b2930;
 }
 
-/* 首页 hero */
-.VPHero .name { background: linear-gradient(120deg, #c4b5fd, #f0abfc 60%, #a78bfa); -webkit-background-clip: text; background-clip: text; }
-.VPHero .tagline { font-size: 15px; line-height: 1.8; }
+/* ---------- 整体尺寸收紧 ---------- */
+.vp-doc { font-size: 13.5px; line-height: 1.68; }
+.vp-doc h1 { font-size: 22px; letter-spacing: .2px; margin-bottom: 10px; }
+.vp-doc h2 { font-size: 17px; padding-top: 18px; margin: 20px 0 8px; border-top-width: 1px; }
+.vp-doc h3 { font-size: 14.5px; margin: 16px 0 6px; }
+.vp-doc p, .vp-doc li { margin: 6px 0; }
+.vp-doc ul, .vp-doc ol { padding-left: 18px; }
+.vp-doc hr { margin: 18px 0; }
+.vp-doc table { font-size: 12.5px; }
+.vp-doc th, .vp-doc td { padding: 6px 10px; }
+.vp-doc div[class*='language-'] { margin: 10px 0; border-radius: var(--cq-radius-sm); }
+.vp-doc :not(pre) > code { font-size: 12px; padding: 1px 5px; }
+.VPDoc .content-container { max-width: 760px !important; }
+.VPDoc.has-aside .content-container { max-width: 760px !important; }
 
-/* 首页卡片 */
-.VPFeature {
-  border: 1px solid var(--vp-c-divider) !important;
-  border-radius: var(--cq-radius) !important;
-  background: var(--vp-c-bg-alt) !important;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.VPFeature:hover { transform: translateY(-2px); border-color: var(--vp-c-brand-1) !important; box-shadow: 0 10px 28px rgba(0,0,0,.28); }
-.VPFeature .title { font-size: 15.5px; }
-.VPFeature .details { font-size: 13.5px; line-height: 1.7; color: var(--vp-c-text-2); }
+/* 侧边栏 */
+.VPSidebar { width: 250px !important; padding-top: 16px !important; }
+.VPSidebarItem .text { font-size: 12.5px; line-height: 1.5; }
+.VPSidebarItem.level-0 > .item > .text { font-size: 11.5px; letter-spacing: .03em; }
+.VPSidebarItem.level-1 .item, .VPSidebarItem.level-2 .item { padding: 3px 0; }
+.VPSidebarItem .item { min-height: 0; }
 
-/* 正文里的检测项卡片（details/summary） */
+/* 顶栏 */
+.VPNavBar { height: 48px; }
+.VPNavBar .title { font-size: 14px; }
+.VPNavBarMenuLink { font-size: 13px; line-height: 20px; }
+.VPLocalSearchBox .shell { --vp-local-search-result-max-height: 60vh; }
+
+/* ---------- 检测项卡片 ---------- */
 .vp-doc details {
   background: var(--vp-c-bg-alt);
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--cq-radius);
-  margin: 10px 0;
+  margin: var(--cq-gap) 0;
   overflow: hidden;
-  transition: box-shadow .18s ease, border-color .18s ease;
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
-.vp-doc details:hover { box-shadow: 0 8px 24px rgba(0,0,0,.25); border-color: var(--vp-c-brand-1); }
+.vp-doc details:hover { border-color: var(--vp-c-brand-1); box-shadow: 0 6px 18px rgba(0,0,0,.22); }
 .vp-doc details[open] { background: var(--vp-c-bg-soft); }
-.vp-doc summary {
-  cursor: pointer; padding: 13px 18px; font-weight: 600; font-size: 14.5px;
-  list-style: none; position: relative; transition: background .15s ease;
+.vp-doc details > summary {
+  cursor: pointer; list-style: none; position: relative;
+  padding: 9px 34px 9px 13px; font-weight: 600; font-size: 13.5px; line-height: 1.5;
+  transition: background .15s ease;
 }
-.vp-doc summary::-webkit-details-marker { display: none; }
-.vp-doc summary::after {
-  content: ""; position: absolute; right: 20px; top: 50%; width: 8px; height: 8px;
-  border-right: 2px solid var(--vp-c-text-3); border-bottom: 2px solid var(--vp-c-text-3);
+.vp-doc details > summary::-webkit-details-marker { display: none; }
+.vp-doc details > summary::after {
+  content: ""; position: absolute; right: 15px; top: 50%;
+  width: 7px; height: 7px;
+  border-right: 1.8px solid var(--vp-c-text-3); border-bottom: 1.8px solid var(--vp-c-text-3);
   transform: translateY(-70%) rotate(45deg); transition: transform .2s ease, border-color .2s ease;
 }
 .vp-doc details[open] > summary::after { transform: translateY(-30%) rotate(225deg); border-color: var(--vp-c-brand-1); }
-.vp-doc summary:hover { background: var(--vp-c-bg-soft); }
-.vp-doc details > *:not(summary) { padding-left: 18px; padding-right: 18px; }
-.vp-doc details > *:last-child { padding-bottom: 14px; }
-.vp-doc details details summary::after { transform: translateY(-70%) rotate(-45deg); }
-.vp-doc details details[open] > summary::after { transform: translateY(-30%) rotate(135deg); }
+.vp-doc details > summary:hover { background: var(--vp-c-bg-soft); }
+/* 内容区：用统一内边距，避免块级元素高度/边框错位 */
+.vp-doc details > *:not(summary) { padding-left: 13px; padding-right: 13px; }
+.vp-doc details > *:not(summary):first-of-type { margin-top: 0; }
+.vp-doc details > *:last-child { padding-bottom: 12px; margin-bottom: 0; }
+.vp-doc details details { margin: 6px 0; }
+.vp-doc details details > summary { font-size: 13px; padding: 7px 30px 7px 11px; }
+.vp-doc details details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
+.vp-doc details details > summary::after { width: 6px; height: 6px; }
 
-/* 引用块 → 提示条 */
+/* ---------- 提示条：改成整块圆角卡片（去掉高度不一致的左侧竖条） ---------- */
 .vp-doc blockquote {
-  border-left: 4px solid var(--vp-c-brand-1);
-  background: var(--vp-c-bg-soft);
-  border-radius: 12px;
-  padding: 12px 16px;
+  margin: 8px 0 !important;
+  padding: 8px 11px !important;
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: var(--cq-radius-sm);
 }
-.vp-doc blockquote > p { color: var(--vp-c-text-2); font-size: 13.5px; }
+.vp-doc blockquote > p { margin: 4px 0; font-size: 13px; color: var(--vp-c-text-2); }
+.vp-doc blockquote > p:first-child { margin-top: 0; }
+.vp-doc blockquote > p:last-child { margin-bottom: 0; }
+.vp-doc details > blockquote { margin: 2px 13px 8px !important; padding: 8px 11px !important; }
+.vp-doc details > blockquote:last-of-type { margin-bottom: 10px !important; }
 
-/* 表格 / 代码 */
-.vp-doc table { border-radius: 12px; overflow: hidden; }
-.vp-doc th { background: var(--vp-c-bg-soft); }
-.vp-doc div[class*='language-'] { border-radius: 12px; border: 1px solid var(--vp-c-divider); }
-
-/* 侧边栏：分组更像折叠树 */
-.VPSidebarItem.level-0 > .item > .text { font-size: 12px; letter-spacing: .04em; }
+/* ---------- 首页 ---------- */
+.VPHero .name { font-size: 30px; }
+.VPHero .text { font-size: 22px; }
+.VPHero .tagline { font-size: 13px; line-height: 1.7; }
+.VPHero .actions { margin-top: 18px; }
+.VPButton { font-size: 13px; padding: 0 16px; line-height: 34px; }
+.VPFeature { padding: 14px 16px !important; border-radius: var(--cq-radius) !important; }
+.VPFeature .icon { font-size: 20px; margin-bottom: 6px; }
+.VPFeature .title { font-size: 13.5px; }
+.VPFeature .details { font-size: 12.5px; line-height: 1.65; }
+.VPFeatures { margin-top: 24px !important; }
 
 /* 页脚版权卡 */
 .cq-copyright {
-  max-width: 1152px; margin: 24px auto 40px; padding: 18px 22px;
+  max-width: 760px; margin: 18px auto 30px; padding: 12px 16px;
   border: 1px solid var(--vp-c-divider); border-radius: var(--cq-radius);
-  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 13px; line-height: 1.9;
+  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 12px; line-height: 1.8;
 }
 .cq-copyright strong { color: var(--vp-c-text-1); }
 .cq-copyright a { color: var(--vp-c-brand-1); }
 
-/* 首页里的语言入口卡片 */
-.cq-lang { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; max-width: 900px; margin: 8px auto 0; }
+/* 首页语言入口卡 */
+.cq-lang { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-width: 760px; margin: 6px auto 0; }
 .cq-lang a {
-  display: block; padding: 18px 20px; border-radius: var(--cq-radius);
-  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-alt);
-  text-decoration: none !important; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  display: block; padding: 12px 14px; border-radius: var(--cq-radius);
+  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-alt); text-decoration: none !important;
+  transition: transform .16s ease, border-color .16s ease;
 }
-.cq-lang a:hover { transform: translateY(-2px); border-color: var(--vp-c-brand-1); box-shadow: 0 10px 26px rgba(0,0,0,.26); }
-.cq-lang .t { font-size: 15px; font-weight: 650; color: var(--vp-c-text-1); }
-.cq-lang .d { margin-top: 6px; font-size: 13px; color: var(--vp-c-text-2); line-height: 1.7; }
+.cq-lang a:hover { transform: translateY(-1px); border-color: var(--vp-c-brand-1); }
+.cq-lang .t { font-size: 13.5px; font-weight: 650; color: var(--vp-c-text-1); }
+.cq-lang .d { margin-top: 4px; font-size: 12px; color: var(--vp-c-text-2); line-height: 1.65; }
+
+/* ---------- 窄屏再收一档 ---------- */
+@media (max-width: 768px) {
+  .vp-doc { font-size: 13px; }
+  .vp-doc h1 { font-size: 20px; }
+  .vp-doc h2 { font-size: 16px; }
+  .vp-doc details > summary { font-size: 13px; padding: 8px 30px 8px 11px; }
+  .vp-doc details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
+  .VPHero .name { font-size: 25px; }
+  .VPHero .text { font-size: 19px; }
+}
