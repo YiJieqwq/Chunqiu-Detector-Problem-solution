@@ -1,0 +1,279 @@
+/* ===========================================================
+   春秋检测器解决方案 · Material Design 3 (MD3) 主题
+   参考 FolkPatch 文档站的版式：深色 + 大圆角卡片 + M3 色板
+   =========================================================== */
+
+/* ---------- 1. 设计令牌（M3 baseline 色板） ---------- */
+:root,
+html[data-theme="dark"] {
+  --md-primary: #D0BCFF;
+  --md-on-primary: #381E72;
+  --md-primary-container: #4F378B;
+  --md-on-primary-container: #EADDFF;
+  --md-secondary-container: #4A4458;
+  --md-on-secondary-container: #E8DEF8;
+  --md-tertiary: #EFB8C8;
+  --md-tertiary-container: #633B48;
+  --md-error: #F2B8B5;
+  --md-error-container: #8C1D18;
+  --md-surface: #141218;
+  --md-surface-1: #1D1B20;
+  --md-surface-2: #211F26;
+  --md-surface-3: #2B2930;
+  --md-surface-4: #322F37;
+  --md-on-surface: #E6E0E9;
+  --md-on-surface-variant: #CAC4D0;
+  --md-outline: #938F99;
+  --md-outline-variant: #49454F;
+  --md-inverse-surface: #E6E0E9;
+  --md-inverse-on-surface: #322F37;
+  --md-scrim: rgba(0, 0, 0, .55);
+  --md-shadow-1: 0 1px 3px rgba(0,0,0,.35);
+  --md-shadow-2: 0 4px 12px rgba(0,0,0,.42);
+  --md-shadow-3: 0 8px 24px rgba(0,0,0,.5);
+  /* 版式 */
+  --md-radius-xs: 8px;
+  --md-radius-sm: 12px;
+  --md-radius-md: 16px;
+  --md-radius-lg: 24px;
+  --md-radius-xl: 28px;
+  --md-sidebar-w: 300px;
+}
+
+html[data-theme="light"] {
+  --md-primary: #6750A4;
+  --md-on-primary: #FFFFFF;
+  --md-primary-container: #EADDFF;
+  --md-on-primary-container: #21005D;
+  --md-secondary-container: #E8DEF8;
+  --md-on-secondary-container: #1D192B;
+  --md-tertiary: #7D5260;
+  --md-tertiary-container: #FFD8E4;
+  --md-error: #B3261E;
+  --md-error-container: #F9DEDC;
+  --md-surface: #FEF7FF;
+  --md-surface-1: #F7F2FA;
+  --md-surface-2: #F3EDF7;
+  --md-surface-3: #ECE6F0;
+  --md-surface-4: #E6E0E9;
+  --md-on-surface: #1D1B20;
+  --md-on-surface-variant: #49454F;
+  --md-outline: #79747E;
+  --md-outline-variant: #CAC4D0;
+  --md-inverse-surface: #322F37;
+  --md-inverse-on-surface: #F5EFF7;
+  --md-scrim: rgba(0, 0, 0, .32);
+  --md-shadow-1: 0 1px 2px rgba(0,0,0,.12);
+  --md-shadow-2: 0 2px 8px rgba(0,0,0,.14);
+  --md-shadow-3: 0 6px 18px rgba(0,0,0,.16);
+}
+
+/* ---------- 2. 基础 ---------- */
+html { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+body {
+  background: var(--md-surface) !important;
+  color: var(--md-on-surface);
+  font-family: "HarmonyOS Sans SC", "MiSans", "Noto Sans SC", -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+* { scrollbar-width: thin; scrollbar-color: var(--md-outline-variant) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+a { color: var(--md-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- 3. 顶部应用栏 ---------- */
+.sidebar { background: var(--md-surface) !important; border-right: 1px solid var(--md-outline-variant) !important; width: var(--md-sidebar-w) !important; }
+.sidebar > h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+.sidebar .app-name-link { color: var(--md-on-surface) !important; display: flex; align-items: center; gap: 8px; }
+.sidebar .app-name-link img { max-height: 26px; }
+
+body .app-nav, .app-nav {
+  background: color-mix(in srgb, var(--md-surface) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--md-outline-variant);
+  padding: 6px 20px;
+}
+.app-nav a { color: var(--md-on-surface-variant); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+.app-nav a:hover, .app-nav a.active { background: var(--md-secondary-container); color: var(--md-on-secondary-container); text-decoration: none; }
+
+/* 主题切换按钮 */
+.md3-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 999px; cursor: pointer;
+  background: var(--md-surface-3); color: var(--md-on-surface);
+  border: 1px solid var(--md-outline-variant); font-size: 15px; line-height: 1;
+  transition: background .18s, transform .18s;
+}
+.md3-icon-btn:hover { background: var(--md-surface-4); transform: scale(1.04); }
+
+/* 搜索（沿用自带注入的 DOM 结构） */
+.nav-search-item { margin-left: 8px !important; }
+.nav-search-input {
+  background: var(--md-surface-3) !important; color: var(--md-on-surface) !important;
+  border: 1px solid var(--md-outline-variant) !important; border-radius: 999px !important;
+  padding: 8px 14px !important; width: 190px !important; font-size: 13px !important;
+}
+.nav-search-input::placeholder { color: var(--md-on-surface-variant); }
+.nav-search-input:focus { border-color: var(--md-primary) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary) 22%, transparent); outline: none; }
+.nav-search-dropdown {
+  background: var(--md-surface-2) !important; border: 1px solid var(--md-outline-variant) !important;
+  border-radius: var(--md-radius-md) !important; box-shadow: var(--md-shadow-3) !important; overflow: hidden;
+}
+.nav-search-result, .nav-search-result * { color: var(--md-on-surface) !important; }
+.nav-search-result { padding: 8px 14px !important; border-radius: var(--md-radius-xs); font-size: 13px; }
+.nav-search-result:hover { background: var(--md-surface-4) !important; }
+
+/* Docsify 自带搜索插件面板 */
+.search { border-bottom: 1px solid var(--md-outline-variant) !important; padding: 6px 0 12px !important; }
+.search input {
+  background: var(--md-surface-3) !important; color: var(--md-on-surface) !important;
+  border: 1px solid var(--md-outline-variant) !important; border-radius: 999px !important; padding: 9px 14px !important;
+}
+.search .results-panel { background: transparent !important; color: var(--md-on-surface-variant); font-size: 12.5px; }
+.search .matching-post { border-bottom: 1px solid var(--md-outline-variant) !important; padding: 10px 4px !important; }
+.search .matching-post a { color: var(--md-on-surface) !important; font-weight: 500; }
+.search .matching-post p { color: var(--md-on-surface-variant) !important; }
+.search .matching-post .search-keyword, em { color: var(--md-primary) !important; font-style: normal; font-weight: 600; }
+
+/* ---------- 4. 侧边栏（导航抽屉） ---------- */
+.sidebar-nav { padding: 4px 12px 40px; }
+.sidebar-nav > ul > li > strong,
+.sidebar-nav p > strong {
+  display: block; margin: 18px 6px 8px; font-size: 11.5px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--md-primary);
+}
+.sidebar-nav ul { list-style: none; margin: 0; padding: 0; }
+.sidebar-nav li { margin: 2px 0; }
+.sidebar-nav li a {
+  display: block; padding: 9px 14px; border-radius: 999px;
+  font-size: 13.5px; color: var(--md-on-surface-variant) !important;
+  transition: background .16s, color .16s;
+}
+.sidebar-nav li a:hover { background: var(--md-surface-3); color: var(--md-on-surface) !important; text-decoration: none; }
+.sidebar-nav li.active > a,
+.sidebar-nav li a.active { background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; font-weight: 600; }
+.sidebar-nav ul ul { padding-left: 6px; }
+
+/* 侧边栏徽标 */
+.md3-badge {
+  display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .02em; vertical-align: 1px;
+  background: var(--md-tertiary-container); color: #fff;
+}
+html[data-theme="light"] .md3-badge { color: var(--md-on-primary-container); }
+.md3-badge.must { background: var(--md-error-container); color: #fff; }
+
+/* ---------- 5. 正文容器（大圆角卡片） ---------- */
+.content { left: 0; padding: 0; }
+.markdown-section {
+  max-width: 920px !important; margin: 24px auto 64px !important;
+  padding: 36px 40px !important;
+  background: var(--md-surface-1) !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: var(--md-radius-xl) !important;
+  box-shadow: var(--md-shadow-1);
+  color: var(--md-on-surface);
+  line-height: 1.75; font-size: 15px;
+}
+@media screen and (min-width: 1400px) { .markdown-section { margin-left: calc(var(--md-sidebar-w) + 40px) !important; margin-right: 260px !important; } }
+@media screen and (max-width: 768px) { .markdown-section { margin: 12px !important; padding: 20px 18px !important; border-radius: var(--md-radius-lg) !important; } }
+
+.markdown-section h1 { font-size: 30px; font-weight: 700; letter-spacing: -.2px; margin-bottom: 8px; }
+.markdown-section h2 {
+  font-size: 22px; font-weight: 650; margin: 40px 0 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--md-outline-variant);
+}
+.markdown-section h3 { font-size: 17.5px; font-weight: 600; margin: 26px 0 10px; color: var(--md-on-surface); }
+.markdown-section h1 a, .markdown-section h2 a, .markdown-section h3 a { color: inherit !important; }
+.markdown-section strong { color: var(--md-on-surface); font-weight: 650; }
+.markdown-section hr { border: 0; border-top: 1px solid var(--md-outline-variant); margin: 28px 0; }
+.markdown-section p, .markdown-section li { color: var(--md-on-surface); }
+.markdown-section li::marker { color: var(--md-primary); }
+
+/* 行内代码 / 代码块 */
+.markdown-section code {
+  background: var(--md-surface-3) !important; color: var(--md-tertiary) !important;
+  border: 1px solid var(--md-outline-variant); border-radius: 6px;
+  padding: 1px 6px !important; font-size: 12.5px !important;
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+.markdown-section pre {
+  background: var(--md-surface-3) !important; border: 1px solid var(--md-outline-variant) !important;
+  border-radius: var(--md-radius-sm) !important; padding: 14px 16px !important;
+}
+.markdown-section pre code { background: transparent !important; border: 0; color: var(--md-on-surface) !important; padding: 0 !important; }
+
+/* 引用块 → M3 提示条 */
+.markdown-section blockquote {
+  margin: 16px 0 !important; padding: 14px 18px !important;
+  background: var(--md-surface-2) !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-left: 4px solid var(--md-primary) !important;
+  border-radius: var(--md-radius-sm) !important; color: var(--md-on-surface-variant) !important;
+}
+.markdown-section blockquote p { margin: 6px 0; color: var(--md-on-surface-variant); }
+
+/* 表格 */
+.markdown-section table { display: table; width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--md-outline-variant); border-radius: var(--md-radius-sm); overflow: hidden; }
+.markdown-section th { background: var(--md-surface-3); color: var(--md-on-surface); font-weight: 650; }
+.markdown-section th, .markdown-section td { border: 0; border-bottom: 1px solid var(--md-outline-variant); padding: 10px 14px; }
+
+/* ---------- 6. 检测项卡片（details/summary） ---------- */
+.markdown-section details {
+  background: var(--md-surface-2);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--md-radius-md);
+  margin: 12px 0; padding: 0; overflow: hidden;
+  transition: box-shadow .18s, border-color .18s, background .18s;
+}
+.markdown-section details:hover { box-shadow: var(--md-shadow-2); border-color: var(--md-outline); }
+.markdown-section details[open] { background: var(--md-surface-1); box-shadow: var(--md-shadow-1); }
+.markdown-section summary {
+  list-style: none; cursor: pointer; position: relative;
+  padding: 14px 46px 14px 18px; font-size: 15px; font-weight: 600; color: var(--md-on-surface);
+  border-radius: var(--md-radius-md);
+  transition: background .16s;
+}
+.markdown-section summary::-webkit-details-marker { display: none; }
+.markdown-section summary:hover { background: var(--md-surface-3); }
+.markdown-section summary::after {
+  content: "expand_more"; font-family: "Material Symbols Outlined", "Material Icons", sans-serif;
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%) rotate(0);
+  color: var(--md-on-surface-variant); font-size: 20px; transition: transform .2s, color .2s;
+}
+.markdown-section details[open] > summary::after { transform: translateY(-50%) rotate(180deg); color: var(--md-primary); }
+.markdown-section details > *:not(summary) { padding-left: 18px; padding-right: 18px; }
+.markdown-section details > *:last-child { padding-bottom: 16px; }
+.markdown-section details blockquote { margin-left: 0 !important; margin-right: 0 !important; }
+.markdown-section details details summary::after { content: "chevron_right"; }
+.markdown-section details details[open] > summary::after { transform: translateY(-50%) rotate(90deg); }
+
+/* 搜索命中高亮 */
+.search-highlight { animation: md3-pulse 1.6s ease-out; }
+@keyframes md3-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--md-primary) 55%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+
+/* ---------- 7. 右侧「本页目录」 ---------- */
+.md3-toc {
+  position: fixed; top: 84px; right: 20px; width: 208px; max-height: calc(100vh - 120px);
+  overflow-y: auto; padding: 12px; font-size: 12.5px;
+  background: var(--md-surface-1); border: 1px solid var(--md-outline-variant);
+  border-radius: var(--md-radius-md); box-shadow: var(--md-shadow-1);
+}
+.md3-toc-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--md-primary); margin: 2px 6px 8px; }
+.md3-toc a { display: block; padding: 6px 10px; border-radius: 999px; color: var(--md-on-surface-variant) !important; }
+.md3-toc a:hover { background: var(--md-surface-3); color: var(--md-on-surface) !important; text-decoration: none; }
+.md3-toc a.active { background: var(--md-secondary-container); color: var(--md-on-secondary-container) !important; font-weight: 600; }
+@media screen and (max-width: 1399px) { .md3-toc { display: none; } }
+
+/* ---------- 8. 杂项 ---------- */
+/* 折叠声明块（页首）稍作强调 */
+.markdown-section > details:first-of-type > summary { color: var(--md-error); }
+.github-corner svg { fill: var(--md-primary) !important; color: var(--md-surface) !important; }
+.sidebar-toggle { background: var(--md-surface-2) !important; border-radius: 999px; }
+.progress { background: linear-gradient(90deg, var(--md-primary), var(--md-tertiary)) !important; }
