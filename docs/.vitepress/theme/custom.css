@@ -125,3 +125,33 @@
 .vp-doc details blockquote > p { color: var(--vp-c-text-2); font-size: 13px; margin: 4px 0; }
 .vp-doc details blockquote > p:first-child { margin-top: 0; }
 .vp-doc details blockquote > p:last-child { margin-bottom: 0; }
+
+/* ================= v4：列表对齐 / 溢出 / 表格 / 阅读进度 ================= */
+
+/* 1) 卡片内的列表：只留一处内边距，别把编号/圆点推得过右 */
+.vp-doc details > ol,
+.vp-doc details > ul { padding-left: 28px !important; padding-right: 13px !important; margin: 6px 0 8px !important; }
+.vp-doc details > ol li,
+.vp-doc details > ul li { margin: 4px 0; }
+
+/* 2) 断行策略：正文只在必要时断词，避免“字体看着不对”的怪断行；仅代码允许任意断 */
+.vp-doc p, .vp-doc li, .vp-doc td, .vp-doc blockquote { overflow-wrap: break-word; word-break: normal; }
+.vp-doc :not(pre) > code, .vp-doc a { overflow-wrap: anywhere; }
+
+/* 3) 内容栏宽度自适应，杜绝桌面模式手机上的横向溢出 */
+.VPDoc .content-container,
+.VPDoc.has-aside .content-container {
+  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
+}
+
+/* 4) 表格：斑马纹 + 首列强调 */
+.vp-doc tbody tr:nth-child(2n) { background: var(--vp-c-bg-alt); }
+.vp-doc td:first-child { font-weight: 500; }
+.vp-doc table { border-radius: 10px; overflow: hidden; }
+
+/* 5) 顶部阅读进度条（由 head 中的小脚本驱动宽度） */
+#cq-progress {
+  position: fixed; top: 0; left: 0; height: 2px; width: 0;
+  background: linear-gradient(90deg, var(--vp-c-brand-2), var(--vp-c-brand-1));
+  z-index: 100; transition: width .08s linear;
+}
