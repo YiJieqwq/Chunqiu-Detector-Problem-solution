@@ -157,7 +157,6 @@
 }
 
 /* ================= v6：标准标题层级（H2 章节 / H3 条目 / H4 条目内小节） ================= */
-.VPDoc.has-aside .aside { display: block; }
 
 /* H2：大章节 */
 .vp-doc h2 { font-size: 19px; margin: 30px 0 10px; padding-top: 18px; }
@@ -175,3 +174,7 @@
 .vp-doc h4 + p, .vp-doc h4 + ol, .vp-doc h4 + ul, .vp-doc h4 + blockquote { margin-top: 4px; }
 /* 条目之间的呼吸感 */
 .vp-doc h3 + p, .vp-doc h3 + ul, .vp-doc h3 + ol, .vp-doc h3 + blockquote { margin-top: 4px; }
+
+
+/* 保险：窄屏必须隐藏右侧「本页目录」，否则会浮层盖住正文 */
+@media (max-width: 1279px) { .VPDoc .aside, .VPDoc.has-aside .aside { display: none !important; } }
