@@ -7,6 +7,9 @@ const DOCS = join(ROOT, 'docs')
 const ensure = p => mkdirSync(dirname(p), { recursive: true })
 const plainTitle = s => s.replace(/<[^>]+>/g, '').trim()
 
+// 分类图标（按出现顺序套用；中英各 8 组）
+const GROUP_ICON = ['📖', '🧭', '🔐', '🔑', '🗂️', '🧪', '⚙️', '📎']
+
 // 1) 附件：File/ → docs/public/File/（站点里 /File/... 链接可直接访问）
 rmSync(join(DOCS, 'public', 'File'), { recursive: true, force: true })
 if (existsSync(join(ROOT, 'File'))) cpSync(join(ROOT, 'File'), join(DOCS, 'public', 'File'), { recursive: true })
@@ -47,7 +50,7 @@ function convert(md, lang) {
       const name = plainTitle(h2[1])
       current = (['目录', 'Table of Contents', '声明', 'Disclaimer'].includes(name))
         ? { skip: true }
-        : { text: name, collapsed: true, items: [] }
+        : { text: `${GROUP_ICON[groups.filter(g => g.items).length] || '•'} ${name}`, collapsed: true, items: [] }
       groups.push(current)
       out.push(line)
       continue
