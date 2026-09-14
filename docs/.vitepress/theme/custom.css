@@ -34,9 +34,11 @@
 .VPDoc.has-aside .content-container { max-width: 760px !important; }
 
 /* 侧边栏 */
-.VPSidebar {
-  width: 250px !important;
-  padding-top: calc(var(--vp-nav-height) + 10px) !important;  /* 让开固定顶栏 */
+.VPSidebar { width: 250px !important; }
+/* 注意：VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，
+   所以这里必须写显式值；移动端抽屉保持 VitePress 原逻辑 */
+@media (min-width: 960px) {
+  .VPSidebar { padding-top: 60px !important; }   /* 顶栏 48px + 12px 间距 */
 }
 .VPSidebar .nav { padding-bottom: 56px !important; }
 .VPSidebarItem .text { font-size: 12.5px; line-height: 1.5; }
