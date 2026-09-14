@@ -208,25 +208,41 @@
 .DocSearch-Button-Placeholder { flex: 1 1 auto; text-align: left; font-size: 13px !important; }
 @media (max-width: 1120px) { .DocSearch-Button-Keys { display: none !important; } }
 
+/* ================= v9：卡片框回归 + 字号调整 ================= */
 
-/* ================= v8：右侧「本页目录」只在足够宽的屏幕显示，彻底消除叠字 =================
-   说明：桌面模式手机常见视口宽度 ≈1280px，会命中 VitePress 的 "≥1280 显示 aside" 断点，
-   而 aside 是绝对/固定定位，会浮在正文之上 → 把门槛提到 1440px。 */
-@media (max-width: 1439px) {
-  .VPDoc .aside,
-  .VPDoc.has-aside .aside { display: none !important; }
+/* 检测项标题（H3）字号调大一点 */
+.vp-doc h3 { font-size: 16px; font-weight: 650; }
+
+/* 条目内小节（H4）必须比正文大、且更醒目 */
+.vp-doc h4 { font-size: 14px; font-weight: 650; color: var(--vp-c-brand-1); margin: 14px 0 5px; }
+
+/* 灰色圆角卡片框：由主题脚本把每个条目的正文包进 .cq-card */
+.vp-doc .cq-card {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 8px 0 16px;
+  transition: border-color .16s ease;
 }
-@media (min-width: 1440px) {
-  .VPDoc .aside { display: block; }
+.vp-doc .cq-card:hover { border-color: var(--vp-c-brand-2); }
+.vp-doc .cq-card > *:first-child { margin-top: 0; }
+.vp-doc .cq-card > *:last-child { margin-bottom: 0; }
+/* 卡片内的提示条再收一层 */
+.vp-doc .cq-card blockquote { background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider) !important; border-radius: 10px; padding: 8px 11px !important; }
+
+/* 折叠箭头：H2 / H3 通用 */
+.vp-doc h2.cq-foldable,
+.vp-doc h3.cq-foldable { cursor: pointer; position: relative; padding-right: 28px; }
+.vp-doc h2.cq-foldable:hover,
+.vp-doc h3.cq-foldable:hover { color: var(--vp-c-brand-1); }
+.vp-doc h2.cq-foldable::after,
+.vp-doc h3.cq-foldable::after {
+  content: ""; position: absolute; right: 8px; top: 50%; width: 7px; height: 7px;
+  border-right: 1.8px solid var(--vp-c-text-3); border-bottom: 1.8px solid var(--vp-c-text-3);
+  transform: translateY(-60%) rotate(45deg); transition: transform .18s ease, border-color .18s ease;
 }
-/* 正文栏继续自适应，永远不与 aside 相撞 */
-.VPDoc .content-container,
-.VPDoc.has-aside .content-container {
-  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 360px)) !important;
-}
-@media (max-width: 1439px) {
-  .VPDoc .content-container,
-  .VPDoc.has-aside .content-container {
-    max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
-  }
-}
+.vp-doc h2.cq-collapsed::after,
+.vp-doc h3.cq-collapsed::after { transform: translateY(-40%) rotate(-45deg); }
+.vp-doc h2.cq-foldable:hover::after,
+.vp-doc h3.cq-foldable:hover::after { border-color: var(--vp-c-brand-1); }
