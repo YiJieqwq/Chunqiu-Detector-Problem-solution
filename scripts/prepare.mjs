@@ -12,7 +12,30 @@ rmSync(join(DOCS, 'public', 'File'), { recursive: true, force: true })
 if (existsSync(join(ROOT, 'File'))) cpSync(join(ROOT, 'File'), join(DOCS, 'public', 'File'), { recursive: true })
 
 // 2) 解析 Markdown：按 ## 分类聚合 <details> 条目，注入锚点
+// 规范化：</details> 独占一行且其前有空行（避免 Markdown 懒续行把闭合标签吞进引用段落）
+function normalizeDetails(md) {
+  const out = []
+  for (const l of md.split('\n')) {
+    const t = l.trim()
+    if (t === '</details>') {
+      if (out.length && out[out.length - 1].trim() !== '' && out[out.length - 1].trim() !== '</details>') out.push('')
+      out.push(l); continue
+    }
+    if (l.includes('</details>')) {
+      const pre = l.slice(0, l.indexOf('</details>')).trimEnd()
+      if (pre) { out.push(pre, '') }
+      out.push('</details>')
+      const rest = l.slice(l.indexOf('</details>') + '</details>'.length).trim()
+      if (rest) out.push(rest)
+      continue
+    }
+    out.push(l)
+  }
+  return out.join('\n')
+}
+
 function convert(md, lang) {
+  md = normalizeDetails(md)
   const lines = md.split('\n')
   const out = []
   const groups = []
