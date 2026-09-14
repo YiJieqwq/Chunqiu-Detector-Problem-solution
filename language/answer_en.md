@@ -569,7 +569,9 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > 
 > Unstable detection, occasional occurrence.
 
-> Relation: the same probe as the community name “App Zygote Fork Order Anomaly” (fork order inside the app_zygote / Zygisk early-injection residue).</details>
+> Relation: the same probe as the community name “App Zygote Fork Order Anomaly” (fork order inside the app_zygote / Zygisk early-injection residue).
+
+</details>
 
 <details>
 <summary>Mount loophole</summary>
