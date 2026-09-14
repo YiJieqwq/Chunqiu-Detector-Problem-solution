@@ -40,6 +40,7 @@ function convert(md, lang) {
   const out = []
   const groups = []
   let current = null
+  let lastDetailsIdx = -1
   for (const line of lines) {
     const h2 = line.match(/^##\s+(.+?)\s*$/)
     if (h2) {
@@ -51,13 +52,18 @@ function convert(md, lang) {
       out.push(line)
       continue
     }
+    if (/^<details\b/.test(line)) { lastDetailsIdx = out.length }
     const sum = line.match(/^<summary>(.*?)<\/summary>\s*$/)
     if (sum && current && !current.skip) {
       const title = plainTitle(sum[1])
       if (title && title !== '目录' && !title.includes('声明') && !title.includes('Disclaimer')) {
         const id = `item-${groups.length}-${current.items.length}`
         current.items.push({ text: title, link: `/${lang}/#${id}` })
-        out.push(`<a id="${id}"></a>`)
+        // 把 id 打到紧邻的 <details> 标签上（避免多出一个空行把标题挤下去）
+        if (lastDetailsIdx >= 0 && !/\sid=/.test(out[lastDetailsIdx])) {
+          out[lastDetailsIdx] = out[lastDetailsIdx].replace(/^<details/, `<details id="${id}"`)
+        }
+        lastDetailsIdx = -1
       }
     }
     out.push(line)
