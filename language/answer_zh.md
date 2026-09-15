@@ -183,7 +183,7 @@
 >       - KernelSU 系：不同分支的支持范围不完全相同，需要具体情况具体判断。以原版 KernelSU 为例，它仅支持 GKI2 内核。
 >   - **内核模块方案（可用于 KernelSU 系 / APatch 系 / Magisk 系）**：SELinux_Hook.kpm 一类 SELinux hook（内核模块；selinux_magisk_access_filter链接见序章「相关模块推荐」）。
 >     - 说明：目前有两种模块可用：原版 selinux_hook（即 selinux_magisk_access_filter）和 selinux_MAF_fork。[selinux_MAF_fork仓库地址见此](https://github.com/741afb7/selinux_maf_fork)
->     - 适用范围：原版 selinux_hook（即 selinux_magisk_access_filter）仅适用于 KernelSU 系 / APatch 系；selinux_MAF_fork 专注于适配 Magisk 系，但 KernelSU 系 / APatch 系仍然可用。
+>     - 适用范围：原版 selinux_hook（即 selinux_magisk_access_filter）仅适用于 KernelSU 系 / APatch 系；selinux_MAF_fork 专注于适配 Magisk 系，但 KernelSU 系 / APatch 系仍然可用。Magisk系必须包含[此代码](https://github.com/topjohnwu/Magisk/commit/5a28d2fcfcd3245f726933d7fd0a6173ea484e32)，否则该方法无法生效。
 >     - 运行模式：KernelSU 系和 Magisk 系必须嵌入才能生效，APatch 系在安装模式下也可生效。
 >     - 内核版本支持范围及要求：
 >       - selinux_MAF_fork：4.19 及以上和部分 4.14 内核，更详细的介绍见仓库的 README 文档。
