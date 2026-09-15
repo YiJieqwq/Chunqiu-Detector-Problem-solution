@@ -85,6 +85,19 @@ export default defineConfig({
     ['meta', { property: 'og:title', content: '春秋检测器解决方案' }],
     ['meta', { property: 'og:description', content: '社区实测整理的检测项说明与处置方案 · 中英双语' }],
     ['script', {}, `(function(){
+  /* 视图模式：默认桌面端（用 width=1024 让窄屏也走桌面布局）；可在右上角「⋯」菜单切换为移动端 */
+  var KEY='cq-view';
+  function apply(mode){
+    var content = mode==='mobile' ? 'width=device-width,initial-scale=1' : 'width=1024';
+    var vp=document.querySelector('meta[name="viewport"]');
+    if(vp){ vp.setAttribute('content', content); }
+    else { vp=document.createElement('meta'); vp.name='viewport'; vp.setAttribute('content', content); document.head.appendChild(vp); }
+  }
+  var mode='desktop';
+  try{ mode = localStorage.getItem(KEY) || 'desktop'; }catch(e){}
+  apply(mode);
+})();`],
+    ['script', {}, `(function(){
   /* 顶部阅读进度条 */
   function prog(){
     var d=document.getElementById('cq-progress');
