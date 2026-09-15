@@ -596,3 +596,25 @@
 @media (min-width: 960px) {
   .VPDoc .content-container, .VPDoc.has-aside .content-container { width: auto !important; }
 }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：修正 z-index 覆盖顶栏 + 长页面渲染性能
+   ===================================================================== */
+
+/* 1) 之前给侧边栏写死 z-index:31，反而盖住了顶栏左侧的标题/返回区。
+     改为跟随 VitePress 的层级变量：侧边栏低于顶栏、高于内容。 */
+:root { --vp-z-index-nav: 32; --vp-z-index-sidebar: 25; }
+@media (min-width: 960px) {
+  .VPSidebar { z-index: var(--vp-z-index-sidebar) !important; }
+  .VPNav { z-index: var(--vp-z-index-nav) !important; }
+  .VPNavBar { z-index: var(--vp-z-index-nav) !important; }
+}
+
+/* 2) 长页面渲染性能：离屏的条目内容不参与布局/绘制（滚动时再渲染） */
+.vp-doc .cq-item-body {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+/* 3) 去掉不必要的合成开销 */
+.vp-doc .cq-card { transition: none; }
+.vp-doc .cq-card:hover { box-shadow: none; }
