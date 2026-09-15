@@ -245,7 +245,7 @@
 .vp-doc h3.cq-foldable:hover::after { border-color: var(--vp-c-brand-1); }
 
 /* ================= v10：隐藏移动端局部导航条（它会在桌面模式下浮在正文上） ================= */
-.VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; }
+/* 见文件末尾：VPLocalNav 仅在宽屏隐藏（移动端保留「目录 / 回到顶部」） */
 
 /* =====================================================================
    CQ ESSENTIALS —— 关键规则区块（请勿删除；合并冲突时请整体保留）
@@ -296,7 +296,7 @@
 }
 
 /* 4. 移动端局部导航条（会在桌面模式下浮在正文上） */
-.VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; }
+/* 见文件末尾：VPLocalNav 仅在宽屏隐藏（移动端保留「目录 / 回到顶部」） */
 
 /* 5. 文档里的 --- 会与卡片边框叠成双线，站点内隐藏 */
 .vp-doc hr { display: none; }
@@ -437,7 +437,7 @@
    ===================================================================== */
 
 /* 1) VPLocalNav 只在“侧边栏常驻”的宽屏隐藏；移动端保留（它提供「目录 / 回到顶部」且负责顶部占位） */
-@media (min-width: 960px) { .VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; } }
+@media (min-width: 960px) { /* 见文件末尾：VPLocalNav 仅在宽屏隐藏（移动端保留「目录 / 回到顶部」） */ }
 @media (max-width: 959px) { .VPLocalNav { display: flex !important; } }
 
 /* 2) 「全部展开 / 全部折叠」按钮：移动端缩小并让开内容，避免压住文字 */
