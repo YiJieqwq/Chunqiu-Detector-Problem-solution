@@ -67,55 +67,9 @@ function init() {
     return owner
   }
 
-  /* ---------- ① 建卡：只包最后一级内容 ---------- */
-  const makeCard = (nodes: HTMLElement[], after: HTMLElement) => {
-    const card = document.createElement('div')
-    card.className = 'cq-card'
-    after.insertAdjacentElement('afterend', card)
-    nodes.forEach((n) => card.appendChild(n))
-    return card
-  }
-
-  const h3s = Array.from(doc.querySelectorAll('h3')) as HTMLElement[]
-  for (const h3 of h3s) {
-    if (h3.dataset.cqCards) continue
-    h3.dataset.cqCards = '1'
-    const nodes = rawBody(h3)
-    // 按 H4 分段
-    const groups: { h4: HTMLElement | null; nodes: HTMLElement[] }[] = []
-    let cur: { h4: HTMLElement | null; nodes: HTMLElement[] } = { h4: null, nodes: [] }
-    for (const n of nodes) {
-      if (/^H4$/.test(n.tagName)) {
-        groups.push(cur)
-        cur = { h4: n, nodes: [] }
-      } else {
-        cur.nodes.push(n)
-      }
-    }
-    groups.push(cur)
-
-    const h3Nodes: HTMLElement[] = []
-    for (const g of groups) {
-      if (g.nodes.length) {
-        const anchorEl = g.h4 ?? h3
-        const card = makeCard(g.nodes, anchorEl)
-        h3Nodes.push(card)
-        if (g.h4) (g.h4 as any).__cqNodes = [card]
-      }
-      if (g.h4) h3Nodes.push(g.h4)
-    }
-    ;(h3 as any).__cqNodes = h3Nodes
-  }
-
-  /* 独立的 H4（不隶属于任何 H3）也各自成卡 */
-  for (const h4 of Array.from(doc.querySelectorAll('h4')) as HTMLElement[]) {
-    if ((h4 as any).__cqNodes) continue
-    const nodes = rawBody(h4)
-    if (nodes.length) (h4 as any).__cqNodes = [makeCard(nodes, h4)]
-  }
-
-  /* 其余标题（H2 等）的折叠范围 */
-  for (const h of Array.from(doc.querySelectorAll('h2')) as HTMLElement[]) {
+  /* ---------- ① 卡片由构建时生成（见 config.mts 的 markdown 插件），运行时不包装 ---------- */
+  /* 节点范围：H2/H3/H4 之后、遇到同级或更高级标题为止 */
+  for (const h of Array.from(doc.querySelectorAll('h2, h3, h4')) as HTMLElement[]) {
     ;(h as any).__cqNodes = rawBody(h)
   }
 
