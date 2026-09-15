@@ -517,3 +517,25 @@
 /* 小节标签（检测方式 / 解决办法 / 术语…）不可折叠：鼠标样式与箭头一律去掉 */
 .vp-doc h4, .vp-doc h4.cq-foldable { cursor: text; padding-right: 12px; }
 .vp-doc h4::after, .vp-doc h4.cq-foldable::after { content: none !important; }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：折叠改为 class + CSS 驱动（唯一规则，不再靠 JS 逐节点隐藏）
+   ===================================================================== */
+.vp-doc h3.cq-collapsed + .cq-item-body { display: none !important; }
+
+/* 条目内容层：首个标签条（原来靠 h3 + h4 匹配，现在它在 .cq-item-body 里） */
+.vp-doc .cq-item-body > h4:first-child {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  margin: 10px 0 0 14px;
+  padding: 8px 14px 6px;
+}
+@media (max-width: 959px) {
+  .vp-doc .cq-item-body > h4:first-child { margin-left: 0; }
+}
+/* 条目内容层里、标签条之后的卡片沿用既有规则（h4 + .cq-card）；无标签条时首个卡片即完整卡片 */
+.vp-doc .cq-item-body > .cq-card:first-child { margin-top: 10px; }
+/* 内容层本身不产生额外间距 */
+.vp-doc .cq-item-body { display: block; }
