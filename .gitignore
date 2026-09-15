@@ -6,3 +6,7 @@ docs/public/File/
 docs/zh/
 docs/en/
 docs/thanks.md
+
+private/
+!public/detail/
+

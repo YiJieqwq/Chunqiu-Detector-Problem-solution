@@ -4,6 +4,7 @@ import './items.css'
 import { nextTick, h } from 'vue'
 import Breadcrumbs from './Breadcrumbs.vue'
 import type { EnhanceAppContext } from 'vitepress'
+let detailHtml: string | null = null
 
 /** 右上角「⋯」菜单：注入“桌面端 / 移动端”切换；并修正语言切换链接 */
 function injectViewToggle() {
@@ -42,9 +43,24 @@ function injectViewToggle() {
 
 
 let cleanup = () => {}
+async function unlockDetail() {
+  const lang=/\/en\//.test(location.pathname)?'en':'zh'
+  const base=(document.querySelector('base')?.href || location.origin+'/Chunqiu-Detector-Problem-solution/')
+  const r=await fetch(base+'detail/answer_'+lang+'.html.enc'); const x=await r.json()
+  const b64=(v:string)=>Uint8Array.from(atob(v),c=>c.charCodeAt(0))
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(prompt('请输入开发者验证密码 / Password')||''),'PBKDF2',false,['deriveKey'])
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(x.s),iterations:x.i,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt'])
+  const d=b64(x.d), tag=b64(x.t), all=new Uint8Array(d.length+tag.length); all.set(d);all.set(tag,d.length)
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(x.iv)},key,all); detailHtml=new TextDecoder().decode(plain)
+  applyDetail(); sessionStorage.setItem('cq-detail-ok','1')
+}
+function applyDetail(){ if(!detailHtml || !/\/items/.test(location.pathname)) return; const box=document.createElement('div');box.innerHTML=detailHtml; const fresh=[...box.querySelectorAll('details.cq-entry')], old=[...document.querySelectorAll('.vp-doc details.cq-entry')]; fresh.forEach((n,i)=>{if(old[i]) old[i].replaceWith(n)}); init() }
 function init() {
   cleanup()
   injectViewToggle()
+  const menu=document.querySelector('.VPNavBarExtra .VPMenu')
+  if(menu && !menu.querySelector('.cq-dev-item')){const g=document.createElement('div');g.className='group cq-dev-item';const p=document.createElement('p');p.className='label';p.textContent='开发者验证 / Developer';const b=document.createElement('button');b.className='cq-dev-btn';b.textContent=detailHtml?'已解密 / Decrypted':'输入密码 / Verify';b.onclick=()=>unlockDetail().catch(()=>alert('密码错误或解密失败 / Verification failed'));g.append(p,b);menu.append(g)}
+  applyDetail()
   const doc = document.querySelector('.vp-doc')
   const items = Array.from(doc?.querySelectorAll<HTMLDetailsElement>('details.cq-entry') || [])
   const english = /\/en\//.test(location.pathname)

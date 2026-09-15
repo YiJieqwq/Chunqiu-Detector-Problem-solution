@@ -125,3 +125,6 @@
 .vp-doc h2[id], .vp-doc h3[id], .vp-doc h4[id] {
   scroll-margin-top: calc(var(--vp-nav-height) + 64px);
 }
+.cq-dev-btn { display:block; width:100%; margin-top:8px; padding:8px 12px; border:1px solid var(--vp-c-divider); border-radius:8px; background:var(--vp-c-bg-soft); color:var(--vp-c-text-1); cursor:pointer; }
+.cq-dev-btn:hover { border-color:var(--vp-c-brand-1); color:var(--vp-c-brand-1); }
+.cq-dev-item .cq-dev-btn{display:block;width:100%;padding:7px 10px;border:1px solid var(--vp-c-divider);border-radius:8px;background:var(--vp-c-bg-soft);color:var(--vp-c-text-1);cursor:pointer}.cq-dev-item .cq-dev-btn:hover{color:var(--vp-c-brand-1);border-color:var(--vp-c-brand-1)}
