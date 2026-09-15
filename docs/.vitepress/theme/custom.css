@@ -30,34 +30,6 @@
 .VPFeature .title { font-size: 15.5px; }
 .VPFeature .details { font-size: 13.5px; line-height: 1.7; color: var(--vp-c-text-2); }
 
-/* 正文里的检测项卡片（details/summary） */
-.vp-doc details {
-  background: var(--vp-c-bg-alt);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: var(--cq-radius);
-  margin: 10px 0;
-  overflow: hidden;
-  transition: box-shadow .18s ease, border-color .18s ease;
-}
-.vp-doc details:hover { box-shadow: 0 8px 24px rgba(0,0,0,.25); border-color: var(--vp-c-brand-1); }
-.vp-doc details[open] { background: var(--vp-c-bg-soft); }
-.vp-doc summary {
-  cursor: pointer; padding: 13px 18px; font-weight: 600; font-size: 14.5px;
-  list-style: none; position: relative; transition: background .15s ease;
-}
-.vp-doc summary::-webkit-details-marker { display: none; }
-.vp-doc summary::after {
-  content: ""; position: absolute; right: 20px; top: 50%; width: 8px; height: 8px;
-  border-right: 2px solid var(--vp-c-text-3); border-bottom: 2px solid var(--vp-c-text-3);
-  transform: translateY(-70%) rotate(45deg); transition: transform .2s ease, border-color .2s ease;
-}
-.vp-doc details[open] > summary::after { transform: translateY(-30%) rotate(225deg); border-color: var(--vp-c-brand-1); }
-.vp-doc summary:hover { background: var(--vp-c-bg-soft); }
-.vp-doc details > *:not(summary) { padding-left: 18px; padding-right: 18px; }
-.vp-doc details > *:last-child { padding-bottom: 14px; }
-.vp-doc details details summary::after { transform: translateY(-70%) rotate(-45deg); }
-.vp-doc details details[open] > summary::after { transform: translateY(-30%) rotate(135deg); }
-
 /* 引用块 → 提示条 */
 .vp-doc blockquote {
   border-left: 4px solid var(--vp-c-brand-1);
@@ -392,9 +364,9 @@
 
 /* 版权卡（与首页风格一致） */
 .cq-copyright {
-  max-width: 760px; margin: 26px auto 8px; padding: 14px 18px;
+  width: 100%; max-width: none; margin: 36px 0 12px; padding: 22px 24px;
   border: 1px solid var(--vp-c-divider); border-radius: 12px;
-  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 12.5px; line-height: 1.9;
+  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 15px; line-height: 1.9;
 }
 .cq-copyright strong { color: var(--vp-c-text-1); }
 .cq-copyright a { color: var(--vp-c-brand-1); }
@@ -544,8 +516,8 @@
    CQ ESSENTIALS 追加：层级缩进统一 + 小节标签条去锚点/不可点
    ===================================================================== */
 
-:root { --cq-indent: 16px; }
-@media (max-width: 959px) { :root { --cq-indent: 12px; } }
+:root { --cq-indent: 0px; }
+@media (max-width: 959px) { :root { --cq-indent: 0px; } }
 
 /* 一级：H2 分类不缩进；二级：H3 条目缩进一级；条目内容层与条目对齐 */
 .vp-doc h3 { padding-left: var(--cq-indent); }
