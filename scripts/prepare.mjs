@@ -119,11 +119,14 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
       .replace(/\n{3,}/g, '\n\n')
       .trimEnd() + '\n\n' + copy + '\n'
 
-  const promote = (t) => t.replace(/^##\s+/, '# ')   // 页面首个 H2 提升为 H1（页面标题）
+  const promote = (t, title) => {
+    const out = t.replace(/^##\s+/, '# ')   // 页面首个 H2 提升为 H1
+    return title ? out.replace(/^#\s+.*$/m, '# ' + title) : out
+  }
   const pages = {
     intro: finish(intro).replace(/(\n)(##\s+)/, `$1${chapters}\n$1$2`),
-    prologue: finish(promote(prologue)),
-    items: finish(promote(items))
+    prologue: finish(promote(prologue, lang === 'zh' ? '前言' : 'Prologue')),
+    items: finish(promote(items) )
   }
 
   const sidebar = [
@@ -139,7 +142,7 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
     {
       text: lang === 'zh' ? '第三章 · 正文' : 'Chapter 3 · Detection Items',
       link: `/${lang}/items`,
-      collapsed: true,
+      collapsed: false,
       items: itemSections.map((s, i) => ({
         text: `${GROUP_ICON[i] || '•'} ${s.category}`,
         collapsed: true,
