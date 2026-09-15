@@ -145,7 +145,7 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
       collapsed: false,
       items: itemSections.map((s, i) => ({
         text: `${GROUP_ICON[i] || '•'} ${s.category}`,
-        collapsed: true,
+        collapsed: false,
         items: s.items.map((it) => ({ text: it.title, link: `/${lang}/items#${it.slug}` }))
       }))
     }

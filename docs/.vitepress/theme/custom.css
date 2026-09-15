@@ -225,13 +225,13 @@
 
 /* 1. 布局基准：顶栏高度 / 侧边栏宽度（必须改变量，否则内容区留白错位） */
 :root {
-  --vp-nav-height: 48px;
+  --vp-nav-height: 64px;
   --vp-sidebar-width: 250px;
 }
 .VPSidebar { width: var(--vp-sidebar-width) !important; }
 @media (min-width: 960px) {
   /* VitePress 会在 .VPSidebar 内部把 --vp-nav-height 重定义为 22px，故写显式值 */
-  .VPSidebar { padding-top: 60px !important; }
+  .VPSidebar { padding-top: 80px !important; }
 }
 
 /* 2. 顶栏不透明（避免左侧透出侧边栏颜色） */

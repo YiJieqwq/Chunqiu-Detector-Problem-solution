@@ -81,3 +81,47 @@
 @media (max-width: 959px) {
   #cq-fold-all { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
 }
+
+/* Sidebar indentation belongs to each direct child container, including level 0. */
+.VPSidebar .VPSidebarItem > .items {
+  padding-left: 14px; margin-left: 0;
+  border-left: 1px solid var(--vp-c-divider);
+}
+.VPSidebar .VPSidebarItem > .item > .link { min-width: 0; }
+.VPSidebar .VPSidebarItem > .item .text { overflow-wrap: anywhere; line-height: 1.65; }
+.VPSidebar .VPSidebarItem > .item > .indicator { left: -15px; }
+.VPSidebar .VPSidebarItem:not(.collapsed) > .item > .caret .caret-icon { transform: rotate(90deg); }
+.VPSidebar .VPSidebarItem.collapsed > .item > .caret .caret-icon { transform: rotate(0); }
+
+/* Independent controls: body (gray, upper) and sidebar (brand, lower). */
+#cq-sidebar-fold {
+  position: fixed; z-index: 40; right: 24px;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  min-width: 176px; min-height: 48px; padding: 12px 20px;
+  font-size: 15px; font-weight: 650; line-height: 1.4;
+  color: var(--vp-button-brand-text); background: var(--vp-button-brand-bg);
+  border: 1px solid var(--vp-button-brand-border); border-radius: 14px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%); cursor: pointer;
+}
+#cq-sidebar-fold[hidden] { display: none !important; }
+#cq-sidebar-fold:hover { background: var(--vp-button-brand-hover-bg); }
+#cq-fold-all {
+  bottom: calc(max(24px, env(safe-area-inset-bottom)) + 60px);
+  min-width: 176px; font-size: 15px;
+  background: var(--vp-c-bg-soft); color: var(--vp-c-text-1);
+  border-color: var(--vp-c-divider);
+}
+#cq-fold-all:hover { background: var(--vp-c-bg-alt); color: var(--vp-c-brand-1); }
+#cq-sidebar-fold:focus-visible { outline: 2px solid var(--vp-c-brand-1); outline-offset: 4px; }
+.VPDoc .content-container { padding-bottom: 144px; }
+@media (max-width: 959px) {
+  #cq-sidebar-fold { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
+  #cq-fold-all { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 60px); }
+}
+/* Fixed-width sidebar must not inherit centered-layout padding on ultrawide screens. */
+@media (min-width: 1440px) {
+  .VPSidebar { padding-left: 24px !important; padding-right: 20px !important; }
+}
+.vp-doc h2[id], .vp-doc h3[id], .vp-doc h4[id] {
+  scroll-margin-top: calc(var(--vp-nav-height) + 64px);
+}

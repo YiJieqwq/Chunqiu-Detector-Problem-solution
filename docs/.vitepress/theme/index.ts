@@ -59,7 +59,7 @@ function init() {
     if (!btn) return
     btn.hidden = !items.length
     const allOpen = items.length > 0 && items.every(i => i.open)
-    btn.textContent = english ? (allOpen ? 'Collapse all' : 'Expand all') : (allOpen ? '全部折叠' : '全部展开')
+    btn.textContent = english ? (allOpen ? 'Collapse body' : 'Expand body') : (allOpen ? '正文全部折叠' : '正文全部展开')
   }
   const onToggle = (e: Event) => {
     const item = e.target as HTMLDetailsElement
@@ -73,6 +73,34 @@ function init() {
     updateButton()
   }
   updateButton()
+  // Sidebar state stays owned by VitePress. Invoke its carets, never override classes.
+  const sidebar = document.querySelector<HTMLElement>('.VPSidebar')
+  let sideButton = document.getElementById('cq-sidebar-fold') as HTMLButtonElement | null
+  if (!sideButton) {
+    sideButton = document.createElement('button'); sideButton.id = 'cq-sidebar-fold'
+    sideButton.type = 'button'; document.body.appendChild(sideButton)
+  }
+  sideButton.hidden = !sidebar || !doc
+  const groups = () => Array.from(sidebar?.querySelectorAll<HTMLElement>('.VPSidebarItem.collapsible') || [])
+  const updateSidebar = () => {
+    const open = groups().every(g => !g.classList.contains('collapsed'))
+    sideButton!.textContent = english ? (open ? 'Collapse sidebar' : 'Expand sidebar') : (open ? '侧边栏全部折叠' : '侧边栏全部展开')
+  }
+  let active = true
+  const afterSidebar = () => { void nextTick(() => { if (active) updateSidebar() }) }
+  sideButton.onclick = () => {
+    const entries = groups()
+    const expand = entries.some(g => g.classList.contains('collapsed'))
+    for (const g of entries) {
+      if (g.classList.contains('collapsed') === expand) {
+        g.querySelector<HTMLElement>(':scope > .item > .caret')?.click()
+      }
+    }
+    afterSidebar()
+  }
+  sidebar?.addEventListener('click', afterSidebar)
+  sidebar?.addEventListener('keydown', afterSidebar)
+  updateSidebar()
   let frame = 0
   const focusHash = () => {
     let id = ''
@@ -88,6 +116,10 @@ function init() {
   window.addEventListener('hashchange', focusHash)
   focusHash()
   cleanup = () => {
+    active = false
+    sidebar?.removeEventListener('click', afterSidebar)
+    sidebar?.removeEventListener('keydown', afterSidebar)
+    if (sideButton) sideButton.onclick = null
     cancelAnimationFrame(frame)
     doc?.removeEventListener('toggle', onToggle, true)
     window.removeEventListener('hashchange', focusHash)
