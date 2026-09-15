@@ -11,10 +11,10 @@ import type { EnhanceAppContext } from 'vitepress'
  * 2) 折叠策略
  *    - H2 声明 / 说明与反馈：可折叠，默认折叠；其余 H2 不可折叠
  *    - H3：序章下的不可折叠；检测项可折叠、默认折叠
- *    - H4：可折叠、默认展开
+ *    - H4（检测方式/解决办法…）：不可折叠，永远显示
  * 3) 跳转锚点自动展开目标；右下角「全部展开 / 全部折叠」
  */
-const STORE_KEY = 'cq-fold-v4'
+const STORE_KEY = 'cq-fold-v5'
 
 type State = Record<string, boolean>
 const readState = (): State => {
@@ -131,7 +131,7 @@ function init() {
     if (isIntro) return { foldable: false, open: true }
     if (n === 2) return { foldable: false, open: true }   // 章节标题一律不折叠
     if (n === 3) return isItems ? { foldable: true, open: false } : { foldable: false, open: true }
-    if (n === 4) return { foldable: true, open: true }    // 小节：可折叠、默认展开
+    if (n === 4) return { foldable: false, open: true }   // 小节（检测方式/解决办法…）：不可折叠，永远显示
     return { foldable: false, open: true }
   }
 
