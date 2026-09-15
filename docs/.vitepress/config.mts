@@ -31,11 +31,16 @@ const cqCardsPlugin = (md: any) => {
       if (i < end) { out.push(tokens[i]); i++ }        // h3 close
 
       let inCard = false
-      const openCard = () => { if (!inCard) { out.push(mk('<div class="cq-card">\n')); inCard = true } }
+      let footer = false   // 版权卡 / 章节入口卡等“页脚块”：不包进卡片
+      const openCard = () => { if (!inCard && !footer) { out.push(mk('<div class="cq-card">\n')); inCard = true } }
       const closeCard = () => { if (inCard) { out.push(mk('</div>\n')); inCard = false } }
 
       let segStart = i
       for (let k = i; k < end; k++) {
+        // 页脚块（版权卡 / 三章入口卡）：先收尾当前卡片，且此后不再开卡
+        if (tokens[k].type === 'html_block' && /cq-(copyright|chapters)/.test(tokens[k].content || '')) {
+          closeCard(); footer = true; out.push(tokens[k]); continue
+        }
         if (isH(tokens[k], 'h4')) {
           // H4 之前的正文先收尾成卡片
           if (k > segStart) openCard()
