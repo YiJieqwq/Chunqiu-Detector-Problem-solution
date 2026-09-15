@@ -128,3 +128,20 @@
 .cq-dev-btn { display:block; width:100%; margin-top:8px; padding:8px 12px; border:1px solid var(--vp-c-divider); border-radius:8px; background:var(--vp-c-bg-soft); color:var(--vp-c-text-1); cursor:pointer; }
 .cq-dev-btn:hover { border-color:var(--vp-c-brand-1); color:var(--vp-c-brand-1); }
 .cq-dev-item .cq-dev-btn{display:block;width:100%;padding:7px 10px;border:1px solid var(--vp-c-divider);border-radius:8px;background:var(--vp-c-bg-soft);color:var(--vp-c-text-1);cursor:pointer}.cq-dev-item .cq-dev-btn:hover{color:var(--vp-c-brand-1);border-color:var(--vp-c-brand-1)}
+
+/* Document surfaces: a shared neutral canvas in both appearance modes.
+   Scoped to docs so the landing-page palette stays unchanged. */
+:root { --cq-doc-bg: #ffffff; --cq-doc-card: #f6f6f7; --cq-doc-line: #e2e2e3; }
+.dark { --cq-doc-bg: #1b1b1f; --cq-doc-card: #232327; --cq-doc-line: #353539; }
+.VPSidebar, .VPContent.has-sidebar, .VPDoc {
+  --vp-c-bg: var(--cq-doc-bg);
+  --vp-c-bg-alt: var(--cq-doc-card);
+  --vp-c-bg-soft: var(--cq-doc-card);
+  --vp-c-divider: var(--cq-doc-line);
+  --vp-sidebar-bg-color: var(--cq-doc-bg);
+  background-color: var(--cq-doc-bg) !important;
+}
+.VPSidebar .curtain { background-color: var(--cq-doc-bg) !important; }
+.VPDoc .container, .VPDoc .content, .VPDoc .content-container, .VPDoc .vp-doc {
+  background-color: var(--cq-doc-bg);
+}
