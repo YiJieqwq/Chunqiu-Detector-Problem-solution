@@ -102,14 +102,14 @@ Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_b
 
   const chapters = lang === 'zh'
     ? `<div class="cq-chapters">
-<a href="/zh/"><span class="n">第一章</span><span class="t">概述</span><span class="d">项目信息 · 免责声明 · 说明与反馈 · 版权</span></a>
-<a href="/zh/prologue"><span class="n">第二章</span><span class="t">前言</span><span class="d">术语定义 · 最小模块集合 · 模块推荐 · 正确配置</span></a>
-<a href="/zh/items"><span class="n">第三章</span><span class="t">正文</span><span class="d">95 个检测项：检测方式 · 分组说明 · 解决办法</span></a>
+<a href="./"><span class="n">第一章</span><span class="t">概述</span><span class="d">项目信息 · 免责声明 · 说明与反馈 · 版权</span></a>
+<a href="prologue"><span class="n">第二章</span><span class="t">前言</span><span class="d">术语定义 · 最小模块集合 · 模块推荐 · 正确配置</span></a>
+<a href="items"><span class="n">第三章</span><span class="t">正文</span><span class="d">95 个检测项：检测方式 · 分组说明 · 解决办法</span></a>
 </div>`
     : `<div class="cq-chapters">
-<a href="/en/"><span class="n">Chapter 1</span><span class="t">Overview</span><span class="d">Project info · Disclaimer · Help &amp; Feedback · License</span></a>
-<a href="/en/prologue"><span class="n">Chapter 2</span><span class="t">Prologue</span><span class="d">Terminology · Minimal module set · Recommendations · Configuration</span></a>
-<a href="/en/items"><span class="n">Chapter 3</span><span class="t">Detection Items</span><span class="d">95 items: detection method · notes · solutions</span></a>
+<a href="./"><span class="n">Chapter 1</span><span class="t">Overview</span><span class="d">Project info · Disclaimer · Help &amp; Feedback · License</span></a>
+<a href="prologue"><span class="n">Chapter 2</span><span class="t">Prologue</span><span class="d">Terminology · Minimal module set · Recommendations · Configuration</span></a>
+<a href="items"><span class="n">Chapter 3</span><span class="t">Detection Items</span><span class="d">95 items: detection method · notes · solutions</span></a>
 </div>`
 
   const finish = (text) =>
