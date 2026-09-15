@@ -539,3 +539,32 @@
 .vp-doc .cq-item-body > .cq-card:first-child { margin-top: 10px; }
 /* 内容层本身不产生额外间距 */
 .vp-doc .cq-item-body { display: block; }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：层级缩进统一 + 小节标签条去锚点/不可点
+   ===================================================================== */
+
+:root { --cq-indent: 16px; }
+@media (max-width: 959px) { :root { --cq-indent: 12px; } }
+
+/* 一级：H2 分类不缩进；二级：H3 条目缩进一级；条目内容层与条目对齐 */
+.vp-doc h3 { padding-left: var(--cq-indent); }
+.vp-doc .cq-item-body { margin-left: var(--cq-indent); }
+
+/* 条目内容层内部：标签条与卡片不再各自缩进（缩进只由内容层统一负责） */
+.vp-doc .cq-item-body > h4,
+.vp-doc .cq-item-body > .cq-card { margin-left: 0 !important; margin-right: 0 !important; }
+.vp-doc h4 { padding-left: 12px !important; padding-right: 12px !important; }
+.vp-doc .cq-item-body > h4:first-child { margin-left: 0 !important; }
+
+/* 小节标签条（检测方式/解决办法/术语…）：
+   - 不显示 “#” 锚点
+   - 不可点击（去掉 hover 变色与手型光标）
+   - 标题本身不响应鼠标（内容照常可选） */
+.vp-doc h4 > .header-anchor { display: none !important; }
+.vp-doc h4, .vp-doc h4:hover { cursor: default; color: var(--vp-c-brand-1); }
+.vp-doc h4::after { content: none !important; }
+
+/* 代码框（.cq-card）本身不可点、不显示手型 */
+.vp-doc .cq-card, .vp-doc .cq-card * { cursor: auto; }
+.vp-doc .cq-card:hover { border-color: var(--vp-c-divider); }
