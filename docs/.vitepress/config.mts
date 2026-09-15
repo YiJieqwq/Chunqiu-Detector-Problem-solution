@@ -29,6 +29,7 @@ const cqCardsPlugin = (md: any) => {
       out.push(tokens[i]); i++                        // h3 open
       if (i < end) { out.push(tokens[i]); i++ }        // h3 inline
       if (i < end) { out.push(tokens[i]); i++ }        // h3 close
+      out.push(mk('<div class="cq-item-body">\n'))      // 条目内容外再包一层：折叠只需一条 CSS 规则
 
       let inCard = false
       let footer = false   // 版权卡 / 章节入口卡等“页脚块”：不包进卡片
@@ -39,7 +40,9 @@ const cqCardsPlugin = (md: any) => {
       for (let k = i; k < end; k++) {
         // 页脚块（版权卡 / 三章入口卡）：先收尾当前卡片，且此后不再开卡
         if (tokens[k].type === 'html_block' && /cq-(copyright|chapters)/.test(tokens[k].content || '')) {
-          closeCard(); footer = true; out.push(tokens[k]); continue
+          closeCard()
+          if (!footer) out.push(mk('</div>\n'))   // 先关掉条目内容层，页脚块留在外面
+          footer = true; out.push(tokens[k]); continue
         }
         if (isH(tokens[k], 'h4')) {
           // H4 之前的正文先收尾成卡片
@@ -58,6 +61,7 @@ const cqCardsPlugin = (md: any) => {
         out.push(tokens[k])
       }
       closeCard()
+      if (!footer) out.push(mk('</div>\n'))       // 关掉 cq-item-body
       i = end
     }
     state.tokens = out
