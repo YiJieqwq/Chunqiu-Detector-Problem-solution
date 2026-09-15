@@ -172,6 +172,15 @@ export default defineConfig({
       options: {
         translations: { button: { buttonText: '搜索 / Search', buttonAriaLabel: '搜索文档' } },
         miniSearch: {
+          /* 排序权重：关键字出现在“越高的层级”权重越高
+             title = 当前小节标题（条目名 / 检测方式 / 解决办法…）
+             titles = 面包屑（祖先标题）
+             text  = 正文 */
+          searchOptions: {
+            fuzzy: 0.2,
+            prefix: true,
+            boost: { title: 12, titles: 3, text: 1 }
+          },
           options: {
             tokenize: (text: string) => text
               .split(/[\s\-_/，。、；：！？（）【】]+/)
