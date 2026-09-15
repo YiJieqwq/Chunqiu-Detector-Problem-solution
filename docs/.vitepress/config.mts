@@ -31,14 +31,16 @@ export default defineConfig({
     search: {
       provider: 'local',
       options: {
-        translations: { button: { buttonText: '搜索', buttonAriaLabel: '搜索' } },
-        miniSearch: {
-          options: {
-            tokenize: (text: string) => text.split(/[\s\-_/，。、；：！？（）【】]+/).flatMap((w) =>
-              typeof Intl !== 'undefined' && (Intl as any).Segmenter
-                ? [...new (Intl as any).Segmenter('zh', { granularity: 'word' }).segment(w)].map((s: any) => s.segment)
-                : [w]
-            )
+        locales: {
+          zh: {
+            translations: {
+              button: { buttonText: '搜索', buttonAriaLabel: '搜索' },
+              modal: {
+                noResultsText: '无法找到相关结果',
+                resetButtonTitle: '清除查询条件',
+                footer: { selectText: '选择', navigateText: '切换', closeText: '关闭' }
+              }
+            }
           }
         }
       }

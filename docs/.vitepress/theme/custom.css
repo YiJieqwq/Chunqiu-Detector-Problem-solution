@@ -6,9 +6,9 @@
   --vp-c-brand-3: #7c3aed;
   --vp-c-brand-soft: rgba(139, 92, 246, .16);
   --vp-nav-height: 48px;      /* 统一顶栏高度：侧边栏/内容偏移都会跟着变 */
-  --cq-radius: 12px;
-  --cq-radius-sm: 10px;
-  --cq-gap: 10px;
+  --cq-radius: 6px;
+  --cq-radius-sm: 4px;
+  --cq-gap: 4px;
 }
 .dark {
   --vp-c-bg: #141218;
@@ -19,10 +19,10 @@
 }
 
 /* ---------- 整体尺寸收紧 ---------- */
-.vp-doc { font-size: 13.5px; line-height: 1.68; }
-.vp-doc h1 { font-size: 22px; letter-spacing: .2px; margin-bottom: 10px; }
-.vp-doc h2 { font-size: 17px; padding-top: 18px; margin: 20px 0 8px; border-top-width: 1px; }
-.vp-doc h3 { font-size: 14.5px; margin: 16px 0 6px; }
+.vp-doc { font-size: 13px; line-height: 1.68; }
+.vp-doc h1 { font-size: 20px; letter-spacing: .2px; margin-bottom: 10px; }
+.vp-doc h2 { font-size: 15px; padding-top: 18px; margin: 20px 0 8px; border-top-width: 1px; }
+.vp-doc h3 { font-size: 14px; margin: 16px 0 6px; }
 .vp-doc p, .vp-doc li { margin: 6px 0; }
 .vp-doc ul, .vp-doc ol { padding-left: 18px; }
 .vp-doc hr { margin: 18px 0; }
@@ -70,7 +70,7 @@
 }
 .vp-doc details > summary {
   cursor: pointer; list-style: none; position: relative;
-  padding: 9px 34px 9px 13px; font-weight: 600; font-size: 13.5px; line-height: 1.5;
+  padding: 8px 30px 8px 10px; font-weight: 600; font-size: 13px; line-height: 1.4;
   transition: background .15s ease;
 }
 .vp-doc details > summary::-webkit-details-marker { display: none; }
@@ -84,12 +84,12 @@
 .vp-doc details > summary { border-radius: 0; }
 .vp-doc details > summary:hover { background: var(--vp-c-bg-soft); }
 /* 内容区：用统一内边距，避免块级元素高度/边框错位 */
-.vp-doc details > *:not(summary) { padding-left: 13px; padding-right: 13px; }
+.vp-doc details > *:not(summary) { padding-left: 10px; padding-right: 10px; }
 .vp-doc details > *:not(summary):first-of-type { margin-top: 0; }
 .vp-doc details > *:last-child { padding-bottom: 12px; margin-bottom: 0; }
 .vp-doc details details { margin: 6px 0; }
-.vp-doc details details > summary { font-size: 13px; padding: 7px 30px 7px 11px; }
-.vp-doc details details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
+.vp-doc details details > summary { font-size: 12.5px; padding: 6px 26px 6px 8px; }
+.vp-doc details details > *:not(summary) { padding-left: 8px; padding-right: 8px; }
 .vp-doc details details > summary::after { width: 6px; height: 6px; }
 
 /* ---------- 提示条：改成整块圆角卡片（去掉高度不一致的左侧竖条） ---------- */
@@ -140,11 +140,39 @@
 
 /* ---------- 窄屏再收一档 ---------- */
 @media (max-width: 768px) {
-  .vp-doc { font-size: 13px; }
-  .vp-doc h1 { font-size: 20px; }
-  .vp-doc h2 { font-size: 16px; }
-  .vp-doc details > summary { font-size: 13px; padding: 8px 30px 8px 11px; }
-  .vp-doc details > *:not(summary) { padding-left: 11px; padding-right: 11px; }
+  .vp-doc { font-size: 12px; }
+  .vp-doc h1 { font-size: 18px; }
+  .vp-doc h2 { font-size: 15px; }
+  .vp-doc details > summary { font-size: 12px; padding: 6px 24px 6px 8px; }
+  .vp-doc details > *:not(summary) { padding-left: 8px; padding-right: 8px; }
   .VPHero .name { font-size: 25px; }
   .VPHero .text { font-size: 19px; }
+}
+
+/* ---------- 展开/闭合动画 ---------- */
+/* Using grid trick for details animation */
+.vp-doc details::details-content {
+  display: block;
+}
+.vp-doc details {
+  interpolate-size: allow-keywords;
+}
+
+.vp-doc details {
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.vp-doc details[open] > *:not(summary) {
+  animation: details-show 0.25s ease-in-out;
+}
+
+@keyframes details-show {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
