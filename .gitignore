@@ -1,3 +1,4 @@
+node_modules
 node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
@@ -6,3 +7,5 @@ docs/public/File/
 docs/zh/
 docs/en/
 docs/thanks.md
+
+private/
