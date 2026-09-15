@@ -387,3 +387,36 @@
 }
 .cq-copyright strong { color: var(--vp-c-text-1); }
 .cq-copyright a { color: var(--vp-c-brand-1); }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：卡片连续化 + 概述页排版
+   ===================================================================== */
+
+/* 同一段内相邻卡片视觉上连成一张（H4 标签作为卡片内的分段条） */
+.vp-doc h3 + h4,
+.vp-doc .cq-card + h4 {
+  background: var(--vp-c-bg-alt);
+  border-left: 1px solid var(--vp-c-divider);
+  border-right: 1px solid var(--vp-c-divider);
+  border-top: 1px solid var(--vp-c-divider);
+  margin: 0 0 0 14px;
+  padding: 8px 14px 6px;
+}
+.vp-doc h3 + h4 { border-radius: 12px 12px 0 0; margin-top: 8px; }
+.vp-doc .cq-card + h4 { border-top: 0; }
+.vp-doc h4 + .cq-card { margin-top: 0 !important; border-top-left-radius: 0; border-top-right-radius: 0; }
+.vp-doc .cq-card:has(+ h4) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-color: transparent; }
+/* 分组收尾：最后一张卡恢复圆角 */
+.vp-doc .cq-card:not(:has(+ h4)) { border-radius: 12px; }
+
+/* 概述页：三章入口卡 */
+.cq-chapters { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0 26px; }
+.cq-chapters a {
+  display: flex; flex-direction: column; gap: 3px; text-decoration: none !important;
+  padding: 14px 16px; border: 1px solid var(--vp-c-divider); border-radius: 12px;
+  background: var(--vp-c-bg-alt); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.cq-chapters a:hover { transform: translateY(-2px); border-color: var(--vp-c-brand-1); box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+.cq-chapters .n { font-size: 11px; letter-spacing: .12em; color: var(--vp-c-brand-1); font-weight: 700; }
+.cq-chapters .t { font-size: 15px; font-weight: 650; color: var(--vp-c-text-1); }
+.cq-chapters .d { font-size: 12px; line-height: 1.7; color: var(--vp-c-text-2); }
