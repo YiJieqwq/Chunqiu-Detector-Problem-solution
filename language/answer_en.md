@@ -67,7 +67,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 ## Prologue
 
-<details open>
+<details>
 <summary><b>Terminology & Conventions</b></summary>
 
 > **Genuinely Unlocked Device**: a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
@@ -89,7 +89,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > **App-hiding module**: a module that operates on “package visibility” — it intercepts the package-query path inside a target process (or a system process) and hides selected apps from the configured target app.
 
 </details>
-<details open>
+<details>
 <summary><b>Minimal Module Set for a Perfectly Hidden Environment</b></summary>
 
 > - Genuinely unlocked device: **key module + Zygisk provider + app-hiding module**
@@ -98,7 +98,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > For **APatch / FolkPatch** users, additionally load **[NoHello.kpm](https://t.me/welikeandroid)** to guard against the side-channel detection; newer managers may have a built-in SELinux hook (must be enabled manually), and users on older versions can additionally load **[SELinux_Hook.kpm](https://t.me/APatch_nightly)** (links are given in “Recommended Modules” below).
 
 </details>
-<details open>
+<details>
 <summary><b>Recommended Modules (in no particular order)</b></summary>
 
 > **Key modules**
@@ -124,7 +124,7 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 > - [Hybrid-Mount](https://github.com/Hybrid-Mount/meta-hybrid_mount): a widely used third-party metamodule.
 
 </details>
-<details open>
+<details>
 <summary><b>Correct Module Configuration</b></summary>
 
 > **Key module**
