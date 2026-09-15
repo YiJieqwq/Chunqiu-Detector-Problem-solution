@@ -1,7 +1,7 @@
 # 致谢清单 · Chunqiu Detector Solutions / Credits
 
 > 整理时间：2026-09-13
-> 数据来源：GitHub API（提交记录 + Pull Request 记录）
+> 数据来源：GitHub API（历史提交与 PR 记录）及贡献者补充。下方提交数量为 2026-09-13 的历史快照，不代表当前总数。
 
 ---
 
@@ -11,6 +11,7 @@
   *佐证：90 次提交（2026-04-07 起）；PR #30–#35 的合并人。*
 
 - **YiJieqwq** —— 文档结构重构；各条目「检测方式」补充与指标附录；检测项更新；术语规范化；中英文同步。
+  负责文档网站的持续建设与维护：规划并落地概述／前言／正文三章结构，中英文目录、锚点与搜索对齐；推进原生条目折叠、侧边栏独立控制、路径导航、桌面／移动界面切换及深浅色适配，持续复核页面结构与修复交互问题。
   *佐证：41 次提交（2026-06-11 起）；PR #18 / #19 / #20 / #24 / #39 / #40 / #41。*
 
 - **741afb7** —— 更正多条错误解释；文档拆分；引入 `File/Doc/ksu_kp_sidechannel_zh.md` 与 NoHello KPM（`File/Bin/`）；修订 SELinux_Hook 使用说明。
@@ -28,9 +29,11 @@
 - **HongSir6（畜中牲）** —— 中文条目修正。
   *佐证：1 次提交（2026-05-01）；PR #6。*
 
-## 二、特别致谢（未通过 GitHub 提交）
+## 二、特别致谢
 
-- **[JeTeeZNtMax](https://github.com/jeteezntmax)** —— 提供 **16 个检测点**方面的整理与线索。
+- **[Matsuzaka Yuki](https://github.com/matsuzaka-yuki)** —— 提供网页建设方面的支持。
+
+- **[JeTeeZnTmax](https://github.com/jeteezntmax)** —— 提供 **16 个检测点**方面的整理与线索。
   因其未在 GitHub 仓库提交，故不会出现在提交记录与贡献者列表中，特此致谢。
 
 ## 三、工具与自动化
@@ -51,7 +54,7 @@
 # Credits · Chunqiu Detector Solutions
 
 > Compiled: 2026-09-13
-> Sources: GitHub API (commit history + pull-request records)
+> Sources: historical GitHub commit/PR records and contributor additions. Counts below are a snapshot as of 2026-09-13, not current totals.
 
 ## 1. Documentation contributors
 
@@ -59,6 +62,7 @@
   *Evidence: 90 commits (since 2026-04-07); merged PRs #30–#35.*
 
 - **YiJieqwq** — document restructuring; per-item “Detection method” sections and the indicator appendices; detection-item updates; terminology standardisation; ZH/EN synchronisation.
+  Led ongoing website development and maintenance: the Overview / Prologue / Detection Items structure; bilingual navigation, anchors and search; native disclosures, independent sidebar controls, breadcrumbs, desktop/mobile view selection and light/dark styling; continued structural checks and interaction fixes.
   *Evidence: 41 commits (since 2026-06-11); PRs #18 / #19 / #20 / #24 / #39 / #40 / #41.*
 
 - **741afb7** — corrected several wrong explanations; split the document; introduced `File/Doc/ksu_kp_sidechannel_zh.md` and the NoHello KPM (`File/Bin/`); revised the SELinux_Hook usage notes.
@@ -76,9 +80,11 @@
 - **HongSir6 (畜中牲)** — Chinese item corrections.
   *Evidence: 1 commit (2026-05-01); PR #6.*
 
-## 2. Special thanks (no GitHub commits)
+## 2. Special thanks
 
-- **[JeTeeZNtMax](https://github.com/jeteezntmax)** — provided organisation and leads for **16 detection items**. Because they never committed to this repository, they do not appear in the commit history or the contributor list; recorded here in thanks.
+- **[Matsuzaka Yuki](https://github.com/matsuzaka-yuki)** — provided support with website development.
+
+- **[JeTeeZnTmax](https://github.com/jeteezntmax)** — provided organisation and leads for **16 detection items**. Because they never committed to this repository, they do not appear in the commit history or the contributor list; recorded here in thanks.
 
 ## 3. Tools & automation
 
