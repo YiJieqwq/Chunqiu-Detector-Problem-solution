@@ -72,7 +72,7 @@ export default defineConfig({
           { text: 'GitHub', link: REPO }
         ],
         sidebar: { '/zh/': sidebar.zh },
-        outline: { level: [2, 3], label: '本页目录' },
+        outline: false, aside: false,
         docFooter: { prev: '上一篇', next: '下一篇' },
         returnToTopLabel: '回到顶部',
         sidebarMenuLabel: '目录',
@@ -98,7 +98,7 @@ export default defineConfig({
           { text: 'GitHub', link: REPO }
         ],
         sidebar: { '/en/': sidebar.en },
-        outline: { level: [2, 3], label: 'On this page' },
+        outline: false, aside: false,
         docFooter: { prev: 'Previous', next: 'Next' },
         returnToTopLabel: 'Return to top',
         sidebarMenuLabel: 'Menu',

@@ -30,9 +30,9 @@
 
 ## 二、特别致谢
 
-- **[LyraVoid（有希）](https://github.com/LyraVoid)** —— 提供网页建设方面的支持。
+- **[Matsuzaka Yuki](https://github.com/matsuzaka-yuki)** —— 提供网页建设方面的支持。
 
-- **[JeTeeZNtMax](https://github.com/jeteezntmax)** —— 提供 **16 个检测点**方面的整理与线索。
+- **[JeTeeZnTmax](https://github.com/jeteezntmax)** —— 提供 **16 个检测点**方面的整理与线索。
   因其未在 GitHub 仓库提交，故不会出现在提交记录与贡献者列表中，特此致谢。
 
 ## 三、工具与自动化
@@ -80,9 +80,9 @@
 
 ## 2. Special thanks
 
-- **[LyraVoid (Yuki)](https://github.com/LyraVoid)** — provided support with website development.
+- **[Matsuzaka Yuki](https://github.com/matsuzaka-yuki)** — provided support with website development.
 
-- **[JeTeeZNtMax](https://github.com/jeteezntmax)** — provided organisation and leads for **16 detection items**. Because they never committed to this repository, they do not appear in the commit history or the contributor list; recorded here in thanks.
+- **[JeTeeZnTmax](https://github.com/jeteezntmax)** — provided organisation and leads for **16 detection items**. Because they never committed to this repository, they do not appear in the commit history or the contributor list; recorded here in thanks.
 
 ## 3. Tools & automation
 

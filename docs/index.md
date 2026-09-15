@@ -35,7 +35,7 @@ features:
     details: 仅供 Root 爱好者的环境检测技术学习与研究；严禁用于绕过反作弊、规避风控等违规场景，操作风险自负。
   - icon: 🤝
     title: 致谢
-    details: 铭鐏(mingzun09)、741afb7、huoyan1231、juanma0511、Young-Six-6、HongSir6、YiJieqwq，以及特别致谢 JeTeeZNtMax。
+    details: 铭鐏(mingzun09)、741afb7、huoyan1231、juanma0511、Young-Six-6、HongSir6、YiJieqwq，以及特别致谢 JeTeeZnTmax。
 ---
 
 ## 快速开始

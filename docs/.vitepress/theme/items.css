@@ -145,3 +145,23 @@
 .VPDoc .container, .VPDoc .content, .VPDoc .content-container, .VPDoc .vp-doc {
   background-color: var(--cq-doc-bg);
 }
+
+/* Match navigation to the neutral document canvas, including navbar sublayers. */
+.VPNav, .VPNavBar {
+  --vp-nav-bg-color: var(--cq-doc-bg);
+  --vp-c-bg: var(--cq-doc-bg);
+  background-color: var(--cq-doc-bg) !important;
+}
+.VPNavBar .content-body, .VPNavBar .title, .VPNavBar .curtain {
+  background-color: var(--cq-doc-bg) !important;
+}
+/* Remove the local outline strip and its compensating top space. */
+.VPLocalNav { display: none !important; }
+.VPContent.has-sidebar { padding-top: var(--vp-nav-height) !important; }
+.cq-mobile-sidebar { display: none; }
+@media (max-width: 959px) {
+  .cq-mobile-sidebar { display: inline-block; margin-bottom: 16px; padding: 6px 12px; border: 1px solid var(--vp-c-divider); border-radius: 8px; color: var(--vp-c-brand-1); }
+}
+@media (min-width: 1440px) {
+  .VPDoc .content-container { max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important; }
+}

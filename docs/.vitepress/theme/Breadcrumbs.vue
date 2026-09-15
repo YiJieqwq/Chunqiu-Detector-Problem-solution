@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
 const { page } = useData()
+function openSidebar() { document.querySelector<HTMLButtonElement>('.VPLocalNav button.menu')?.click() }
 const english = computed(() => page.value.relativePath.startsWith('en/'))
 const languagePath = computed(() => withBase(english.value ? '/en/' : '/zh/'))
 const chapter = computed(() => {
@@ -15,6 +16,7 @@ const chapter = computed(() => {
 </script>
 
 <template>
+  <button class="cq-mobile-sidebar" type="button" @click="openSidebar">{{ english ? 'Open sidebar' : '打开侧边栏' }}</button>
   <nav class="cq-breadcrumbs" :aria-label="english ? 'Breadcrumb' : '当前位置'">
     <a :href="withBase('/')">{{ english ? 'Home' : '首页' }}</a>
     <span aria-hidden="true">›</span>
