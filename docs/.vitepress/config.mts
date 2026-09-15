@@ -1,73 +1,9 @@
+import nativeItems from './items.mjs'
 import { defineConfig } from 'vitepress'
 import sidebar from './data/sidebar'
 
 const REPO = 'https://github.com/mingzun09/Chunqiu-Detector-Problem-solution'
 
-
-/* 构建时把每个检测条目的正文包成 .cq-card（避免运行时 JS 包装被 hydration 重建导致的框分裂/漏包）
-   规则：H3 条目的内容按 H4 分段，每段正文各自一个 .cq-card；H4 标题留在框外 */
-const cqCardsPlugin = (md: any) => {
-  md.core.ruler.push('cq_cards', (state: any) => {
-    const tokens: any[] = state.tokens
-    const isH = (t: any, tag: string) => t.type === 'heading_open' && t.tag === tag
-    const mk = (content: string) => {
-      const t = new state.Token('html_block', '', 0)
-      t.content = content
-      t.block = true
-      return t
-    }
-    const out: any[] = []
-    let i = 0
-    while (i < tokens.length) {
-      const t = tokens[i]
-      if (!isH(t, 'h3')) { out.push(t); i++; continue }
-
-      // 该 H3 的范围：[i, end)
-      let end = i + 1
-      while (end < tokens.length && !(isH(tokens[end], 'h2') || isH(tokens[end], 'h3'))) end++
-
-      out.push(tokens[i]); i++                        // h3 open
-      if (i < end) { out.push(tokens[i]); i++ }        // h3 inline
-      if (i < end) { out.push(tokens[i]); i++ }        // h3 close
-      out.push(mk('<div class="cq-item-body">\n'))      // 条目内容外再包一层：折叠只需一条 CSS 规则
-
-      let inCard = false
-      let footer = false   // 版权卡 / 章节入口卡等“页脚块”：不包进卡片
-      const openCard = () => { if (!inCard && !footer) { out.push(mk('<div class="cq-card">\n')); inCard = true } }
-      const closeCard = () => { if (inCard) { out.push(mk('</div>\n')); inCard = false } }
-
-      let segStart = i
-      for (let k = i; k < end; k++) {
-        // 页脚块（版权卡 / 三章入口卡）：先收尾当前卡片，且此后不再开卡
-        if (tokens[k].type === 'html_block' && /cq-(copyright|chapters)/.test(tokens[k].content || '')) {
-          closeCard()
-          if (!footer) out.push(mk('</div>\n'))   // 先关掉条目内容层，页脚块留在外面
-          footer = true; out.push(tokens[k]); continue
-        }
-        if (isH(tokens[k], 'h4')) {
-          // H4 之前的正文先收尾成卡片
-          if (k > segStart) openCard()
-          closeCard()
-          out.push(tokens[k])                          // h4 open
-          if (k + 1 < end) out.push(tokens[k + 1])     // h4 inline
-          if (k + 2 < end) out.push(tokens[k + 2])     // h4 close
-          k += 2
-          segStart = k + 1
-          continue
-        }
-        if (k >= segStart ^ inCard) { /* noop: 保持简单 */ }
-        // 非标题 token：若当前段落有内容则开卡
-        if (k === segStart) openCard()
-        out.push(tokens[k])
-      }
-      closeCard()
-      if (!footer) out.push(mk('</div>\n'))       // 关掉 cq-item-body
-      i = end
-    }
-    state.tokens = out
-    return true
-  })
-}
 
 export default defineConfig({
   title: '春秋检测器解决方案',
@@ -78,7 +14,7 @@ export default defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: true,
   markdown: {
-    config: cqCardsPlugin
+    config: nativeItems
   },
   head: [
     ['meta', { name: 'theme-color', content: '#141218' }],

@@ -1,34 +1,8 @@
 import DefaultTheme from 'vitepress/theme'
 import './custom.css'
+import './items.css'
+import { nextTick } from 'vue'
 import type { EnhanceAppContext } from 'vitepress'
-
-/**
- * 站点增强（客户端）——折叠改为“class + CSS”驱动，避免运行时改 DOM 结构带来的错位
- *
- * 结构（构建时生成，见 config.mts 的 markdown 插件）：
- *   <h3 id="...">条目名</h3>
- *   <div class="cq-item-body">
- *     <h4>检测方式</h4><div class="cq-card">…</div>
- *     <h4>解决办法</h4><div class="cq-card">…</div>
- *   </div>
- *
- * 折叠：给 h3 加/去 .cq-collapsed，CSS 负责隐藏 h3 + .cq-item-body
- */
-const STORE_KEY = 'cq-fold-v6'
-
-const readState = (): Record<string, boolean> => {
-  try {
-    return JSON.parse(localStorage.getItem(STORE_KEY) || '{}')
-  } catch {
-    return {}
-  }
-}
-const writeState = (s: Record<string, boolean>) => {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(s))
-  } catch {}
-}
-
 
 /** 右上角「⋯」菜单：注入“桌面端 / 移动端”切换；并修正语言切换链接 */
 function injectViewToggle() {
@@ -65,99 +39,73 @@ function injectViewToggle() {
   menu.appendChild(group)
 }
 
+
+let cleanup = () => {}
 function init() {
+  cleanup()
   injectViewToggle()
   const doc = document.querySelector('.vp-doc')
-  if (!doc) return
-
-  /* 只有“正文”页（/items）的条目可折叠；前言页与概述页不折叠 */
-  const isItems = /\/items$/.test(location.pathname.replace(/\/$/, ''))
-  const state = readState()
-  const items = Array.from(doc.querySelectorAll('h3')) as HTMLElement[]
-
-  const render = (h: HTMLElement) => {
-    if (!isItems) {
-      h.classList.remove('cq-collapsed', 'cq-foldable')
-      return
-    }
-    h.classList.add('cq-foldable')
-    const collapsed = h.id in state ? !state[h.id] : true // 默认折叠
-    h.classList.toggle('cq-collapsed', collapsed)
-  }
-
-  items.forEach((h) => {
-    if (!h.id) h.id = 'cq-' + Math.abs((h.textContent || '').length * 7919 + items.indexOf(h))
-    if (!h.dataset.cqReady) {
-      h.dataset.cqReady = '1'
-      h.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a')) return
-        if (!isItems) return
-        const collapsed = h.id in state ? !state[h.id] : true
-        state[h.id] = collapsed // 记录“展开”
-        writeState(state)
-        render(h)
-      })
-    }
-    render(h)
-  })
-
-  /* 跳转锚点时自动展开目标条目 */
-  const expandTarget = () => {
-    const id = decodeURIComponent((location.hash.replace(/^#\/?/, '').split('?')[0] || ''))
-    if (!id) return
-    const el = document.getElementById(id)
-    if (!el) return
-    const body = el.closest('.cq-item-body')
-    let h: HTMLElement | null = null
-    if (el.tagName === 'H3') h = el as HTMLElement
-    else if (body) h = body.previousElementSibling as HTMLElement | null
-    else if (el.closest('h4')) {
-      const b = (el.closest('h4') as HTMLElement).closest('.cq-item-body')
-      h = b ? (b.previousElementSibling as HTMLElement) : null
-    }
-    if (h && h.tagName === 'H3') {
-      state[h.id] = true
-      writeState(state)
-      render(h)
-    }
-  }
-  if (!(window as any).__cqExpand) {
-    ;(window as any).__cqExpand = expandTarget
-    window.addEventListener('hashchange', () => setTimeout(expandTarget, 60))
-  }
-  setTimeout(expandTarget, 80)
-
-  /* 右下角：全部展开 / 全部折叠 */
+  const items = Array.from(doc?.querySelectorAll<HTMLDetailsElement>('details.cq-entry') || [])
+  const english = /\/en\//.test(location.pathname)
+  const key = 'cq-native-items:' + location.pathname
+  let saved: Record<string, boolean> = {}
+  try { saved = JSON.parse(localStorage.getItem(key) || '{}') } catch {}
+  const idOf = (el: Element) => el.querySelector('summary h3')?.id || ''
+  for (const item of items) item.open = saved[idOf(item)] === true
   let btn = document.getElementById('cq-fold-all') as HTMLButtonElement | null
-  if (!btn) {
-    btn = document.createElement('button')
-    btn.id = 'cq-fold-all'
-    btn.type = 'button'
+  if (!btn && items.length) {
+    btn = document.createElement('button'); btn.id = 'cq-fold-all'; btn.type = 'button'
     document.body.appendChild(btn)
   }
-  let allOpen = false
-  btn.textContent = '全部展开'
-  btn.onclick = () => {
-    allOpen = !allOpen
-    items.forEach((h) => {
-      state[h.id] = allOpen
-      writeState(state)
-      render(h)
-    })
-    btn!.textContent = allOpen ? '全部折叠' : '全部展开'
+  const updateButton = () => {
+    if (!btn) return
+    btn.hidden = !items.length
+    const allOpen = items.length > 0 && items.every(i => i.open)
+    btn.textContent = english ? (allOpen ? 'Collapse all' : 'Expand all') : (allOpen ? '全部折叠' : '全部展开')
+  }
+  let saveTimer: ReturnType<typeof setTimeout>
+  const onToggle = (e: Event) => {
+    const item = e.target as HTMLDetailsElement
+    if (!items.includes(item)) return
+    saved[idOf(item)] = item.open
+    clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => { try { localStorage.setItem(key, JSON.stringify(saved)) } catch {} }, 120)
+    updateButton()
+  }
+  doc?.addEventListener('toggle', onToggle, true)
+  if (btn) btn.onclick = () => {
+    const open = !items.every(i => i.open)
+    items.forEach(i => { i.open = open })
+    updateButton()
+  }
+  updateButton()
+  let frame = 0
+  const focusHash = () => {
+    let id = ''
+    try { id = decodeURIComponent(location.hash.slice(1)) } catch { return }
+    const target = document.getElementById(id)
+    if (!target) return
+    for (let node: HTMLElement | null = target; node; node = node.parentElement) {
+      if (node instanceof HTMLDetailsElement) node.open = true
+    }
+    cancelAnimationFrame(frame)
+    frame = requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }))
+  }
+  window.addEventListener('hashchange', focusHash)
+  focusHash()
+  cleanup = () => {
+    clearTimeout(saveTimer); cancelAnimationFrame(frame)
+    doc?.removeEventListener('toggle', onToggle, true)
+    window.removeEventListener('hashchange', focusHash)
+    if (btn) btn.onclick = null
   }
 }
-
 export default {
   extends: DefaultTheme,
   enhanceApp({ router }: EnhanceAppContext) {
     if (typeof window === 'undefined') return
-    const run = () => {
-      setTimeout(init, 60)
-      // 只做几次延迟重试（此前用 setInterval 每 800ms 扫 DOM，明显拖慢页面）
-      ;[200, 900, 2200].forEach((d) => setTimeout(injectViewToggle, d))
-    }
-    window.addEventListener('load', run)
-    ;(router as any).onAfterRouteChanged = run
+    const run = async () => { await nextTick(); init() }
+    window.addEventListener('load', run, { once: true })
+    router.onAfterRouteChanged = run
   }
 }
