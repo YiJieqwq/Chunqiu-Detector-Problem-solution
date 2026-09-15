@@ -154,8 +154,8 @@ export default {
     if (typeof window === 'undefined') return
     const run = () => {
       setTimeout(init, 60)
-      setTimeout(injectViewToggle, 200)
-      setInterval(injectViewToggle, 800)
+      // 只做几次延迟重试（此前用 setInterval 每 800ms 扫 DOM，明显拖慢页面）
+      ;[200, 900, 2200].forEach((d) => setTimeout(injectViewToggle, d))
     }
     window.addEventListener('load', run)
     ;(router as any).onAfterRouteChanged = run
