@@ -491,3 +491,25 @@
 /* 3) 本地导航条：「本页目录」靠最右 */
 .VPLocalNav { width: 100% !important; justify-content: space-between !important; }
 .VPLocalNavOutlineDropdown { margin-left: auto !important; }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：卡片圆角连续化（消除分段之间的缝）
+   ===================================================================== */
+
+/* 后面还跟着小节标签的卡片：去掉下圆角、下描边与下外边距，与标签条无缝相接 */
+.vp-doc .cq-card:has(+ h4) {
+  margin-bottom: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom-color: transparent !important;
+}
+/* 标签条：与上下卡片同宽、无上下缝隙 */
+.vp-doc h3 + h4 { margin-top: 10px !important; margin-bottom: 0 !important; border-bottom: 0 !important; }
+.vp-doc .cq-card + h4 { margin-top: 0 !important; margin-bottom: 0 !important; border-bottom: 0 !important; border-top: 0 !important; }
+/* 标签条下的卡片：无上圆角、无上外边距 */
+.vp-doc h4 + .cq-card { margin-top: 0 !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
+/* 该条目最后一张卡片：恢复四角圆角 */
+.vp-doc .cq-card:not(:has(+ h4)) { border-bottom-left-radius: 12px !important; border-bottom-right-radius: 12px !important; }
+
+/* 移动端不要显示小节标题的“#”锚点（触摸后 hover 态会残留） */
+@media (max-width: 959px) { .vp-doc h4 > .header-anchor { display: none !important; } }
