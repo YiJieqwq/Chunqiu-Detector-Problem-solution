@@ -50,6 +50,8 @@ function init() {
     while (el) {
       const l = lv(el)
       if (l && l <= n) break
+      // 版权卡等“页脚块”永远不属于任何条目
+      if (el.classList.contains('cq-copyright') || el.classList.contains('cq-chapters')) break
       out.push(el)
       el = el.nextElementSibling as HTMLElement | null
     }
@@ -118,19 +120,18 @@ function init() {
   }
 
   /* ---------- ② 折叠策略 ---------- */
+  const path = location.pathname.replace(/\/$/, '')
+  const isItems = /\/items$/.test(path)          // 第三章：正文
+  const isPrologue = /\/prologue$/.test(path)    // 第二章：前言
+  const isIntro = !isItems && !isPrologue        // 第一章：概述
+
   const policy = (h: HTMLElement): { foldable: boolean; open: boolean } => {
-    const t = titleOf(h)
     const n = Number(h.tagName[1])
-    if (n === 2) {
-      const foldable = H2_FOLDABLE.includes(t)
-      return { foldable, open: !foldable }
-    }
-    if (n === 3) {
-      const sec = sectionOf(h)
-      const noFold = H3_NOFOLD_IN.some((p) => sec.startsWith(p))
-      return noFold ? { foldable: false, open: true } : { foldable: true, open: H3_OPEN_IN.some((p) => sec.startsWith(p)) }
-    }
-    if (n === 4) return { foldable: true, open: true }
+    // 概述章内容很少：全部不折叠
+    if (isIntro) return { foldable: false, open: true }
+    if (n === 2) return { foldable: false, open: true }   // 章节标题一律不折叠
+    if (n === 3) return isItems ? { foldable: true, open: false } : { foldable: false, open: true }
+    if (n === 4) return { foldable: true, open: true }    // 小节：可折叠、默认展开
     return { foldable: false, open: true }
   }
 
