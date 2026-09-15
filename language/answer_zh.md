@@ -174,11 +174,27 @@
 > **常见原因族**（命中时详情会给出）：`enforcing is not 1`、`deny_unknown is not 1`、`unexpected version`、`sequence/policyload unexpected`、`direct syscall and libc views disagree (PLT-hook residue)`。
 >
 > **解决办法**
+>
 > - 检测方式参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
 > - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
->   - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新进行**免解（越狱）**后重启）；
->   - **内核级方案**：SELinux_Hook.kpm 一类 SELinux hook（KPM 或内核集成；模块链接见序章「相关模块推荐」）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
->   - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
+>   - **root 实现的自带能力（可用于 KernelSU 系 / APatch 系）**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新进行**免解（越狱）**后重启）。
+>     - 内核版本支持范围：
+>       - APatch 系：4.19 及以上；
+>       - KernelSU 系：不同分支的支持范围不完全相同，需要具体情况具体判断。以原版 KernelSU 为例，它仅支持 GKI2 内核。
+>   - **内核模块方案（可用于 KernelSU 系 / APatch 系 / Magisk 系）**：SELinux_Hook.kpm 一类 SELinux hook（内核模块；selinux_magisk_access_filter链接见序章「相关模块推荐」）。
+>     - 说明：目前有两种模块可用：原版 selinux_hook（即 selinux_magisk_access_filter）和 selinux_MAF_fork。[selinux_MAF_fork仓库地址见此](https://github.com/741afb7/selinux_maf_fork)
+>     - 适用范围：原版 selinux_hook（即 selinux_magisk_access_filter）仅适用于 KernelSU 系 / APatch 系；selinux_MAF_fork 专注于适配 Magisk 系，但 KernelSU 系 / APatch 系仍然可用。Magisk系必须包含[此代码](https://github.com/topjohnwu/Magisk/commit/5a28d2fcfcd3245f726933d7fd0a6173ea484e32)，否则该方法无法生效。
+>     - 运行模式：KernelSU 系和 Magisk 系必须嵌入才能生效，APatch 系在安装模式下也可生效。
+>     - 内核版本支持范围及要求：
+>       - selinux_MAF_fork：4.19 及以上和部分 4.14 内核，更详细的介绍见仓库的 README 文档。
+>       - selinux_magisk_access_filter：理论支持范围在 4.9 及以上，但在 4.9 和 4.14 版本内核上运行可能存在风险。
+>     - 特别说明：
+>       1. Magisk 系原生不支持 KPM 内核模块，需要额外安装 KPM 支持：
+>          - [KPatch-Next-EXP](https://github.com/741afb7/KPatch-Next-Module-EXP)：不包含 OTA 更新功能，且不计划长期更新，但支持 KPM 安装模式；
+>          - [KPM-Manager](https://github.com/Yervant7/KPM-Manager)；
+>          - [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next-Module)：已停更较长时间，和 KernelPatch 最新版相差较大。
+>       2. Build-in KernelPatch 不可使用此类模块：内核源码集成的 KernelPatch 的 KPM 嵌入模式实现与原版 KernelPatch 不同，此类模块无法在 Build-in KernelPatch 中生效。
+>   - 若当前管理器不属于 KernelSU 系 / APatch 系 / Magisk 系，可考虑更换为以上 3 种的任意一种。
 >
 > 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
 
