@@ -29,7 +29,44 @@ const writeState = (s: Record<string, boolean>) => {
   } catch {}
 }
 
+
+/** 右上角「⋯」菜单：注入“桌面端 / 移动端”切换；并修正语言切换链接 */
+function injectViewToggle() {
+  // 语言切换链接修正：/en/zh/… → /en/…（locales 前缀映射在当前目录结构下会拼错）
+  document.querySelectorAll('.VPNavBarExtra a[href*="/en/zh/"], .VPNavBarExtra a[href*="/zh/en/"]').forEach((a) => {
+    a.setAttribute('href', (a.getAttribute('href') || '').replace('/en/zh/', '/en/').replace('/zh/en/', '/zh/'))
+  })
+
+  const menu = document.querySelector('.VPNavBarExtra .VPMenu')
+  if (!menu || menu.querySelector('.cq-view-item')) return
+  let mode = 'desktop'
+  try { mode = localStorage.getItem('cq-view') || 'desktop' } catch {}
+  const group = document.createElement('div')
+  group.className = 'group cq-view-item'
+  const item = document.createElement('div')
+  item.className = 'item'
+  const label = document.createElement('p')
+  label.className = 'label'
+  label.textContent = '界面 / View'
+  const action = document.createElement('div')
+  action.className = 'appearance-action'
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'cq-view-btn'
+  btn.textContent = mode === 'desktop' ? '桌面端 / Desktop' : '移动端 / Mobile'
+  btn.addEventListener('click', () => {
+    try { localStorage.setItem('cq-view', mode === 'desktop' ? 'mobile' : 'desktop') } catch {}
+    location.reload()
+  })
+  action.appendChild(btn)
+  item.appendChild(label)
+  item.appendChild(action)
+  group.appendChild(item)
+  menu.appendChild(group)
+}
+
 function init() {
+  injectViewToggle()
   const doc = document.querySelector('.vp-doc')
   if (!doc) return
 
@@ -115,7 +152,11 @@ export default {
   extends: DefaultTheme,
   enhanceApp({ router }: EnhanceAppContext) {
     if (typeof window === 'undefined') return
-    const run = () => setTimeout(init, 60)
+    const run = () => {
+      setTimeout(init, 60)
+      setTimeout(injectViewToggle, 200)
+      setInterval(injectViewToggle, 800)
+    }
     window.addEventListener('load', run)
     ;(router as any).onAfterRouteChanged = run
   }
