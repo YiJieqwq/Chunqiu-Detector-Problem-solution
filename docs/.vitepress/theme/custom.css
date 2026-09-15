@@ -363,3 +363,27 @@
 /* H4 小节的折叠箭头稍小，且不换行 */
 .vp-doc h4.cq-foldable { padding-right: 22px; }
 .vp-doc h4.cq-foldable::after { width: 6px; height: 6px; right: 6px; }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：层级缩进 + 章节化排版
+   ===================================================================== */
+
+/* 层级缩进：H4 小节与其卡片相对 H3 条目内缩一级 */
+.vp-doc h4 { padding-left: 14px; }
+.vp-doc h4 + .cq-card { margin-left: 14px; }
+.vp-doc h4 + .cq-card + h4, .vp-doc .cq-card + h4 { margin-top: 16px; }
+/* 条目下的第一层卡片（无 H4 时）保持与标题同宽 */
+.vp-doc h3 + .cq-card { margin-left: 0; }
+
+/* 页面级标题（第一章/第二章/第三章页面的 H1） */
+.vp-doc > h1 { font-size: 24px; margin-bottom: 6px; }
+.vp-doc > h1 + p, .vp-doc > h1 + blockquote { color: var(--vp-c-text-2); }
+
+/* 版权卡（与首页风格一致） */
+.cq-copyright {
+  max-width: 760px; margin: 26px auto 8px; padding: 14px 18px;
+  border: 1px solid var(--vp-c-divider); border-radius: 12px;
+  background: var(--vp-c-bg-alt); color: var(--vp-c-text-2); font-size: 12.5px; line-height: 1.9;
+}
+.cq-copyright strong { color: var(--vp-c-text-1); }
+.cq-copyright a { color: var(--vp-c-brand-1); }
