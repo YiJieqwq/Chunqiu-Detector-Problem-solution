@@ -4,7 +4,6 @@ import './items.css'
 import { nextTick, h } from 'vue'
 import Breadcrumbs from './Breadcrumbs.vue'
 import type { EnhanceAppContext } from 'vitepress'
-let detailHtml: string | null = null
 
 /** 右上角「⋯」菜单：注入“桌面端 / 移动端”切换；并修正语言切换链接 */
 function injectViewToggle() {
@@ -43,42 +42,9 @@ function injectViewToggle() {
 
 
 let cleanup = () => {}
-async function unlockDetail() {
-  const lang = /\/en\//.test(location.pathname) ? 'en' : 'zh'
-  const base = document.querySelector('base')?.href || `${location.origin}/Chunqiu-Detector-Problem-solution/`
-  const url = new URL(`detail/answer_${lang}.html.enc`, base).href
-  const password = prompt('请输入开发者验证密码 / Password')
-  if (password == null) return
-  const b64 = (v: string) => {
-    const raw = atob(v); const out = new Uint8Array(raw.length)
-    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i)
-    return out
-  }
-  try {
-    const response = await fetch(url, { cache: 'no-store' })
-    if (!response.ok) throw new Error(`detail asset HTTP ${response.status}`)
-    const x = await response.json()
-    if (x.a !== 'AES-256-GCM' || x.k !== 'PBKDF2-SHA-256' || !x.s || !x.iv || !x.t || !x.d) throw new Error('invalid detail envelope')
-    const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey'])
-    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(x.s), iterations: Number(x.i), hash: 'SHA-256' }, material, { name: 'AES-GCM', length: 256 }, false, ['decrypt'])
-    const ciphertext = b64(x.d), tag = b64(x.t), combined = new Uint8Array(ciphertext.length + tag.length)
-    combined.set(ciphertext); combined.set(tag, ciphertext.length)
-    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(x.iv), tagLength: 128 }, key, combined)
-    detailHtml = new TextDecoder().decode(plain)
-    applyDetail()
-    if (location.pathname.endsWith('/items') || location.pathname.endsWith('/items/')) history.replaceState(null, '', location.pathname + '?detail=1')
-  } catch (error) {
-    console.warn('[cq] developer detail unlock failed', error)
-    alert(error instanceof Error && /HTTP/.test(error.message) ? '详细文档资源加载失败，请刷新后重试 / Detail resource unavailable' : '密码错误或解密失败，请确认密码后重试 / Verification failed')
-  }
-}
-function applyDetail(){ if(!detailHtml || !/\/items/.test(location.pathname)) return; const box=document.createElement('div');box.innerHTML=detailHtml; const fresh=[...box.querySelectorAll('details.cq-entry')], old=[...document.querySelectorAll('.vp-doc details.cq-entry')]; fresh.forEach((n,i)=>{if(old[i]) old[i].replaceWith(n)}); init() }
 function init() {
   cleanup()
   injectViewToggle()
-  const menu=document.querySelector('.VPNavBarExtra .VPMenu')
-  if(menu && !menu.querySelector('.cq-dev-item')){const g=document.createElement('div');g.className='group cq-dev-item';const p=document.createElement('p');p.className='label';p.textContent='开发者验证 / Developer';const b=document.createElement('button');b.className='cq-dev-btn';b.textContent=detailHtml?'已解密 / Decrypted':'输入密码 / Verify';b.onclick=()=>unlockDetail().catch(()=>alert('密码错误或解密失败 / Verification failed'));g.append(p,b);menu.append(g)}
-  applyDetail()
   const doc = document.querySelector('.vp-doc')
   const items = Array.from(doc?.querySelectorAll<HTMLDetailsElement>('details.cq-entry') || [])
   const english = /\/en\//.test(location.pathname)
