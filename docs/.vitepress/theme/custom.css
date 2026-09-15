@@ -139,10 +139,7 @@
 .vp-doc :not(pre) > code, .vp-doc a { overflow-wrap: anywhere; }
 
 /* 3) 内容栏宽度自适应，杜绝桌面模式手机上的横向溢出 */
-.VPDoc .content-container,
-.VPDoc.has-aside .content-container {
-  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
-}
+/* （内容栏宽度统一由文件末尾的分断点规则控制，勿在此处再写） */
 
 /* 4) 表格：斑马纹 + 首列强调 */
 .vp-doc tbody tr:nth-child(2n) { background: var(--vp-c-bg-alt); }
@@ -279,9 +276,23 @@
 @media (max-width: 1439px) { .VPDoc .aside, .VPDoc.has-aside .aside { display: none !important; } }
 @media (min-width: 1440px) { .VPDoc .aside { display: block; } }
 .VPDoc .content-container,
-.VPDoc.has-aside .content-container {
-  max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
-  width: 100%;
+.VPDoc.has-aside .content-container { width: 100%; }
+/* 只有“侧边栏常驻”的宽度才减去侧栏宽度；窄屏必须用 100%，否则内容会被挤成一字一行 */
+@media (max-width: 959px) {
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container { max-width: 100% !important; }
+}
+@media (min-width: 960px) and (max-width: 1439px) {
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 72px)) !important;
+  }
+}
+@media (min-width: 1440px) {
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: min(760px, calc(100vw - var(--vp-sidebar-width) - 360px)) !important;
+  }
 }
 
 /* 4. 移动端局部导航条（会在桌面模式下浮在正文上） */
