@@ -35,6 +35,15 @@ features:
     details: 铭鐏(mingzun09)、741afb7、huoyan1231、juanma0511、Young-Six-6、HongSir6、YiJieqwq，以及特别致谢 JeTeeZNtMax。
 ---
 
+## 快捷跳转 / Quick jump
+
+<div class="cq-chapters">
+<a href="/zh/"><span class="n">第一章</span><span class="t">概述 · Overview</span><span class="d">项目信息 · 免责声明 · 说明与反馈 · 版权</span></a>
+<a href="/zh/prologue"><span class="n">第二章</span><span class="t">前言 · Prologue</span><span class="d">术语定义（真解锁/假回锁/免解/自签）· 最小模块集合 · 模块推荐 · 正确配置</span></a>
+<a href="/zh/items"><span class="n">第三章</span><span class="t">正文 · Detection Items</span><span class="d">95 个检测项：检测方式 · 分组说明 · 解决办法</span></a>
+<a href="/en/items"><span class="n">Chapter 3</span><span class="t">English · Detection Items</span><span class="d">95 items with detection method, groups and solutions</span></a>
+</div>
+
 ## 快速开始
 
 <div class="cq-lang">
