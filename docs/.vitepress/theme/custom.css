@@ -431,3 +431,31 @@
 .cq-chapters .n { font-size: 11px; letter-spacing: .12em; color: var(--vp-c-brand-1); font-weight: 700; }
 .cq-chapters .t { font-size: 15px; font-weight: 650; color: var(--vp-c-text-1); }
 .cq-chapters .d { font-size: 12px; line-height: 1.7; color: var(--vp-c-text-2); }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：移动端专项修正
+   ===================================================================== */
+
+/* 1) VPLocalNav 只在“侧边栏常驻”的宽屏隐藏；移动端保留（它提供「目录 / 回到顶部」且负责顶部占位） */
+@media (min-width: 960px) { .VPLocalNav, .VPLocalNavOutlineDropdown { display: none !important; } }
+@media (max-width: 959px) { .VPLocalNav { display: flex !important; } }
+
+/* 2) 「全部展开 / 全部折叠」按钮：移动端缩小并让开内容，避免压住文字 */
+@media (max-width: 959px) {
+  #cq-fold-all { right: 10px; bottom: 10px; padding: 6px 12px; font-size: 12px; opacity: .92; }
+  .vp-doc { padding-bottom: 64px; }
+}
+
+/* 3) 卡片与小节标签在窄屏不再额外内缩（避免卡片比标题窄一截、左右不对齐） */
+@media (max-width: 959px) {
+  .vp-doc h4 { padding-left: 0; }
+  .vp-doc h4 + .cq-card { margin-left: 0; }
+  .vp-doc h3 + h4, .vp-doc .cq-card + h4 { margin-left: 0; padding-left: 12px; padding-right: 12px; }
+}
+/* 所有宽度下：卡片与页面正文左右对齐 */
+.vp-doc .cq-card { margin-left: 14px; margin-right: 0; }
+@media (max-width: 959px) { .vp-doc .cq-card { margin-left: 0 !important; } }
+
+/* 4) 小节标签条与卡片贴死，避免看起来像两个分离的框 */
+.vp-doc h3 + h4 { margin-top: 10px; }
+.vp-doc h4 + .cq-card { margin-top: 0 !important; padding-top: 12px; }
