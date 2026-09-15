@@ -1,7 +1,8 @@
 import DefaultTheme from 'vitepress/theme'
 import './custom.css'
 import './items.css'
-import { nextTick } from 'vue'
+import { nextTick, h } from 'vue'
+import Breadcrumbs from './Breadcrumbs.vue'
 import type { EnhanceAppContext } from 'vitepress'
 
 /** 右上角「⋯」菜单：注入“桌面端 / 移动端”切换；并修正语言切换链接 */
@@ -47,11 +48,8 @@ function init() {
   const doc = document.querySelector('.vp-doc')
   const items = Array.from(doc?.querySelectorAll<HTMLDetailsElement>('details.cq-entry') || [])
   const english = /\/en\//.test(location.pathname)
-  const key = 'cq-native-items:' + location.pathname
-  let saved: Record<string, boolean> = {}
-  try { saved = JSON.parse(localStorage.getItem(key) || '{}') } catch {}
-  const idOf = (el: Element) => el.querySelector('summary h3')?.id || ''
-  for (const item of items) item.open = saved[idOf(item)] === true
+  // Every page entry starts expanded; do not restore legacy collapsed states.
+  for (const item of items) item.open = true
   let btn = document.getElementById('cq-fold-all') as HTMLButtonElement | null
   if (!btn && items.length) {
     btn = document.createElement('button'); btn.id = 'cq-fold-all'; btn.type = 'button'
@@ -63,13 +61,9 @@ function init() {
     const allOpen = items.length > 0 && items.every(i => i.open)
     btn.textContent = english ? (allOpen ? 'Collapse all' : 'Expand all') : (allOpen ? '全部折叠' : '全部展开')
   }
-  let saveTimer: ReturnType<typeof setTimeout>
   const onToggle = (e: Event) => {
     const item = e.target as HTMLDetailsElement
     if (!items.includes(item)) return
-    saved[idOf(item)] = item.open
-    clearTimeout(saveTimer)
-    saveTimer = setTimeout(() => { try { localStorage.setItem(key, JSON.stringify(saved)) } catch {} }, 120)
     updateButton()
   }
   doc?.addEventListener('toggle', onToggle, true)
@@ -94,7 +88,7 @@ function init() {
   window.addEventListener('hashchange', focusHash)
   focusHash()
   cleanup = () => {
-    clearTimeout(saveTimer); cancelAnimationFrame(frame)
+    cancelAnimationFrame(frame)
     doc?.removeEventListener('toggle', onToggle, true)
     window.removeEventListener('hashchange', focusHash)
     if (btn) btn.onclick = null
@@ -102,6 +96,9 @@ function init() {
 }
 export default {
   extends: DefaultTheme,
+  Layout: () => h(DefaultTheme.Layout, null, {
+    'doc-before': () => h(Breadcrumbs)
+  }),
   enhanceApp({ router }: EnhanceAppContext) {
     if (typeof window === 'undefined') return
     const run = async () => { await nextTick(); init() }

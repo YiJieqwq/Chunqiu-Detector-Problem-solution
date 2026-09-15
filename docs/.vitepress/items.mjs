@@ -38,7 +38,7 @@ export default function nativeItems(md) {
     const out = []
     for (const node of parseItems(tokens)) {
       if (node.type === 'raw') { out.push(...node.tokens); continue }
-      out.push(html(isItems ? '<details class="cq-entry"><summary class="cq-entry-title">' : '<section class="cq-static-entry">'))
+      out.push(html(isItems ? '<details class="cq-entry" open><summary class="cq-entry-title">' : '<section class="cq-static-entry">'))
       out.push(...node.title)
       if (isItems) out.push(html('</summary>'))
       out.push(html(isPrologue ? '<div class="cq-prologue-content">' : '<div class="cq-entry-card">'))
