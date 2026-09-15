@@ -513,3 +513,7 @@
 
 /* 移动端不要显示小节标题的“#”锚点（触摸后 hover 态会残留） */
 @media (max-width: 959px) { .vp-doc h4 > .header-anchor { display: none !important; } }
+
+/* 小节标签（检测方式 / 解决办法 / 术语…）不可折叠：鼠标样式与箭头一律去掉 */
+.vp-doc h4, .vp-doc h4.cq-foldable { cursor: text; padding-right: 12px; }
+.vp-doc h4::after, .vp-doc h4.cq-foldable::after { content: none !important; }
