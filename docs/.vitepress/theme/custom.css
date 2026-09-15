@@ -459,3 +459,35 @@
 /* 4) 小节标签条与卡片贴死，避免看起来像两个分离的框 */
 .vp-doc h3 + h4 { margin-top: 10px; }
 .vp-doc h4 + .cq-card { margin-top: 0 !important; padding-top: 12px; }
+
+/* =====================================================================
+   CQ ESSENTIALS 追加：窄屏（≤959px）内容铺满 + 顶栏/本地导航对齐
+   ===================================================================== */
+
+@media (max-width: 959px) {
+  /* 1) 内容铺满屏幕：VitePress 的 688px 内容上限在“移动端导航 + 宽视口”区间会留下右侧大片空白 */
+  .vp-doc,
+  .VPDoc .container,
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .VPDoc { padding-left: 16px; padding-right: 16px; }
+
+  /* 2) 搜索按钮紧贴右上角（此前被 flex:1 撑开，与汉堡按钮离得很远） */
+  .VPNavBarSearch { flex: 0 0 auto !important; max-width: none !important; margin-left: auto !important; padding-left: 8px !important; }
+  .VPNavBarSearch .DocSearch-Button,
+  .DocSearch-Button {
+    min-width: 0 !important; width: 36px !important; max-width: 36px !important;
+    padding: 0 !important; justify-content: center !important;
+  }
+  .DocSearch-Button-Placeholder,
+  .DocSearch-Button-Keys { display: none !important; }
+}
+
+/* 3) 本地导航条：「本页目录」靠最右 */
+.VPLocalNav { width: 100% !important; justify-content: space-between !important; }
+.VPLocalNavOutlineDropdown { margin-left: auto !important; }
