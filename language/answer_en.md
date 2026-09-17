@@ -55,11 +55,13 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 ---
 
-## Prologue
+## Terminology
 
 ### Terminology & Conventions
 
-**Genuinely Unlocked Device**: a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
+#### Genuinely Unlocked Device
+
+a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
 
 #### Fake-Relocked Device
 
@@ -92,6 +94,9 @@ a module that provides the Zygisk runtime — it injects code into Zygote / app 
 #### App-hiding module
 
 a module that operates on “package visibility” — it intercepts the package-query path inside a target process (or a system process) and hides selected apps from the configured target app.
+
+## Prologue
+
 
 ### Minimal Module Set for a Perfectly Hidden Environment
 
@@ -211,6 +216,8 @@ Relation: `SELinux status fingerprint suspicious`, `SELinux status channel incon
 
 KernelSU jailbreak (no-unlock) mode features, or a KSU-related process / device is present.
 
+#### Solution
+
 KSU detected in jailbreak mode, current device using KSU jailbreak mode ROOT method, or KSU processes detected, etc.
 
 Jailbreak mode is not recommended, so no solution is provided here.
@@ -242,6 +249,8 @@ General rule: **never grant root to the detector**.
 Detects KSU/APatch (side-channel detection).
 
 Detection principle reference: [this document](/File/Doc/ksu_kp_sidechannel_zh.md)
+
+#### Solution
 
 **Solution (KernelSU)**: Update your KernelSU Manager and re-patch (LKM work mode) or re-integrate (GKI and Non-GKI work mode).
 
