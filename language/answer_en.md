@@ -55,11 +55,13 @@ Open an issue with your module list and which Xposed modules you're using, etc. 
 
 ---
 
-## Prologue
+## Terminology
 
 ### Terminology & Conventions
 
-**Genuinely Unlocked Device**: a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
+#### Genuinely Unlocked Device
+
+a device whose ABL unlock flag is genuinely set — unsigned images are allowed and flashable, and the unlock state is faithfully reflected in system properties and KeyMint attestation.
 
 #### Fake-Relocked Device
 
@@ -92,6 +94,9 @@ a module that provides the Zygisk runtime — it injects code into Zygote / app 
 #### App-hiding module
 
 a module that operates on “package visibility” — it intercepts the package-query path inside a target process (or a system process) and hides selected apps from the configured target app.
+
+## Prologue
+
 
 ### Minimal Module Set for a Perfectly Hidden Environment
 
@@ -181,10 +186,27 @@ It's not just modules — Magisk's hide features (e.g., SELinux modification hid
 #### Solution
 
 - Detection method reference: [DirtySepolicy](https://github.com/LSPosed/DirtySepolicy);
-- The decisive point is “the app zygote has permission to access `/sys/fs/selinux/access`”, so SELinux modifications must be hidden by the root manager or kernel side:
-  - **Built into the root manager**: update to the latest version and enable “hide SELinux modifications” (KSU users must re-patch the image or re-run the no-unlock jailbreak, then reboot);
-  - **Kernel side**: a SELinux hook such as SELinux_Hook.kpm (module links are in the Prologue's “Recommended Modules”). On kernels 4.19–6.12 it must be used in embedded mode (load mode masks nothing), 6.12 embedding has a high kernelpanic risk; on 4.14 embedding is recommended with a boot.img backup first (load mode falls back to weaker keyword filtering); on 4.9 embedding is recommended with no `context_struct_compute_av` emulation risk;
-  - if the current manager has no such capability, consider switching to a kernel-level manager that does.
+- The decisive point is “the app zygote has permission to access `/sys/fs/selinux/access`”, so SELinux modifications must be hidden by the root implementation or kernel side:
+  - **Built-in support (KernelSU / APatch families)**: update to the latest version and enable “hide SELinux modifications”. KernelSU users must re-patch the image or re-run the **no-unlock jailbreak**, then reboot.
+    - Kernel support:
+      - APatch family: 4.19 and later;
+      - KernelSU family: support differs by branch and must be checked individually. Original KernelSU, for example, supports GKI2 kernels only.
+  - **Kernel-module approach (KernelSU / APatch / Magisk families)**: a SELinux hook such as SELinux_Hook.kpm; see the Prologue's module recommendations for selinux_magisk_access_filter.
+    - Two implementations are described here: original selinux_hook (selinux_magisk_access_filter) and [selinux_MAF_fork](https://github.com/741afb7/selinux_maf_fork).
+    - Applicability: original selinux_hook is for KernelSU / APatch; selinux_MAF_fork focuses on Magisk while remaining usable with KernelSU / APatch. Magisk must include [this change](https://github.com/topjohnwu/Magisk/commit/5a28d2fcfcd3245f726933d7fd0a6173ea484e32), otherwise the approach cannot take effect.
+    - Mode: KernelSU and Magisk require embedding; APatch can also use installation mode.
+    - Kernel requirements:
+      - selinux_MAF_fork: 4.19 and later, plus some 4.14 kernels; consult its README for details.
+      - selinux_magisk_access_filter: theoretically 4.9 and later, but running it on 4.9 or 4.14 may carry risks.
+    - Important limitations:
+      1. Magisk has no native KPM support; additional KPM support is required:
+         - [KPatch-Next-EXP](https://github.com/741afb7/KPatch-Next-Module-EXP): no OTA-update feature or planned long-term maintenance, but supports KPM installation mode;
+         - [KPM-Manager](https://github.com/Yervant7/KPM-Manager);
+         - [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next-Module): has not been updated for a considerable time and differs substantially from recent KernelPatch versions.
+      2. Built-in KernelPatch cannot use these modules: its KPM embedding implementation differs from original KernelPatch, preventing these modules from taking effect.
+  - If the current manager belongs to none of the KernelSU / APatch / Magisk families, consider switching to one of those families.
+
+*Solution updates above are retained from [741afb7's upstream PR #45](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/pull/45). Compatibility statements follow that contribution, not an independent device test.*
 
 Relation: `SELinux status fingerprint suspicious`, `SELinux status channel inconsistency` and `ROOT access obtained / abnormal module` belong to the same family (different facets across versions) and **have been merged into this entry**.
 
@@ -193,6 +215,8 @@ Relation: `SELinux status fingerprint suspicious`, `SELinux status channel incon
 #### Detection method
 
 KernelSU jailbreak (no-unlock) mode features, or a KSU-related process / device is present.
+
+#### Solution
 
 KSU detected in jailbreak mode, current device using KSU jailbreak mode ROOT method, or KSU processes detected, etc.
 
@@ -226,6 +250,8 @@ Detects KSU/APatch (side-channel detection).
 
 Detection principle reference: [this document](/File/Doc/ksu_kp_sidechannel_zh.md)
 
+#### Solution
+
 **Solution (KernelSU)**: Update your KernelSU Manager and re-patch (LKM work mode) or re-integrate (GKI and Non-GKI work mode).
 
 **Solution (APatch)**:
@@ -254,7 +280,15 @@ The item also prints `Argument layouts` (a probe of the register layout the kern
 
 #### Solution
 
-**no known module fixes this today.** KPMs such as nohello intercept *whether an authorisation request is processed*, whereas this item measures *whether the kernel read the user argument page on that syscall path* — that read happens **before/outside** the hook point, so adding the detector to nohello's exclusion list (or switching to a uid-based KPatch-Next) **does not** make this entry go away. It needs a fix on the KernelPatch / APatch side (so the patched syscall path no longer reads the user argument page extra times), or an adjustment of this check upstream.
+Newer KernelPatch code changes the authentication path; the old blanket statement that users can only wait for an upstream fix no longer applies to every version:
+
+- **Update APatch**: use an [APatch](https://github.com/bmax121/APatch) build incorporating the change. The requirements are **a running KernelPatch containing the new logic and a patched image without a preset SuperKey**. Installing a newer manager APK alone does not update the running kernel patch. Follow that version's official kernel-patch upgrade procedure, reboot and retest.
+- **Alternatively, consider [Aster](https://github.com/LyraVoid/Aster)**: an APatch-capability-chain manager developed by FolkPatch author Matsuzaka Yuki, with a modern Miuix interface. Its stated direction, as described by the project and author feedback, is restrained changes with stability as a priority. Visit the repository for details and an appropriate build. The same running-KernelPatch and no-preset-SuperKey requirements apply; replacing the APK alone is not a fix.
+- **Version note**: according to version feedback supplied by the maintainer, FolkPatch **115032** has not adopted the KernelPatch update and may still trigger this item. This does not describe future FolkPatch releases.
+
+The new code reads the first argument and calls `auth_superkey()` only when `has_preset_superkey()` is true. Without a preset SuperKey, that read is skipped: a trusted manager UID receives full authorisation, while an ordinary allowed UID is marked as a trusted caller and restricted operations still require further authorisation. Thus **the new logic plus no preset SuperKey** removes this particular extra argument-page read. Presetting a SuperKey retains that read path. This is not removal of SuperKey support and does not guarantee passing other checks.
+
+[Source reference](https://github.com/bmax121/KernelPatch/blob/997b687f19d150642d56a5c4a49dc06143d33422/kernel/patch/common/supercall.c#L395-L434). Distinguish APatch's stable releases, CI builds and their bundled KernelPatch revisions rather than relying on the label “latest”. Before switching managers or updating the kernel patch, keep the original boot image and a working recovery path; one detection result alone is not a reason to change Root implementations blindly.
 
 #### Note
 

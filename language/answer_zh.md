@@ -9,9 +9,11 @@
 
 ## 声明
 
-1. 春秋检测仅面向Root爱好者提供环境检测能力，仅限技术学习与研究探讨。严禁将本检测器以及本文档内全部方案用于绕过反作弊、规避风控、游戏作弊等任何违法违规场景，违规行为产生的一切后果均由使用者自行承担。
+**1. 合规与用途约束**
+春秋检测器及本文档提供的环境检测和处置方案，**仅面向 Android 技术爱好者**，专用于**技术学习、环境研究与探讨**。**严禁**将本文档中的任何方案用于绕过应用反作弊、规避风控机制、游戏作弊等一切违法违规场景。因违规使用而产生的任何后果与责任，均由使用者自行承担。
 
-2. 文档记述的全部操作、脚本、模块配置仅为技术参考。修改系统镜像、替换密钥、内核模块嵌入、执行Root Shell指令等操作存在不可逆风险，可能造成设备无法开机、数据丢失；所有操作风险由使用者自行承担，文档作者不对设备损坏、数据丢失承担责任。
+**2. 风险提示**
+文档中记录的所有操作流程、自动化脚本、模块配置均仅供技术参考。涉及修改系统镜像、替换硬件密钥、嵌入内核模块（KPM）、执行底层 Root 指令等操作，均存在**极高的不可逆风险**，可能导致设备变砖、无限重启或用户数据丢失。所有操作风险均由使用者本人承担，文档作者对可能引发的设备损坏及数据丢失概不负责。
 
 3. 本方案基于社区实测整理，受ROM版本、内核、Root管理器、模块组合影响，检测项存在误报、概率偶发命中现象；文档给出的解决办法不保证完全生效，检测结果仅作调试参考，不作为绝对判定依据。
 
@@ -55,13 +57,13 @@
 
 ---
 
-## 序章
+## 用语说明
 
 ### 用语介绍与规范
 
 #### 真解锁设备
 
-ABL 解锁标志真实置位，放行未经签名校验的镜像并允许刷写，且解锁状态如实反映在系统属性与 KeyMint attestation 上的设备。
+Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校验的底层镜像并允许刷写。该设备的解锁状态会如实反映在系统底层属性与 KeyMint 硬件级凭据（Attestation）中。
 
 #### 假回锁设备
 
@@ -95,7 +97,10 @@ ABL 解锁标志真实置位，放行未经签名校验的镜像并允许刷写�
 
 以“包可见性”为操作对象，在目标进程（或系统进程）里拦截包查询链路，进而按照用户的配置，对目标应用隐藏选中应用可见性的模块。
 
-### 最小完美隐藏环境所需模块集合
+## 序章
+
+
+### 最小完美隐藏环境构建指南
 
 - 真解锁设备：**密钥模块 + Zygisk 实现模块 + 应用隐藏模块**
 - 假回锁 / 免解 / 自签设备：**Zygisk 实现模块 + 应用隐藏模块**
@@ -187,9 +192,26 @@ c. 正确配置 boot hash（正常情况下会自动设置）。
 
 - 检测方式参考：[DirtySepolicy](https://github.com/LSPosed/DirtySepolicy)；
 - 本条的判定点是「应用 zygote 拥有访问 `/sys/fs/selinux/access` 的权限」，需要让 root 管理器或内核侧隐藏 SELinux 修改：
-  - **root 管理器自带能力**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新进行**免解（越狱）**后重启）；
-  - **内核级方案**：SELinux_Hook.kpm 一类 SELinux hook（KPM 或内核集成；模块链接见序章「相关模块推荐」）。使用说明：内核 4.19–6.12 必须用嵌入模式才能生效（加载模式不启用任何伪装方法），6.12 嵌入有较大概率 kernelpanic 需慎重；4.14 建议嵌入并先备份 boot.img（加载模式是关键词过滤备选方案，效果相对较差）；4.9 建议嵌入且无模拟 `context_struct_compute_av` 的风险；
-  - 若当前管理器不具备上述能力，可考虑更换为支持的内核级管理器。
+  - **root 实现的自带能力（可用于 KernelSU 系 / APatch 系）**：升级到最新版本，开启「隐藏 SELinux 修改」（KSU 系需重新修补镜像或重新进行**免解（越狱）**后重启）。
+    - 内核版本支持范围：
+      - APatch 系：4.19 及以上；
+      - KernelSU 系：不同分支的支持范围不完全相同，需要具体情况具体判断。以原版 KernelSU 为例，它仅支持 GKI2 内核。
+  - **内核模块方案（可用于 KernelSU 系 / APatch 系 / Magisk 系）**：SELinux_Hook.kpm 一类 SELinux hook（内核模块；selinux_magisk_access_filter链接见序章「相关模块推荐」）。
+    - 说明：目前有两种模块可用：原版 selinux_hook（即 selinux_magisk_access_filter）和 selinux_MAF_fork。[selinux_MAF_fork仓库地址见此](https://github.com/741afb7/selinux_maf_fork)
+    - 适用范围：原版 selinux_hook（即 selinux_magisk_access_filter）仅适用于 KernelSU 系 / APatch 系；selinux_MAF_fork 专注于适配 Magisk 系，但 KernelSU 系 / APatch 系仍然可用。Magisk系必须包含[此代码](https://github.com/topjohnwu/Magisk/commit/5a28d2fcfcd3245f726933d7fd0a6173ea484e32)，否则该方法无法生效。
+    - 运行模式：KernelSU 系和 Magisk 系必须嵌入才能生效，APatch 系在安装模式下也可生效。
+    - 内核版本支持范围及要求：
+      - selinux_MAF_fork：4.19 及以上和部分 4.14 内核，更详细的介绍见仓库的 README 文档。
+      - selinux_magisk_access_filter：理论支持范围在 4.9 及以上，但在 4.9 和 4.14 版本内核上运行可能存在风险。
+    - 特别说明：
+      1. Magisk 系原生不支持 KPM 内核模块，需要额外安装 KPM 支持：
+         - [KPatch-Next-EXP](https://github.com/741afb7/KPatch-Next-Module-EXP)：不包含 OTA 更新功能，且不计划长期更新，但支持 KPM 安装模式；
+         - [KPM-Manager](https://github.com/Yervant7/KPM-Manager)；
+         - [KPatch-Next](https://github.com/KernelSU-Next/KPatch-Next-Module)：已停更较长时间，和 KernelPatch 最新版相差较大。
+      2. Build-in KernelPatch 不可使用此类模块：内核源码集成的 KernelPatch 的 KPM 嵌入模式实现与原版 KernelPatch 不同，此类模块无法在 Build-in KernelPatch 中生效。
+  - 若当前管理器不属于 KernelSU 系 / APatch 系 / Magisk 系，可考虑更换为以上 3 种的任意一种。
+
+*以上方案补充整理自 [741afb7 的上游 PR #45](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution/pull/45)；兼容性说明沿用该贡献，并非本站独立真机验证。*
 
 关系：`SELinux 状态指纹可疑`、`SELinux 状态通道不一致`、`设备获取 Root 权限 / 异常模块` 属于同一套判据族（不同版本的不同切面），**本文档已合并到本条**。
 
@@ -198,6 +220,8 @@ c. 正确配置 boot hash（正常情况下会自动设置）。
 #### 检测方式
 
 KSU 免解（越狱）模式特征，或发现 ksu 相关进程 / 设备。
+
+#### 解决办法
 
 发现 KSU 处于**免解（越狱）模式**，或发现 ksu 相关进程等因素。
 
@@ -228,6 +252,8 @@ iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走
 
 检测原理请参考[此文档](/File/Doc/ksu_kp_sidechannel_zh.md)
 
+#### 解决办法
+
 **解决办法（KernelSU 系）**：更新你的 KernelSU 管理器并重新修补（LKM 工作模式）或重新集成（GKI 和 Non-GKI 工作模式）。
 
 **解决办法（APatch 系）**：
@@ -255,7 +281,15 @@ iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走
 
 #### 解决办法
 
-**目前暂无可用模块**。这类内核级隐藏 KPM 拦截的是“鉴权请求是否被处理”，而本条测量的是“内核在该 syscall 路径上是否**额外读取了用户参数页**”——该读取发生在拦截点**之前/之外**，因此把检测器加入该 KPM 的 排除列表（或改用按 uid 鉴权的 KPatch-Next）**并不能**让本条消失。需要等待 KernelPatch / APatch 侧修复（让被补丁的 syscall 路径不再额外读取用户参数页），或上游调整该检测项。
+新版 KernelPatch 已调整鉴权路径，旧版“只能等待上游修复”的说明不再适用于所有版本：
+
+- **更新 APatch**：使用已集成该改动的新版 [APatch](https://github.com/bmax121/APatch)。关键条件是**实际运行的 KernelPatch 已包含新逻辑，且修补镜像未预置 SuperKey**；仅安装新版管理器 APK 不等于内核补丁已更新。按对应版本的官方升级流程更新内核补丁并重启，再复测。
+- **也可考虑 [Aster](https://github.com/LyraVoid/Aster)**：由 FolkPatch 作者有希（Matsuzaka Yuki）开发、基于 APatch 能力链的管理器。项目采用现代化 Miuix 界面；按项目介绍与作者反馈，其方向是改动克制、稳定优先。希望尝试这一方向的用户可从仓库了解并获取适配版本。使用它同样需要确认运行中的 KernelPatch 和无预置 SuperKey 条件，不能只换 APK 就视为完成修复。
+- **版本提醒**：据维护者提供的版本反馈，FolkPatch **115032** 尚未换用包含此改动的 KernelPatch，因此仍可能命中本项；这不是对后续 FolkPatch 版本的结论。
+
+新版在 `has_preset_superkey()` 成立时才读取首参并执行 `auth_superkey()`。未预置 SuperKey 时跳过该读取：可信管理器 UID 获得完整授权，已授权的普通 UID 仅标为可信调用者，受限操作仍需进一步授权。因此，**新逻辑 + 无预置 SuperKey**可消除本条所针对的这一路额外读页行为；若仍预置了 SuperKey，相关读取路径仍然存在。这不等于删除了 SuperKey，也不保证通过其他检测项。
+
+[源码依据](https://github.com/bmax121/KernelPatch/blob/997b687f19d150642d56a5c4a49dc06143d33422/kernel/patch/common/supercall.c#L395-L434)。APatch 的“最新版本”需区分正式 Release、CI 构建及其内置 KernelPatch：不能仅凭版本名认定已包含改动。换用管理器或更新内核补丁前，保留原始启动镜像与可用恢复方式；本说明不要求为单个检测结果盲目更换 Root 方案。
 
 #### 备注
 
@@ -323,7 +357,7 @@ Android 安全更新 2025/09/01 已修复（不准确但结果是这样的）
 读取本进程（应用 zygote 子进程）的 GID 列表，检查 **GID 3009（AID_READPROC）**是否存在（探针输出 `readproc_gid_3009=present/missing`）→ 缺失即命中（**该 GID 缺失的致因尚不能确认**）。
 
 （社区说法）应用自身 zygote 的补充 GID 被限制。
-在应用隐藏模块中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
+在HMA-OSS模块中对春秋检测关闭「限制 zygote 权限」里的 `INET_GID`。
 
 补充：该开关按**黑名单**移除用户勾选的补充 GID（HMA-OSS 的可选项为 1015 / 1023 / 1032 / 1077 / 1078 / 1079 / 3003 / 9997 共 8 项，**不含 3009**）。本条的**判据**确定为「GID 3009 缺失」，但**致因是否来自该开关尚不能确认**。
 
@@ -518,7 +552,7 @@ boot 镜像的 Hash 不匹配。
 
 #### 真解锁设备
 
-使用密钥模块把解锁状态对检测器隐藏，并按「模块正确配置」把检测器加入包名列表（target 列表实时生效，无需重启）。
+Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校验的底层镜像并允许刷写。该设备的解锁状态会如实反映在系统底层属性与 KeyMint 硬件级凭据（Attestation）中。
 社区在测试中的组合尝试：更新 密钥模块(-v307) + TS 插件 v5.0-beta1 → 管理器设置里关闭「卸载模块（内核级）」→ Zygisk 实现模块 设为「仅还原挂载」→ 冻结手机管家（小米可用按应用隐藏 / 冻结方案并打开「禁用环境检查」）→ 把属性隐藏脚本放入 `/data/adb/service.d/`。
 
 ### 证书已被吊销(CRL)
@@ -634,6 +668,8 @@ Magic Mount 对系统修改模块挂载生效
 #### 检测方式
 
 同一 UID 下的 user namespace 视图不一致（`UID namespace mismatch for same UID`）。
+
+#### 解决办法
 
 处理：检查隐藏框架是否改动了 namespace；更换 / 更新元模块后重测。
 
