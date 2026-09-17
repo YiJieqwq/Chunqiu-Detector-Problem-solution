@@ -274,7 +274,15 @@ iQoo/Vivo 用户注意：`/apex/com.android.virt/bin/su` 会被命中 → 移走
 
 #### 解决办法
 
-**目前暂无可用模块**。这类内核级隐藏 KPM 拦截的是“鉴权请求是否被处理”，而本条测量的是“内核在该 syscall 路径上是否**额外读取了用户参数页**”——该读取发生在拦截点**之前/之外**，因此把检测器加入该 KPM 的 排除列表（或改用按 uid 鉴权的 KPatch-Next）**并不能**让本条消失。需要等待 KernelPatch / APatch 侧修复（让被补丁的 syscall 路径不再额外读取用户参数页），或上游调整该检测项。
+新版 KernelPatch 已调整鉴权路径，旧版“只能等待上游修复”的说明不再适用于所有版本：
+
+- **更新 APatch**：使用已集成该改动的新版 [APatch](https://github.com/bmax121/APatch)。关键条件是**实际运行的 KernelPatch 已包含新逻辑，且修补镜像未预置 SuperKey**；仅安装新版管理器 APK 不等于内核补丁已更新。按对应版本的官方升级流程更新内核补丁并重启，再复测。
+- **也可考虑 [Aster](https://github.com/LyraVoid/Aster)**：由 FolkPatch 作者有希（Matsuzaka Yuki）开发、基于 APatch 能力链的管理器。项目采用现代化 Miuix 界面；按项目介绍与作者反馈，其方向是改动克制、稳定优先。希望尝试这一方向的用户可从仓库了解并获取适配版本。使用它同样需要确认运行中的 KernelPatch 和无预置 SuperKey 条件，不能只换 APK 就视为完成修复。
+- **版本提醒**：据维护者提供的版本反馈，FolkPatch **115032** 尚未换用包含此改动的 KernelPatch，因此仍可能命中本项；这不是对后续 FolkPatch 版本的结论。
+
+新版在 `has_preset_superkey()` 成立时才读取首参并执行 `auth_superkey()`。未预置 SuperKey 时跳过该读取：可信管理器 UID 获得完整授权，已授权的普通 UID 仅标为可信调用者，受限操作仍需进一步授权。因此，**新逻辑 + 无预置 SuperKey**可消除本条所针对的这一路额外读页行为；若仍预置了 SuperKey，相关读取路径仍然存在。这不等于删除了 SuperKey，也不保证通过其他检测项。
+
+[源码依据](https://github.com/bmax121/KernelPatch/blob/997b687f19d150642d56a5c4a49dc06143d33422/kernel/patch/common/supercall.c#L395-L434)。APatch 的“最新版本”需区分正式 Release、CI 构建及其内置 KernelPatch：不能仅凭版本名认定已包含改动。换用管理器或更新内核补丁前，保留原始启动镜像与可用恢复方式；本说明不要求为单个检测结果盲目更换 Root 方案。
 
 #### 备注
 
