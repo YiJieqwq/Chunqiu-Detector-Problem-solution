@@ -118,6 +118,11 @@ For **APatch / FolkPatch** users, additionally load **[NoHello.kpm](https://t.me
 #### Zygisk provider
 
 - [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext): the most widely used standalone Zygisk implementation.
+  - If the GitHub account or repository is unavailable, try the [backup Telegram entry](https://t.me/real5ec1cff). When obtaining files from a non-GitHub source, verify the publisher, file hash and version yourself.
+
+#### Xposed implementation
+
+- [LSPosed](https://t.me/LSPosed): an Xposed framework implementation for modules that require the Xposed API. It is not required for the minimal hiding environment; install it only when Xposed modules are actually needed.
 
 #### App-hiding modules
 

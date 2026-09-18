@@ -120,6 +120,11 @@ Bootloader（ABL）解锁标志已被真实置位，系统放行未经签名校�
 #### Zygisk 实现模块
 
 - [Zygisk-Next](https://github.com/Dr-TSNG/ZygiskNext)：最为广泛使用的 Zygisk 独立实现模块。
+  - GitHub 账号或仓库无法访问时，可尝试 [备用 Telegram 入口](https://t.me/real5ec1cff)。通过非 GitHub 来源获取文件时，请自行核验发布者、文件哈希与版本对应关系。
+
+#### Xposed 实现模块
+
+- [LSPosed](https://t.me/LSPosed)：Xposed 框架实现，适用于需要 Xposed API 的模块。它不是最小隐藏环境的必需组件，仅在确实使用 Xposed 模块时按需安装。
 
 #### 应用隐藏模块
 
