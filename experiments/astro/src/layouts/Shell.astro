@@ -1,0 +1,61 @@
+---
+import '../styles/site.css';
+import {docs,url,base} from '../lib/docs.mjs';
+const {lang='zh',chapter=-1,title='春秋检测项解决方案'}=Astro.props;
+const en=lang==='en', data=docs(lang);
+const other=en?'zh':'en';
+const counterpart=chapter>=0?[`${other}/`,`${other}/prologue/`,`${other}/items/`][chapter]:`${other}/`;
+---
+<!doctype html>
+<html lang={en?'en':'zh-CN'}>
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{title} · Astro Preview</title><meta name="robots" content="noindex"/>
+<script is:inline>
+try { document.documentElement.dataset.theme=localStorage.getItem('cq-astro-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');if(localStorage.getItem('cq-astro-view')==='desktop')document.querySelector('meta[name=viewport]').content='width=1024'; } catch {}
+</script>
+</head>
+<body data-lang={lang} data-search={url(`${lang}/search.json`)}>
+<noscript><style>button{display:none!important}@media(max-width:800px){.with-sidebar aside{display:block;position:static;width:auto;height:auto;box-shadow:none;border-right:0}}</style></noscript>
+<a class="skip" href="#main">{en?'Skip to content':'跳到正文'}</a>
+<header><a class="brand" href={url('')}>{en?'Chunqiu Solutions':'春秋检测项解决方案'}<small>ASTRO 实验版</small></a>
+<nav aria-label={en?'Site navigation':'站点导航'}><button id="search-open">{en?'Search':'搜索'}</button><a href={url(counterpart)}>{en?'中文':'English'}</a><button id="theme" aria-label={en?'Toggle theme':'切换深浅色'}>◐</button><details class="more"><summary>{en?'More':'更多'}</summary><div><a href={url('thanks/')}>{en?'Credits':'致谢'}</a><a href="https://github.com/YiJieqwq/Chunqiu-Detector-Problem-solution">GitHub</a><button id="view">{en?'Desktop / Mobile':'桌面 / 手机视图'}</button></div></details></nav></header>
+{chapter>=0&&<button class="mobile-menu" id="sidebar-toggle" aria-controls="sidebar" aria-expanded="false">{en?'Open navigation':'打开章节导航'}</button>}
+<div class:list={['layout',{'with-sidebar':chapter>=0}]}>
+{chapter>=0&&<aside id="sidebar" aria-label={en?'Chapters':'章节导航'}>
+<button id="nav-fold">{en?'Collapse navigation':'侧边栏全部折叠'}</button>
+{data.pages.map((p,n)=><details class="nav-group" open><summary><a href={url(p.path)} aria-current={chapter===n?'page':undefined}>{p.title}</a></summary><div>{p.heads.filter(h=>h.level===2||h.level===3).map(h=><a class:list={['nav-link',{'level3':h.level===3}]} href={url(p.path)+'#'+h.id}>{h.text}</a>)}</div></details>)}
+</aside>}
+<main id="main">
+{chapter>=0&&<nav class="breadcrumbs" aria-label={en?'Breadcrumb':'当前位置'}><a href={url('')}>{en?'Home':'首页'}</a><span>›</span><a href={url(`${lang}/`)}>{en?'English Docs':'中文文档'}</a><span>›</span><span>{data.pages[chapter].title}</span></nav>}
+<slot/>
+<footer><p>{en?'Community documentation · For technical research. Operations are at your own risk.':'社区文档 · 仅供技术研究，操作风险自负。'}</p><p><a href={url('thanks/')}>{en?'Contributors and acknowledgements':'贡献者与致谢'}</a> · Astro prototype by YiJieqwq · {en?'Inspired by':'参考'} <a href="https://github.com/matsuzaka-yuki/Chunqiu-Detector-Problem-solution">Matsuzaka Yuki</a></p></footer>
+</main></div>
+<dialog id="search-dialog" aria-labelledby="search-label"><form method="dialog"><button class="close" aria-label={en?'Close search':'关闭搜索'}>×</button></form><label id="search-label" for="query">{en?'Search this language':'搜索当前语言文档'}</label><input id="query" type="search" autocomplete="off" placeholder={en?'Item title or body text…':'输入条目名称或正文关键词…'}/><p id="search-status" role="status"></p><ol id="results"></ol></dialog>
+<script>
+const $ = (s:string)=>document.querySelector<HTMLElement>(s)!;
+const en=document.body.dataset.lang==='en';
+$('#theme').addEventListener('click',()=>{const v=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=v;try{localStorage.setItem('cq-astro-theme',v)}catch{}});
+$('#view').addEventListener('click',()=>{const meta=document.querySelector<HTMLMetaElement>('meta[name=viewport]')!;const desktop=!meta.content.includes('1024');meta.content=desktop?'width=1024':'width=device-width,initial-scale=1';try{localStorage.setItem('cq-astro-view',desktop?'desktop':'mobile')}catch{}});
+$('#sidebar-toggle')?.addEventListener('click',()=>{const b=$('#sidebar-toggle');const on=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(on));$('#sidebar').classList.toggle('visible',on);});
+$('#sidebar')?.addEventListener('click',e=>{if((e.target as Element).closest('a')){$('#sidebar').classList.remove('visible');$('#sidebar-toggle')?.setAttribute('aria-expanded','false');}});
+const entries=[...document.querySelectorAll<HTMLDetailsElement>('details.entry')];
+function label(){const b=$('#fold');if(b)b.textContent=entries.some(d=>d.open)?(en?'Collapse all items':'正文全部折叠'):(en?'Expand all items':'正文全部展开');}
+$('#fold')?.addEventListener('click',()=>{const open=!entries.some(d=>d.open);entries.forEach(d=>d.open=open);label();});entries.forEach(d=>d.addEventListener('toggle',label));label();
+$('#nav-fold')?.addEventListener('click',()=>{const ds=[...document.querySelectorAll<HTMLDetailsElement>('.nav-group')],on=!ds.some(d=>d.open);ds.forEach(d=>d.open=on);$('#nav-fold').textContent=on?(en?'Collapse navigation':'侧边栏全部折叠'):(en?'Expand navigation':'侧边栏全部展开');});
+function reveal(){let id;try{id=decodeURIComponent(location.hash.slice(1))}catch{return}const target=document.getElementById(id);if(!target)return;let n:Element|null=target;while(n){if(n instanceof HTMLDetailsElement)n.open=true;n=n.parentElement}requestAnimationFrame(()=>target.scrollIntoView({block:'start'}));}
+window.addEventListener('hashchange',reveal);document.addEventListener('click',e=>{const a=(e.target as Element).closest('a');if(a?.hash&&a.pathname===location.pathname&&a.hash===location.hash)reveal();});reveal();
+const dialog=$('#search-dialog') as HTMLDialogElement, input=$('#query') as HTMLInputElement;
+dialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();dialog.close();}});
+type Row={title:string,text:string,href:string};let index:Promise<Row[]>|undefined;let seq=0,timer:ReturnType<typeof setTimeout>;
+async function run(){const my=++seq,q=input.value.trim().toLocaleLowerCase();$('#results').replaceChildren();if(!q){$('#search-status').textContent=en?'Type to search; title matches first.':'输入关键词开始搜索，标题匹配优先。';return;}
+$('#search-status').textContent=en?'Loading…':'加载中…';
+try{const rows=await(index??=fetch(document.body.dataset.search!).then(r=>{if(!r.ok)throw Error();return r.json()}));if(my!==seq)return;
+const matches=rows.map((r,i)=>({r,i,score:r.title.toLocaleLowerCase()===q?3:r.title.toLocaleLowerCase().includes(q)?2:r.text.toLocaleLowerCase().includes(q)?1:0})).filter(x=>x.score).sort((a,b)=>b.score-a.score||a.i-b.i);
+$('#search-status').textContent=en?`${matches.length} results (up to 40 shown)`:`共 ${matches.length} 条结果（最多显示 40 条）`;
+for(const {r} of matches.slice(0,40)){const li=document.createElement('li'),a=document.createElement('a');a.href=r.href;a.textContent=r.title;a.addEventListener('click',()=>dialog.close());li.append(a);$('#results').append(li);}
+}catch{index=undefined;if(my===seq)$('#search-status').textContent=en?'Could not load search. Try again.':'索引加载失败，请重试。';}}
+$('#search-open').addEventListener('click',()=>{dialog.showModal();input.focus();run();});input.addEventListener('input',()=>{++seq;clearTimeout(timer);timer=setTimeout(run,140);});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();dialog.showModal();input.focus();}});
+</script>
+</body></html>

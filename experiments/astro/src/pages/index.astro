@@ -1,0 +1,8 @@
+---
+import Shell from '../layouts/Shell.astro';import {docs,url} from '../lib/docs.mjs';
+---
+<Shell title="春秋检测项解决方案">
+<section class="hero"><p class="eyebrow">ASTRO PROTOTYPE · 静态优先</p><h1>少一点界面负担，<br/>更快找到解决办法。</h1><p>春秋检测项解决方案 · 中英文社区文档</p><a class="primary" href={url('zh/items/')}>直接看解决方案 →</a><a class="secondary" href={url('en/items/')}>English docs</a></section>
+<div class="chapter-cards"><a href={url('zh/')}>第一章 · 概述与用语</a><a href={url('zh/prologue/')}>第二章 · 推荐与配置</a><a href={url('zh/items/')}>第三章 · {docs('zh').count} 个检测项</a></div>
+<section><h2>阅读为主，交互按需</h2><p>正文直接输出静态 HTML；无需 JavaScript 也能阅读和折叠。搜索首次使用时才下载当前语言索引，无外部字体、无 Vue/React 客户端运行时。</p><p class="muted">这是独立实验版，尚未替代正式站点。文档源和附件继续复用仓库内容；参考 Matsuzaka Yuki 的 Astro 原型设计思路。</p></section>
+</Shell>
