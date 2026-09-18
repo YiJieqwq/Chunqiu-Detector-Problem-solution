@@ -1,0 +1,27 @@
+---
+import Shell from "../layouts/Shell.astro";
+import { docs, url } from "../lib/docs.mjs";
+---
+
+<Shell title="春秋检测项解决方案">
+  <section class="hero">
+    <p class="eyebrow">CHUNQIU DETECTOR SOLUTIONS</p><h1>
+      看懂检测项，<br />找到解决办法。
+    </h1><p>春秋检测项解决方案 · 中英文社区文档</p><a
+      class="primary"
+      href={url("zh/items/")}>直接看解决方案 →</a
+    ><a class="secondary" href={url("en/items/")}>English docs</a>
+  </section>
+  <div class="chapter-cards">
+    <a href={url("zh/")}>第一章 · 概述与用语</a><a href={url("zh/prologue/")}
+      >第二章 · 推荐与配置</a
+    ><a href={url("zh/items/")}>第三章 · {docs("zh").count} 个检测项</a>
+  </div>
+  <section>
+    <h2>先了解适用条件，再选择解决方案</h2><p>
+      第一章介绍用语、风险与反馈方式；第二章集中说明模块推荐与配置；第三章按检测类别查询具体说明和处理方法。
+    </p><p class="muted">
+      本文仅供技术学习与环境研究。检测结果可能受设备、系统和模块组合影响，不保证所有方案适用于你的设备；涉及系统修改时，请先做好备份并保留恢复方式。
+    </p>
+  </section>
+</Shell>

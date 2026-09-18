@@ -2,13 +2,27 @@
   "name": "chunqiu-detector-solutions",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "prepare-assets": "node scripts/prepare.mjs",
-    "docs:dev": "npm run prepare-assets && vitepress dev docs",
-    "docs:build": "npm run prepare-assets && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "node scripts/assets.mjs && astro build && node scripts/compat.mjs",
+    "preview": "astro preview --host 0.0.0.0",
+    "test": "node scripts/test.mjs",
+    "test:browser": "node scripts/browser.mjs",
+    "predev": "node scripts/assets.mjs",
+    "docs:dev": "npm run dev",
+    "docs:build": "npm run build",
+    "docs:preview": "npm run preview"
+  },
+  "dependencies": {
+    "astro": "5.18.2",
+    "markdown-it": "14.1.0"
   },
   "devDependencies": {
-    "vitepress": "^1.6.3"
+    "@playwright/test": "1.58.2",
+    "prettier": "3.5.3",
+    "prettier-plugin-astro": "0.14.1"
   }
 }

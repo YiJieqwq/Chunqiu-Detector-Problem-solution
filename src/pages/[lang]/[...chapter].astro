@@ -1,0 +1,61 @@
+---
+import Shell from "../../layouts/Shell.astro";
+import { docs, url } from "../../lib/docs.mjs";
+export function getStaticPaths() {
+  return ["zh", "en"].flatMap((lang) =>
+    [undefined, "prologue", "items"].map((chapter, n) => ({
+      params: { lang, chapter },
+      props: { lang, n },
+    })),
+  );
+}
+const { lang, n } = Astro.props;
+const data = docs(lang),
+  page = data.pages[n],
+  en = lang === "en";
+---
+
+<Shell lang={lang} chapter={n} title={page.title}>
+  {
+    n === 0 && (
+      <div class="chapter-cards">
+        {data.pages.map((p) => (
+          <a href={url(p.path)}>{p.title}</a>
+        ))}
+      </div>
+    )
+  }
+  {
+    n === 2 && (
+      <>
+        <>
+          <div class="reading-note">
+            {en ? "See " : "有关用语详见"}
+            <a
+              href={
+                url(`${lang}/`) +
+                (en ? "#terminology-conventions" : "#用语介绍与规范")
+              }
+            >
+              {en ? "Chapter 1" : "第一章"}
+            </a>
+            {en ? " for terminology; see " : "，有关模块推荐/配置详见"}
+            <a href={url(`${lang}/prologue/`)}>{en ? "Chapter 2" : "第二章"}</a>
+            {en ? " for modules and configuration." : "。"}
+          </div>
+          <div class="item-tools">
+            <>
+              <span>
+                {data.count} {en ? "detection items" : "个检测项"}
+              </span>
+              <button id="fold">
+                {en ? "Collapse all items" : "正文全部折叠"}
+              </button>
+            </>
+          </div>
+        </>
+      </>
+    )
+  }
+  <article class="prose" set:html={page.html} />
+</Shell>

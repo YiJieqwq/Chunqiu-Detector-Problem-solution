@@ -1,0 +1,8 @@
+---
+import Shell from "../layouts/Shell.astro";
+import { credits } from "../lib/docs.mjs";
+---
+
+<Shell title="贡献者与致谢"
+  ><article class="prose" set:html={credits()} /></Shell
+>
