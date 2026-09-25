@@ -1,6 +1,7 @@
 # Chunqiu Detector Solutions (Latest Version) - English Version
 
-> Checked against version: 4.5.5(68) | Last updated: 2026-09-13
+> Documentation baseline: 4.5.5(68) | Last updated: 2026-09-25
+> Added in this update: a static-analysis explanation of `TEESimulator detector` in 4.5.6(69). Other entries have not thereby been revalidated against 4.5.6.
 > Credits: [thanks list](/File/Doc/thanks.md) | For reference only, results vary by device/environment.
 > Document Link: [github](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)
 > Some entries include a **Detection method** section (compiled from community testing and observed behaviour; it may differ from the implementation and is meant only to help locate the problem).
@@ -394,6 +395,43 @@ KSU · LKM — flash a matching PathMask and enable “isolation guard (procguar
 ---
 
 ## TEE & Key Attestation Detection
+
+### TEESimulator detector
+
+> Version scope: **Chunqiu 4.5.6(69)**; anomaly ID: **296**. This entry is based on static analysis of the main APK, not real-device validation. The title retains the application's original spelling.
+
+#### Detection method
+
+This is an **Android Keystore paired-timing check using AES-GCM**, not a scan for an installed module with that name or a verdict based solely on certificate chains.
+
+1. Generate an AES key in `AndroidKeyStore` and produce valid ciphertext with `AES/GCM/NoPadding`. Clone the ciphertext and alter one byte while keeping its length, key, IV and AAD unchanged, creating an authentication-failure control.
+2. Warm up each path once, then collect **8 paired measurements**, alternating the execution order according to round parity.
+3. The measured interval includes `Cipher.getInstance()`, initialization, AAD update, `doFinal()` and success or exception handling. It **does not measure only a TEE-internal primitive**.
+4. Validate behaviour first: valid ciphertext must decrypt successfully, and the altered ciphertext must end in an accepted authentication failure. A mismatch takes the `UNAVAILABLE` path rather than automatically counting as a timing hit.
+
+The statically reconstructed HIT path requires all of these conditions:
+
+- Behaviour-contract mismatches equal `0`.
+- In at least **6 of 8 pairs, the valid path is slower than the authentication-failure path**.
+- The upper median of paired timing differences satisfies `D > max(750000 ns, 3 × MAD)`, a strict comparison.
+- The two duration upper medians satisfy `100 × S >= 125 × F`: the valid-path value is at least **1.25 times** the failure-path value.
+
+Here `S` and `F` are the upper medians of valid-path and authentication-failure durations. `D` is the upper median of the per-pair differences, each calculated as valid duration minus failure duration; `MAD` is the upper median of their absolute deviations from `D`. For 8 sorted values, select the **5th**, not the mean of the two central values. Do not substitute `S - F` for `D`. The constant `750000 ns = 0.75 ms` is a **minimum difference floor**, not an absolute time limit for failed decryption.
+
+The states map to `1 = PASS`, `2 = HIT` and `3 = UNAVAILABLE`. Only state `2` adds anomaly ID `296`.
+
+#### Solution
+
+**This project has not established a generally effective solution through real-device testing.** First record the detector version, system build, relevant modules and configuration, then repeat scans in an unchanged environment to distinguish stable hits from intermittent changes. For controlled comparisons, change only one configuration variable at a time whose original state can be restored. These are diagnostic steps, not a promise of passing.
+
+Do not treat replacing a `keybox`, hiding package names or switching arbitrarily between key modules as a demonstrated fix for this entry; the available evidence does not establish that causal link.
+
+#### Notes
+
+- **Confirmed static facts** include AES-GCM control construction, eight-pair sampling, comparison constants and structure, and the state-`2` to ID-`296` mapping. **Still unresolved:** runtime reachability of some obfuscation-wrapper conditions. Independent checks from the auxiliary APK have not been treated as the same mechanism in the main APK.
+- Requesting `AndroidKeyStore` **does not establish hardware-TEE execution on every device**. Device / KeyMint / crypto-provider compatibility, actual timing distributions and false-positive rates still require testing. **A hit alone proves neither that TEESimulator is installed nor that the device is an emulator.**
+- `error.txt` reports unavailable / error records; it is **not a complete PASS / HIT timing log**, and a valid older file may remain. Neither its presence nor its absence establishes this scan's result. Do not assume that the anomaly card displays all median / MAD diagnostics either.
+- Keep this entry separate from the mixed-purpose-key check in `TEE Spoofing (2)` and the Widevine check in `Invalid forged info (1)`. They do not share a predicate or an established remedy. Adding this entry does not revalidate those older entries against 4.5.6.
 
 ### TEE Environment Untrusted
 

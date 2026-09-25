@@ -121,9 +121,47 @@ try {
         ),
       );
       await p.keyboard.press("Escape");
+      for (const lang of ["zh", "en"]) {
+        await p.goto(url + `/${lang}/items/#teesimulator-detector`);
+        const timingEntry = p.locator("details.entry").filter({
+          has: p.locator("h3#teesimulator-detector"),
+        });
+        assert.equal(await timingEntry.count(), 1);
+        assert(await timingEntry.evaluate((el) => el.open));
+        assert((await timingEntry.innerText()).includes("4.5.6(69)"));
+        assert(
+          await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+          `${lang} timing item: no horizontal overflow`,
+        );
+        await p.locator("#search-open").click();
+        await p.locator("#query").fill("TEESimulator detector");
+        await p.waitForFunction(() =>
+          document.querySelector("#results a")?.textContent === "TEESimulator detector",
+        );
+        assert.equal(
+          await p.locator("#results a").first().getAttribute("href"),
+          base + `/${lang}/items/#teesimulator-detector`,
+        );
+        await p.keyboard.press("Escape");
+        if ((width === 390 && colorScheme === "light") ||
+            (width === 1440 && colorScheme === "dark")) {
+          // Scroll the entry into view, then capture the viewport: element
+          // screenshots of tall entries are unreliable in this suite
+          // (content-visibility:auto can skip offscreen regions in captures).
+          await p.evaluate(() => {
+            document
+              .querySelector("h3#teesimulator-detector")
+              ?.scrollIntoView({ block: "start" });
+          });
+          await p.waitForTimeout(300);
+          await p.screenshot({
+            path: `test-results/teesimulator-${lang}-${width}-${colorScheme}.png`,
+          });
+        }
+      }
       assert.deepEqual(errors, []);
       console.log(
-        `PASS browser ${width}px ${colorScheme}: folding, hash reveal, search, theme, navigation`,
+        `PASS browser ${width}px ${colorScheme}: folding, hash reveal, search, theme, navigation; bilingual timing entry`,
       );
       await ctx.close();
     }
